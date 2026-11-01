@@ -32,7 +32,7 @@ import {
   CalendarClock,
   UserCheck, Radio, FileCheck, FileSignature } from 'lucide-react';
 import { NavigationId } from '../../types';
-import { staffRoleLabel } from '../../data/staffRoles';
+import { staffTitle } from '../../data/staffRoles';
 
 interface NavGroup {
   label: string;
@@ -308,7 +308,7 @@ export const Sidebar: React.FC = () => {
                   {adminName}
                 </div>
                 {profile?.admin_role && (
-                  <div className="text-xs text-indigo-300 truncate">{staffRoleLabel(profile.admin_role)}</div>
+                  <div className="text-xs text-indigo-300 truncate">{staffTitle(profile.admin_role, profile.is_superuser, true)}</div>
                 )}
                 <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono mt-0.5">
                   <Clock className="w-3 h-3 text-indigo-400" />

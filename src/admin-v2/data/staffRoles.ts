@@ -21,6 +21,17 @@ export const STAFF_ROLES: { id: string; label: string; allowed: string; notAllow
 
 export const staffRoleLabel = (id?: string) => STAFF_ROLES.find((r) => r.id === id)?.label || 'No staff role';
 
+// What a person's role is called on screen. Two accounts have the Super Admin role (founder, 2026-11-01): the owner
+// (the superuser) and the COO, who can do everything except log in as, delete or change the owner account.
+export const staffTitle = (adminRole?: string, isSuperuser?: boolean, short = false) =>
+  adminRole === 'super_admin'
+    ? (isSuperuser ? (short ? 'Owner' : 'Owner · Super Admin') : (short ? 'COO' : 'COO · Chief Operating Officer'))
+    : staffRoleLabel(adminRole);
+export const staffAllowed = (adminRole?: string, isSuperuser?: boolean) =>
+  adminRole === 'super_admin'
+    ? (isSuperuser ? 'Everything, including the COO account' : 'Everything except the owner account: cannot log in as it, delete it or change its password')
+    : STAFF_ROLES.find((r) => r.id === adminRole)?.allowed || 'No access until a role is set';
+
 // Menu item → capability needed to open it.
 export const NAV_CAP: Record<string, Cap> = {
   approvals: 'view_approvals',

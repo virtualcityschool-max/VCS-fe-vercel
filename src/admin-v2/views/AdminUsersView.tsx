@@ -7,7 +7,7 @@ import { StatusPill } from '../components/common/StatusPill';
 import { EmptyState } from '../components/common/EmptyState';
 import { Field, SelectInput } from '../components/common/FormControls';
 import { BaseUser } from '../types';
-import { STAFF_ROLES, staffRoleLabel } from '../data/staffRoles';
+import { STAFF_ROLES, staffRoleLabel, staffTitle, staffAllowed } from '../data/staffRoles';
 import { Shield, UserPlus, Pencil, X } from 'lucide-react';
 
 // Staff accounts only. Students, teachers and parents live in their own
@@ -22,7 +22,7 @@ export const AdminUsersView: React.FC = () => {
   const staff = allUsers.filter((u: any) => u.role === 'admin');
   const filtered = staff.filter((u: any) => {
     const q = searchQuery.toLowerCase();
-    return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || staffRoleLabel(u.adminRole).toLowerCase().includes(q);
+    return u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || staffTitle(u.adminRole, u.isSuperuser).toLowerCase().includes(q);
   });
 
   const isMe = (row: any) => String(row.id) === String(profile?.id);
@@ -46,8 +46,8 @@ export const AdminUsersView: React.FC = () => {
       header: 'Staff role',
       cell: (row: any) => (
         <div>
-          <div className="text-xs font-semibold text-indigo-200">{staffRoleLabel(row.adminRole)}</div>
-          <div className="text-xs text-slate-500 max-w-xs truncate">{STAFF_ROLES.find((r) => r.id === row.adminRole)?.allowed || 'No access until a role is set'}</div>
+          <div className="text-xs font-semibold text-indigo-200">{staffTitle(row.adminRole, row.isSuperuser)}</div>
+          <div className="text-xs text-slate-500 max-w-xs truncate" title={staffAllowed(row.adminRole, row.isSuperuser)}>{staffAllowed(row.adminRole, row.isSuperuser)}</div>
         </div>
       ),
     },
@@ -111,7 +111,11 @@ export const AdminUsersView: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {STAFF_ROLES.map((r) => (
+              {[
+                { id: 'owner', label: 'Owner · Super Admin', allowed: staffAllowed('super_admin', true), notAllowed: '—' },
+                { id: 'coo', label: 'COO · Chief Operating Officer', allowed: 'Everything a Super Admin can do', notAllowed: 'Log in as, delete, deactivate or change the owner account (password, email, role)' },
+                ...STAFF_ROLES.filter((r) => r.id !== 'super_admin'),
+              ].map((r) => (
                 <tr key={r.id} className="border-b border-[#1E2648]/60 align-top">
                   <td className="py-2 pr-4 font-semibold text-slate-200 whitespace-nowrap">{r.label}</td>
                   <td className="py-2 pr-4 text-slate-300">{r.allowed}</td>
@@ -137,7 +141,7 @@ export const AdminUsersView: React.FC = () => {
             <Field label="Staff role" required hint={STAFF_ROLES.find((r) => r.id === newRole)?.allowed}>
               <SelectInput value={newRole} onChange={setNewRole} placeholder="Choose a role…" required options={STAFF_ROLES.map((r) => ({ value: r.id, label: r.label }))} />
             </Field>
-            <p className="text-xs text-slate-400">Currently: {staffRoleLabel(editing.adminRole)}. You will be asked to confirm.</p>
+            <p className="text-xs text-slate-400">Currently: {staffTitle(editing.adminRole, editing.isSuperuser)}. You will be asked to confirm.</p>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200">Cancel</button>
               <button type="submit" disabled={saving || !newRole || newRole === editing.adminRole} className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#6D5BFF] text-white disabled:opacity-50">Save role</button>
