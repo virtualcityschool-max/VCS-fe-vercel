@@ -230,7 +230,8 @@ export const DetailDrawer: React.FC = () => {
                 >
                   Open full profile / edit
                 </a>
-                {(type === 'teacher' || type === 'parent' || type === 'user') && (
+                {/* The owner (superuser) account: nobody else can log in as it or switch it off; the server refuses too. */}
+                {(type === 'teacher' || type === 'parent' || type === 'user') && !data.isSuperuser && (
                   <button
                     onClick={async () => {
                       try {
@@ -248,7 +249,7 @@ export const DetailDrawer: React.FC = () => {
                     Login as {type === 'teacher' || data.role === 'teacher' ? 'Teacher' : type === 'parent' || data.role === 'parent' ? 'Parent' : 'User'}
                   </button>
                 )}
-                {(type === 'student' || type === 'teacher' || type === 'parent' || type === 'user') && (
+                {(type === 'student' || type === 'teacher' || type === 'parent' || type === 'user') && !data.isSuperuser && (
                   <button
                     onClick={() => toggleUserStatus(data.id)}
                     className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition-colors"
