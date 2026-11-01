@@ -8,6 +8,7 @@ import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import { getStorageUrl } from "../../utils/storageUrl";
 import FileViewerModal from "../../components/common/FileViewerModal";
 import QuillEditor from "../../components/common/QuillEditor";
+import MarkingReport from "../../components/common/MarkingReport";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 
 const PreviewButton = ({ url, className = "" }) => {
@@ -280,7 +281,7 @@ const StudentAssignmentDetails = () => {
                           </div>
                           <div>
                             <h3 className="text-lg font-black text-emerald-400 leading-none mb-1">Marked by your teacher</h3>
-                            <p className="text-xs text-emerald-300 font-bold uppercase tracking-widest">Your marks and remarks</p>
+                            <p className="text-xs text-emerald-300 font-bold uppercase tracking-widest">Your marks and report</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -294,14 +295,7 @@ const StudentAssignmentDetails = () => {
                         </div>
                       </div>
 
-                      {assignment.my_submission.feedback ? (
-                        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
-                          <p className="text-xs font-bold uppercase tracking-widest text-emerald-300 mb-2">Teacher&apos;s remarks</p>
-                          <p className="text-base text-slate-200 leading-relaxed whitespace-pre-wrap">{assignment.my_submission.feedback}</p>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-slate-300">Your teacher gave marks without remarks.</p>
-                      )}
+                      <MarkingReport feedback={assignment.my_submission.feedback} />
                     </div>
                   ) : (
                     <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-[1.5rem] p-6 flex items-center gap-4 text-indigo-300 shadow-xl">
