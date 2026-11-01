@@ -14,7 +14,7 @@ import { getStorageUrl } from "../../utils/storageUrl";
 import { safeHtml } from "../../utils/safeHtml";
 import { useDateFormatters } from "../../hooks";
 import MarkingReport from "../../components/common/MarkingReport";
-import { LEVELS, LEVEL_ACTIVE, buildFeedback, readFeedback, subjectFor, suggestedMark, writeReport } from "../../utils/markingRubric";
+import { LEVELS, LEVEL_ACTIVE, NA, NA_ACTIVE, buildFeedback, readFeedback, subjectFor, suggestedMark, writeReport } from "../../utils/markingRubric";
 
 const asList = (d) => (Array.isArray(d) ? d : Array.isArray(d?.results) ? d.results : []);
 const isImage = (url) => /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url || "");
@@ -412,8 +412,8 @@ const TeacherAssignmentMarking = () => {
                       <div>
                         <h3 className="text-lg font-semibold text-white">Marking checklist</h3>
                         <p className="mt-1 text-sm text-slate-300">
-                          {subject.label}: ten areas. Click a level for each area; add a note only where it helps.{" "}
-                          <strong className="font-semibold text-indigo-300">{ratedCount} of {subject.areas.length} rated</strong>
+                          {subject.label}: ten areas. Click a level for each area, or <em className="not-italic font-semibold text-slate-200">Not applicable</em> if this assignment doesn&apos;t test it. Add a note only where it helps.{" "}
+                          <strong className="font-semibold text-indigo-300">{ratedCount} of {subject.areas.length} done</strong>
                         </p>
                       </div>
                       <label className="flex items-center gap-2 text-sm text-slate-300">
@@ -463,6 +463,16 @@ const TeacherAssignmentMarking = () => {
                                 </button>
                               );
                             })}
+                            <button
+                              type="button"
+                              role="radio"
+                              aria-checked={ratings[area] === NA}
+                              onClick={() => rate(area, NA)}
+                              title="This assignment doesn't test this area. It is left out of the report and the suggested mark."
+                              className={`min-h-9 rounded-lg border border-dashed px-2.5 text-sm font-semibold transition sm:ml-2 ${ratings[area] === NA ? NA_ACTIVE : "border-slate-600 bg-transparent text-slate-400 hover:border-slate-400 hover:text-white"}`}
+                            >
+                              {NA}
+                            </button>
                           </div>
                           {openNotes[area] && (
                             <input

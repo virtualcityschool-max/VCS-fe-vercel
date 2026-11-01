@@ -8,6 +8,10 @@
 
 export const LEVELS = ["Unsatisfactory", "Just Satisfactory", "Satisfactory", "Good", "Very Good", "Excellent"];
 
+// "Not applicable": the teacher marks an area that this assignment doesn't test. It is left out of the report and the
+// suggested mark, and the student sees it only as a short line.
+export const NA = "Not applicable";
+
 const AREAS = {
   english: [
     "Grammar", "Spelling", "Punctuation", "Vocabulary", "Sentence variety",
@@ -21,6 +25,18 @@ const AREAS = {
     "Understanding of concepts", "Choice of method", "Accuracy of working", "Final answers", "Showing all steps",
     "Use of formulae", "Units and notation", "Diagrams and graphs", "Problem solving", "Presentation and neatness",
   ],
+  physics: [
+    "Subject knowledge", "Physics terms and definitions", "Understanding of concepts", "Applying knowledge", "Equations and rearranging",
+    "Calculations", "Units and significant figures", "Diagrams, graphs and circuits", "Practical and method skills", "Answering the question asked",
+  ],
+  chemistry: [
+    "Subject knowledge", "Chemical terms and definitions", "Formulae and symbols", "Chemical equations and balancing", "Calculations (moles)",
+    "Understanding of concepts", "Applying knowledge", "Practical and method skills", "Diagrams and data", "Answering the question asked",
+  ],
+  biology: [
+    "Subject knowledge", "Biological terms", "Understanding of processes", "Explaining processes in order", "Applying knowledge",
+    "Labelled diagrams", "Data, tables and graphs", "Practical and method skills", "Use of examples", "Answering the question asked",
+  ],
   science: [
     "Subject knowledge", "Scientific terms", "Understanding of concepts", "Applying knowledge", "Calculations and units",
     "Diagrams and labelling", "Data and graphs", "Practical and method skills", "Answering the question asked", "Presentation and neatness",
@@ -29,9 +45,33 @@ const AREAS = {
     "Subject knowledge", "Technical terms", "Problem solving", "Algorithms and logic", "Code accuracy",
     "Testing and errors", "Data representation", "Applying knowledge", "Answering the question asked", "Presentation and neatness",
   ],
-  commerce: [
-    "Subject knowledge", "Key terms", "Application to the case", "Analysis", "Evaluation and judgement",
-    "Calculations and accuracy", "Use of examples", "Diagrams and graphs", "Answering the question asked", "Structure and presentation",
+  accounting: [
+    "Subject knowledge", "Accounting terms", "Double entry", "Format and layout of statements", "Calculations and accuracy",
+    "Adjustments", "Analysis and ratios", "Evaluation and advice", "Answering the question asked", "Neatness and presentation",
+  ],
+  economics: [
+    "Subject knowledge", "Economic terms", "Diagrams, correctly labelled", "Application to the context", "Analysis and chains of reasoning",
+    "Evaluation and judgement", "Use of data", "Real-world examples", "Answering the question asked", "Structure and presentation",
+  ],
+  business: [
+    "Subject knowledge", "Business terms", "Application to the case", "Analysis", "Evaluation and judgement",
+    "Calculations", "Use of data", "Use of examples", "Answering the question asked", "Structure and presentation",
+  ],
+  islamiyat: [
+    "Subject knowledge", "Quranic references", "Hadith references", "Islamic terms", "Explanation",
+    "Relevance to the question", "Lessons and significance", "Examples from Islamic history", "Structure of the answer", "Presentation and handwriting",
+  ],
+  pakstudies: [
+    "Subject knowledge", "Key terms", "Dates and events", "Use of evidence and examples", "Explanation",
+    "Analysis", "Evaluation and judgement", "Maps and sources", "Structure of the answer", "Presentation and handwriting",
+  ],
+  history: [
+    "Subject knowledge", "Historical terms", "Chronology and dates", "Use of evidence and sources", "Causes and effects explained",
+    "Analysis", "Evaluation and judgement", "Answering the question asked", "Structure of the answer", "Presentation and handwriting",
+  ],
+  geography: [
+    "Subject knowledge", "Geographical terms", "Case studies and examples", "Maps and diagrams", "Data and graphs",
+    "Processes explained", "Analysis", "Evaluation and judgement", "Answering the question asked", "Presentation and handwriting",
   ],
   humanities: [
     "Subject knowledge", "Key terms", "Understanding of the question", "Use of evidence and examples", "Explanation",
@@ -43,19 +83,31 @@ const AREAS = {
   ],
 };
 
+// First match wins, so the more specific names come first ("Computer Science" before "Science").
 const SUBJECT_MATCH = [
   ["urdu", /urdu/i],
   ["english", /english|literature|esl/i],
   ["maths", /math|algebra|statistic|calculus/i],
   ["computing", /computer|computing|\bict\b|information tech/i],
-  ["science", /physic|chemi|biolog|science/i],
-  ["commerce", /econom|business|account|commerce/i],
-  ["humanities", /histor|geograph|pakistan|islam|sociolog|global|religio|law/i],
+  ["physics", /physic/i],
+  ["chemistry", /chemi/i],
+  ["biology", /biolog/i],
+  ["science", /science/i],
+  ["accounting", /account/i],
+  ["economics", /econom/i],
+  ["business", /business|commerce/i],
+  ["islamiyat", /islam/i],
+  ["pakstudies", /pakistan/i],
+  ["history", /histor/i],
+  ["geography", /geograph/i],
+  ["humanities", /sociolog|global|religio|law/i],
 ];
 
 const SUBJECT_LABEL = {
-  english: "English", urdu: "Urdu", maths: "Mathematics", science: "Science", computing: "Computer Science",
-  commerce: "Business, Economics and Accounts", humanities: "Humanities", general: "General",
+  english: "English", urdu: "Urdu", maths: "Mathematics", physics: "Physics", chemistry: "Chemistry", biology: "Biology",
+  science: "Science", computing: "Computer Science", accounting: "Accounting", economics: "Economics", business: "Business",
+  islamiyat: "Islamiyat", pakstudies: "Pakistan Studies", history: "History", geography: "Geography", humanities: "Humanities",
+  general: "General",
 };
 
 export function subjectFor(courseTitle) {
@@ -133,15 +185,15 @@ export function writeReport(areas, ratings) {
 const H_REPORT = "REPORT";
 const H_AREAS = "AREA BY AREA";
 const H_REMARKS = "TEACHER'S REMARKS";
-const AREA_LINE = new RegExp(`^• (.+?): (${[...LEVELS].sort((a, b) => b.length - a.length).join("|")})(?: — (.*))?$`);
+const AREA_LINE = new RegExp(`^• (.+?): (${[...LEVELS, NA].sort((a, b) => b.length - a.length).join("|")})(?: — (.*))?$`);
 
 export function buildFeedback({ report, areas, ratings, notes, remarks }) {
-  const rated = areas.filter((a) => LEVELS.includes(ratings[a]));
-  if (!rated.length && !report.trim()) return remarks.trim();
+  const listed = areas.filter((a) => LEVELS.includes(ratings[a]) || ratings[a] === NA);
+  if (!listed.length && !report.trim()) return remarks.trim();
   const parts = [];
   if (report.trim()) parts.push(`${H_REPORT}\n${report.trim()}`);
-  if (rated.length) {
-    parts.push(`${H_AREAS}\n${rated.map((a) => `• ${a}: ${ratings[a]}${notes[a]?.trim() ? ` — ${notes[a].trim().replace(/\s+/g, " ")}` : ""}`).join("\n")}`);
+  if (listed.length) {
+    parts.push(`${H_AREAS}\n${listed.map((a) => `• ${a}: ${ratings[a]}${notes[a]?.trim() ? ` — ${notes[a].trim().replace(/\s+/g, " ")}` : ""}`).join("\n")}`);
   }
   if (remarks.trim()) parts.push(`${H_REMARKS}\n${remarks.trim()}`);
   return parts.join("\n\n");
@@ -181,6 +233,8 @@ export const LEVEL_TONE = [
   "border-indigo-500/40 bg-indigo-500/15 text-indigo-300",
   "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
 ];
+export const NA_TONE = "border-slate-600 bg-slate-800/60 text-slate-300";
+export const NA_ACTIVE = "border-slate-400 bg-slate-600 text-white";
 export const LEVEL_ACTIVE = [
   "border-rose-500 bg-rose-600 text-white",
   "border-orange-500 bg-orange-600 text-white",
