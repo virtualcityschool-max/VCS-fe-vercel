@@ -34,3 +34,4 @@ Disallow: /student/
 Disallow: /teacher/
 
 Sitemap: https://virtualcityschool.com/sitemap.xml
+Sitemap: https://virtualcityschool.com/mocks/sitemap.xml
