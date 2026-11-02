@@ -796,3 +796,10 @@ h3,
             break-inside: avoid;
      }
 }
+
+/* Phones: course cards without the moving shine, lift or blur (the catalogue
+   shows 100+ of them; the effects kept a phone's processor busy for seconds). */
+@media (max-width: 639px) {
+  .course-card.glass-shine::after { display: none; }
+  .course-card.hover-lift, .course-card.hover-lift:hover { transform: none; transition: none; }
+}

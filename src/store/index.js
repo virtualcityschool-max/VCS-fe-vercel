@@ -85,10 +85,29 @@ const rootReducer = (state, action) => {
   return appReducer(state, action);
 };
 
+// Data a pre-built list page was drawn with (scripts/prerender.js writes it
+// into the HTML), so the app's first drawing matches the page already on
+// screen and nothing jumps while fresh data loads.
+const prebuiltState = (() => {
+  try {
+    const s = window.__VCS_STATE__;
+    delete window.__VCS_STATE__;
+    return s && typeof s === "object" ? s : undefined;
+  } catch {
+    return undefined;
+  }
+})();
+
 export const store = configureStore({
   reducer: rootReducer,
-  preloadedState: preloadedAuthState ? { auth: preloadedAuthState } : undefined,
+  preloadedState:
+    prebuiltState || preloadedAuthState
+      ? { ...(prebuiltState || {}), ...(preloadedAuthState ? { auth: preloadedAuthState } : {}) }
+      : undefined,
 });
+
+// Let the pre-build script read the data a page was rendered with.
+if (typeof window !== "undefined" && window.__VCS_PRERENDER__ === true) window.__VCS_STORE__ = store;
 
 // Add a slice when its area's code loads. The no-op action gives the new slice
 // its initial state straight away, so components can read it on first render.

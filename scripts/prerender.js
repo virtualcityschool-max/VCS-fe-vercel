@@ -54,6 +54,7 @@ const PORT = 4321;
 const ORIGIN = `http://localhost:${PORT}`;
 const CONCURRENCY = 4;
 const NAV_TIMEOUT_MS = 30000;
+const STATE_ROUTES = /^\/(courses|teachers)\/?$/;
 const SETTLE_MS = 400; // small buffer after networkidle for final paint/DOM updates
 
 async function fetchJson(url) {
@@ -170,6 +171,17 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     await page.evaluateOnNewDocument(() => { window.__VCS_PRERENDER__ = true; });
     await page.goto(`${ORIGIN}${route}`, { waitUntil: "networkidle0", timeout });
     await new Promise((r) => setTimeout(r, SETTLE_MS));
+    // List pages: the data they were drawn with (everything but sign-in and UI
+    // state), so the app's first drawing in the visitor's browser already has
+    // the list and the page doesn't jump (was CLS 0.86 on /teachers). Only
+    // these pages: it adds ~50-70 KB compressed to their HTML.
+    const stateJson = !STATE_ROUTES.test(route) ? null : await page.evaluate(() => {
+      const s = window.__VCS_STORE__ && window.__VCS_STORE__.getState();
+      if (!s) return null;
+      // not sign-in/UI state, nor slices that load later with their own area
+      const { auth: _a, ui: _u, admin: _ad, parent: _p, approvals: _ap, childLinks: _c, hire: _h, ...rest } = s;
+      return JSON.stringify(rest);
+    });
     // useSeo() reads window.location.href for canonical/OG URLs, which during
     // this crawl is the local server - rewrite it to the real production
     // origin before writing the file, or every prerendered page's canonical
@@ -182,7 +194,14 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     const html = "<!doctype html>\n" + rawHtml.split(ORIGIN).join(SITE_URL).replace(/(<html[^>]*?)\s*\bclass="theme-light"/, "$1").replace(/\btheme-light\s?(?=[^"]*"[^>]*>\s*<head)/, "")
       // The icon stylesheet loads without blocking (media="print" until loaded);
       // the browser has flipped it to "all" by now, so put it back.
-      .replace(/media="all"(\s+onload="this\.media='all'")/g, 'media="print"$1');
+      .replace(/media="all"(\s+onload="this\.media='all'")/g, 'media="print"$1')
+      // Hand the data to the app ("<" escaped so the JSON can never close the
+      // script tag). It goes at the very end of <body>: the page content above
+      // shows first, and this still runs before the app's code (module scripts
+      // run only once the whole document has been read).
+      .replace(/<\/body>(?![\s\S]*<\/body>)/, (tag) => stateJson
+        ? `<script>window.__VCS_STATE__=${stateJson.replace(/</g, "\\u003c")};</script>\n${tag}`
+        : tag);
     const outFile = routeToOutputFile(route);
     mkdirSync(dirname(outFile), { recursive: true });
     writeFileSync(outFile, html);

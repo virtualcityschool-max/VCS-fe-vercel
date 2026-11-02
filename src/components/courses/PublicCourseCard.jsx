@@ -110,7 +110,7 @@ const PublicCourseCard = ({
   return (
     <div
       style={{ animationDelay: `${index * 0.05}s` }}
-      className="bg-[#1a2235]/60 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg group flex flex-col animate-springyReveal opacity-0 glass-shine hover-lift"
+      className="course-card bg-[#1a2235]/60 sm:backdrop-blur-xl rounded-2xl overflow-hidden border border-white/5 shadow-lg group flex flex-col sm:animate-springyReveal sm:opacity-0 glass-shine hover-lift"
     >
       {/* Image */}
       {/* Course artwork is 2400×1260 with words on it: the box has the same

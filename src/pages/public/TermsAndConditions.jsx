@@ -11,6 +11,7 @@ const TermsAndConditions = () => {
     { id: "intellectual", label: "Intellectual Property", icon: "fas fa-copyright" },
     { id: "liability", label: "Limitation of Liability", icon: "fas fa-exclamation-triangle" },
     { id: "governing", label: "Governing Law", icon: "fas fa-balance-scale" },
+    { id: "operator", label: "Who We Are", icon: "fas fa-building" },
   ];
 
   const scrollToSection = (id) => {
@@ -70,7 +71,7 @@ const TermsAndConditions = () => {
             {/* Last Updated Box */}
             <div className="mt-8 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hidden lg:block">
               <p className="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-2">Last Updated</p>
-              <p className="text-sm text-slate-400 font-medium">January 31, {new Date().getFullYear()}</p>
+              <p className="text-sm text-slate-400 font-medium">November 2, 2026</p>
             </div>
           </div>
 
@@ -83,6 +84,8 @@ const TermsAndConditions = () => {
               <p className="text-lg text-slate-400 leading-relaxed max-w-3xl">
                 Welcome to VirtualCitySchool. These terms govern your use of our digital campus and 
                 educational services. By accessing our platform, you agree to be bound by these provisions.
+                virtualcityschool.com is a product of <strong className="text-indigo-300 font-semibold">Grayphite LLC</strong> (see{" "}
+                <a href="#operator" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">Who We Are</a>).
               </p>
             </div>
 
@@ -201,6 +204,36 @@ const TermsAndConditions = () => {
                       proceeding related to your access to the platform shall be instituted in a state or federal court in the 
                       designated jurisdiction.
                     </p>
+                  </div>
+                </div>
+              </section>
+
+
+              {/* 6. Who We Are */}
+              <section id="operator" className="scroll-mt-32">
+                <div className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <i className="fas fa-building text-amber-400 text-sm"></i>
+                    </div>
+                    <h2 className="text-2xl font-bold text-white tracking-tight">6. Who We Are</h2>
+                  </div>
+                  <div className="space-y-4 text-slate-400 leading-relaxed">
+                    <p>
+                      virtualcityschool.com is a product of <strong className="text-amber-300 font-semibold">Grayphite LLC</strong>,
+                      a limited liability company registered in Wyoming, United States. In these terms, &ldquo;VirtualCitySchool&rdquo;,
+                      &ldquo;we&rdquo; and &ldquo;us&rdquo; mean Grayphite LLC.
+                    </p>
+                    <address className="not-italic grid gap-2 sm:grid-cols-2">
+                      <span className="flex items-start gap-3">
+                        <i className="fas fa-location-dot text-amber-400 mt-1" aria-hidden="true"></i>
+                        <span>Grayphite LLC<br />1309 Coffeen Ave, Ste 1200<br />Sheridan, Wyoming 82801<br />United States</span>
+                      </span>
+                      <span className="flex items-start gap-3">
+                        <i className="fas fa-phone text-amber-400 mt-1" aria-hidden="true"></i>
+                        <a href="tel:+15125430590" className="text-slate-200 hover:text-white">+1 (512) 543-0590</a>
+                      </span>
+                    </address>
                   </div>
                 </div>
               </section>

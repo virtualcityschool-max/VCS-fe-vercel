@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchAllCourses, fetchCategories } from "../../store/slices/coursesSlice";
@@ -43,25 +43,35 @@ const getCategoryName = (course) =>
 
 // Netflix-style horizontal row: hover-reveal paging arrows, no "show all" link needed
 // since every course in the category stays reachable by scrolling the row itself.
+// Cards drawn per row before the visitor scrolls it (the rest follow on scroll).
+const ROW_FIRST_CARDS = 8;
+
 const CourseRow = ({ courses, renderCard }) => {
   const rowRef = useRef(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(true);
+  const [shown, setShown] = useState(ROW_FIRST_CARDS);
 
   const updateEdges = () => {
     const el = rowRef.current;
     if (!el) return;
     setAtStart(el.scrollLeft <= 4);
-    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
+    setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 4 && shown >= courses.length);
+    // Near the end of what's drawn: draw the rest of this row.
+    if (shown < courses.length && el.scrollLeft + el.clientWidth >= el.scrollWidth - el.clientWidth) {
+      setShown(courses.length);
+    }
   };
 
   useEffect(() => {
     updateEdges();
-  }, [courses]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courses, shown]);
 
   const page = (dir) => {
     const el = rowRef.current;
     if (!el) return;
+    if (dir > 0 && shown < courses.length) setShown(courses.length);
     el.scrollBy({ left: el.clientWidth * 0.85 * dir, behavior: "smooth" });
   };
 
@@ -85,7 +95,7 @@ const CourseRow = ({ courses, renderCard }) => {
         className="flex gap-3 overflow-x-auto pb-3 scroll-smooth [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: "none" }}
       >
-        {courses.map(renderCard)}
+        {courses.slice(0, shown).map(renderCard)}
       </div>
       {!atEnd && (
         <button
@@ -224,6 +234,30 @@ const Marketplace = () => {
     categories.filter((cat) =>
       filteredCourses.some((c) => getCategoryName(c) === cat.name)
     ), [categories, filteredCourses]);
+
+  // Draw the first few category rows straight away and the rest as the visitor
+  // scrolls down (100+ cards at once kept phones busy for seconds). The
+  // pre-built page has the same first rows, so the app can keep it as is.
+  const FIRST_SECTIONS = 3;
+  // (very old browsers without IntersectionObserver just get every row)
+  const [sectionsShown, setSectionsShown] = useState(() =>
+    typeof IntersectionObserver === "undefined" ? Infinity : FIRST_SECTIONS);
+  // Watch the marker below the last drawn row from the moment it appears (the
+  // page can first show its loading view, so an effect would miss it).
+  const sectionsObserver = useRef(null);
+  const moreSectionsRef = useCallback((el) => {
+    if (sectionsObserver.current) sectionsObserver.current.disconnect();
+    sectionsObserver.current = null;
+    if (!el || window.__VCS_PRERENDER__ === true || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setSectionsShown((n) => n + FIRST_SECTIONS);
+      },
+      { rootMargin: "800px 0px" },
+    );
+    io.observe(el);
+    sectionsObserver.current = io;
+  }, []);
 
   const hasActiveFilters = useMemo(() =>
     searchTerm !== "" || Object.values(filters).some((v) => v !== ""),
@@ -439,8 +473,10 @@ const Marketplace = () => {
     url: typeof window !== "undefined" ? window.location.href : undefined,
   });
 
-  // Loading state - skeleton grid mirrors the real layout
-  if (isLoading) {
+  // Loading state - skeleton grid mirrors the real layout. Only when there is
+  // nothing to show yet: a refresh of an already-loaded list (e.g. the data
+  // the pre-built page came with) keeps the list on screen.
+  if (isLoading && courses.length === 0) {
     return (
       <section className="min-h-screen bg-[#0f172a] text-white font-inter">
         <div className="max-w-[1440px] mx-auto px-6 py-10">
@@ -600,7 +636,7 @@ const Marketplace = () => {
           {/* ── All tab: grouped by category, Netflix-style scrolling rows ── */}
           {activeCategory === "all" && visibleCourses.length > 0 && (
             <div className="space-y-10">
-              {activeCats.map((cat) => {
+              {activeCats.slice(0, sectionsShown).map((cat) => {
                 const catCourses = filteredCourses.filter((c) => getCategoryName(c) === cat.name);
                 if (!catCourses.length) return null;
                 return (
@@ -637,6 +673,7 @@ const Marketplace = () => {
                   </section>
                 );
               })}
+              {sectionsShown < activeCats.length && <div key={sectionsShown} ref={moreSectionsRef} aria-hidden="true" className="h-px" />}
             </div>
           )}
 
