@@ -7,9 +7,13 @@
 const SIZES = [128, 256, 384, 640, 960, 1280];
 const S3 = /^https:\/\/virtual-city-school\.s3\.us-east-2\.amazonaws\.com\//;
 
+// The pre-built pages (scripts/prerender.js) are rendered on a local server but
+// published on the live site, so they must use the resized links too, or phones
+// download every full-size picture before the app replaces them.
 const onVercel = () =>
   typeof window !== "undefined" &&
-  /(^|\.)virtualcityschool\.com$|\.vercel\.app$/.test(window.location.hostname);
+  (window.__VCS_PRERENDER__ === true ||
+    /(^|\.)virtualcityschool\.com$|\.vercel\.app$/.test(window.location.hostname));
 
 export const sizedImage = (url, width) => {
   if (!url || !S3.test(url) || !onVercel()) return url;

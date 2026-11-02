@@ -31,6 +31,12 @@ export const TONES = [
 
 // Photo at the top of each guide (public/images/subjects/<slug>.webp, from Unsplash).
 export const guidePhoto = (slug) => `/images/subjects/${slug}.webp`;
+// Smaller copies (800 px, and 480 px for cards) so phones don't download the
+// 1600 px original; desktops still get the original.
+export const guidePhotoSrcSet = (slug, { card = false } = {}) =>
+  card
+    ? `/images/subjects/${slug}-480.webp 480w, /images/subjects/${slug}-800.webp 800w`
+    : `/images/subjects/${slug}-800.webp 800w, /images/subjects/${slug}.webp 1600w`;
 
 // The guide's sections, numbered, leaving out any the guide has no content for
 // (e.g. maths has no lab practical). `withVcs: false` drops the "Study it with

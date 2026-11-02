@@ -127,10 +127,22 @@ function startServer(shellHtml) {
     ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
     ".svg": "image/svg+xml", ".otf": "font/otf", ".json": "application/json",
     ".ico": "image/x-icon", ".xml": "application/xml", ".txt": "text/plain",
+    ".webp": "image/webp", ".woff2": "font/woff2",
   };
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       const urlPath = decodeURIComponent(req.url.split("?")[0]);
+      // Vercel's image resizer only exists on Vercel. Send the browser to the
+      // original picture instead, so the picture loads and the page keeps the
+      // resized link in its HTML (a failed load would swap in the original).
+      if (urlPath === "/_vercel/image") {
+        const target = new URL(req.url, ORIGIN).searchParams.get("url") || "";
+        if (/^https:\/\/virtual-city-school\.s3\.us-east-2\.amazonaws\.com\//.test(target)) {
+          res.writeHead(302, { Location: target });
+          res.end();
+          return;
+        }
+      }
       const filePath = join(DIST, urlPath);
       const ext = extname(filePath);
       if (ext && existsSync(filePath) && statSync(filePath).isFile()) {
@@ -153,6 +165,9 @@ function routeToOutputFile(route) {
 async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
   const page = await browser.newPage();
   try {
+    // Tell the app it is being pre-built for the live site (imageCdn.js then
+    // writes resized picture links into the HTML, not the full-size originals).
+    await page.evaluateOnNewDocument(() => { window.__VCS_PRERENDER__ = true; });
     await page.goto(`${ORIGIN}${route}`, { waitUntil: "networkidle0", timeout });
     await new Promise((r) => setTimeout(r, SETTLE_MS));
     // useSeo() reads window.location.href for canonical/OG URLs, which during

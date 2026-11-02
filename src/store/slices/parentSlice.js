@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { parentService } from "../../services/parentService";
 import { authService } from "../../services/authService";
+import { injectReducer } from "../index";
 
 // Initial state
 const initialState = {
@@ -304,5 +305,7 @@ export const selectChildAttendanceRecords = (state) =>
   state.parent.childAttendanceRecords.data;
 export const selectChildAttendanceRecordsLoading = (childId) => (state) =>
   state.parent.childAttendanceRecords.loading[childId] || false;
+
+injectReducer("parent", parentSlice.reducer);
 
 export default parentSlice.reducer;

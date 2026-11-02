@@ -8,7 +8,7 @@ import { guideBySlug, guideForCourse, SUBJECT_GUIDES } from "../../data/subjectG
 import { coursesService } from "../../services/coursesService";
 import { getDisplayName } from "../../utils/userDisplay";
 import GuideBody from "../../components/subjects/GuideBody";
-import { ACCENT, guidePhoto, guideSections } from "../../components/subjects/guideSections";
+import { ACCENT, guidePhoto, guidePhotoSrcSet, guideSections } from "../../components/subjects/guideSections";
 
 // One Cambridge subject explained for students: what it is, why it is taught,
 // how it is examined and graded, and how to do well. Content lives in
@@ -37,7 +37,7 @@ export const SubjectGuidesIndex = () => {
               {SUBJECT_GUIDES.filter((g) => g.level === lvl).map((g) => (
                 <Link key={g.slug} to={`/subjects/${g.slug}`} className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] hover:border-indigo-400/50 overflow-hidden transition">
                   <div className="relative aspect-[5/2] overflow-hidden bg-slate-900">
-                    <img src={guidePhoto(g.slug)} alt="" loading="lazy" width="1600" height="640" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    <img src={guidePhoto(g.slug)} srcSet={guidePhotoSrcSet(g.slug, { card: true })} sizes="(max-width: 640px) 100vw, 400px" alt="" loading="lazy" width="1600" height="640" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/90 via-transparent to-transparent" />
                     <span className={`absolute left-4 bottom-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-bold uppercase tracking-widest bg-slate-950/70 ${(ACCENT[g.accent] || ACCENT.violet).soft} ${(ACCENT[g.accent] || ACCENT.violet).text}`}>
                       {g.level} · {g.code}
@@ -171,7 +171,7 @@ const SubjectGuidePage = () => {
           )}
           </div>
           <figure className="relative">
-            <img src={guidePhoto(g.slug)} alt={`${g.subject} — Cambridge ${g.level}`} width="1600" height="640" className="w-full aspect-[5/2] lg:aspect-[16/9] object-cover rounded-3xl border border-white/10 shadow-2xl shadow-black/40" />
+            <img src={guidePhoto(g.slug)} srcSet={guidePhotoSrcSet(g.slug)} sizes="(max-width: 768px) 100vw, 1440px" alt={`${g.subject} — Cambridge ${g.level}`} width="1600" height="640" className="w-full aspect-[5/2] lg:aspect-[16/9] object-cover rounded-3xl border border-white/10 shadow-2xl shadow-black/40" />
             <figcaption className="theme-keep absolute bottom-2 right-3 text-xs text-white/70">Photo: Unsplash</figcaption>
           </figure>
         </header>

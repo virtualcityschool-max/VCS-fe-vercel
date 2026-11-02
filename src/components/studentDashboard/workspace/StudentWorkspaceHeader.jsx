@@ -16,6 +16,7 @@ import { getDisplayName } from "../../../utils/userDisplay";
 import { getStorageUrl } from "../../../utils/storageUrl";
 import { getTimezoneAbbr, formatTime } from "../../../utils/validation";
 import { canStudentJoin, getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
+import { sizedImage } from "../../../utils/imageCdn";
 
 const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass: _onJoinNextClass, onOpenTimezone }) => {
   const dispatch = useDispatch();
@@ -118,7 +119,7 @@ const StudentWorkspaceHeader = ({ onResolveOverdue, onJoinNextClass: _onJoinNext
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 overflow-hidden border-2 border-white/10">
               {avatarUrl ? (
                 <img
-                  src={avatarUrl}
+                  src={sizedImage(avatarUrl, 128)}
                   alt={displayName}
                   className="w-full h-full object-cover"
                 />

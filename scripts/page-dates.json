@@ -1,10 +1,10 @@
 {
   "/about": {
-    "hash": "df432dc32bafe9ea",
+    "hash": "9aff5bd602e119d7",
     "date": "2026-10-18"
   },
   "/privacy-policy": {
-    "hash": "f0503c3c7a459b12",
+    "hash": "522fa551c08b2c85",
     "date": "2026-06-15"
   },
   "/terms": {
@@ -12,15 +12,15 @@
     "date": "2026-05-14"
   },
   "/mind-lab": {
-    "hash": "eb919931ca163a33",
+    "hash": "1e1d3d40261885f8",
     "date": "2026-10-31"
   },
   "/mind-lab/personality-test": {
-    "hash": "b877d863d5cf6273",
+    "hash": "b6cce779ec42e759",
     "date": "2026-10-31"
   },
   "/mind-lab/16-personalities": {
-    "hash": "70dbae20de0a0536",
+    "hash": "36f9934b19990a8b",
     "date": "2026-10-31"
   },
   "/mind-lab/workplace-assessment": {
@@ -28,47 +28,47 @@
     "date": "2026-10-31"
   },
   "/mind-lab/star-signs": {
-    "hash": "5a5bec2896720936",
+    "hash": "61fa14f911bb81aa",
     "date": "2026-10-31"
   },
   "/mind-lab/memory-challenge": {
-    "hash": "df5d01befc44f62e",
+    "hash": "7db4bafe6e9d4836",
     "date": "2026-10-31"
   },
   "/mind-lab/brain-teasers": {
-    "hash": "f17f5ff8bd26bf01",
+    "hash": "6d9c4e8224ae312f",
     "date": "2026-10-31"
   },
   "/mind-lab/smart-revision": {
-    "hash": "2b650529e5ca1443",
+    "hash": "cc31443aabc728b5",
     "date": "2026-10-31"
   },
   "/mind-lab/smart-notes": {
-    "hash": "3e9da2d7fd6abf98",
+    "hash": "5b7685463106d0da",
     "date": "2026-10-31"
   },
   "/mind-lab/learning-domains": {
-    "hash": "d61a0dc31de5a5ea",
+    "hash": "7cc65733e9766916",
     "date": "2026-10-31"
   },
   "/mind-lab/smart-learning": {
-    "hash": "7d61b804a7369a9e",
+    "hash": "b760f8c16419d7d9",
     "date": "2026-10-31"
   },
   "/mind-lab/career-interests": {
-    "hash": "65ea35760a0e57d4",
+    "hash": "69f5d7ae21aad722",
     "date": "2026-10-31"
   },
   "/mind-lab/eq-check": {
-    "hash": "b36bddea505ecd44",
+    "hash": "609b59cd13179e7d",
     "date": "2026-10-31"
   },
   "/mind-lab/reasoning-test": {
-    "hash": "a8fa33c30f503576",
+    "hash": "3b128fd7c8afe018",
     "date": "2026-10-31"
   },
   "/mind-lab/aptitude-practice": {
-    "hash": "b2aa04cf4c9ab9e3",
+    "hash": "06ac54286c8b7722",
     "date": "2026-10-31"
   },
   "/teachers/:id": {
@@ -80,75 +80,75 @@
     "date": "2026-10-20"
   },
   "/subjects/mathematics-4024": {
-    "hash": "6cba843b7a5cbefc",
+    "hash": "44892be715cfd69a",
     "date": "2026-10-23"
   },
   "/subjects/additional-mathematics-4037": {
-    "hash": "915e0f837d0efd8e",
+    "hash": "6f076987d5a2f802",
     "date": "2026-10-23"
   },
   "/subjects/physics-5054": {
-    "hash": "c411317018180157",
+    "hash": "14cd0fbdb6cdb44f",
     "date": "2026-10-23"
   },
   "/subjects/chemistry-5070": {
-    "hash": "ff910a203202cd14",
+    "hash": "fda5075b8cec35e8",
     "date": "2026-10-23"
   },
   "/subjects/biology-5090": {
-    "hash": "5717227eb03dd0cd",
+    "hash": "aeea146830e449cf",
     "date": "2026-10-23"
   },
   "/subjects/english-1123": {
-    "hash": "445d0ae6fe54f02c",
+    "hash": "fccbabb9dcf05dbc",
     "date": "2026-10-23"
   },
   "/subjects/computer-science-2210": {
-    "hash": "def71b8f59d665e8",
+    "hash": "72771bc9ff325d54",
     "date": "2026-10-23"
   },
   "/subjects/islamiyat-2058": {
-    "hash": "b8bef87c4530b1d9",
+    "hash": "712088e79bec6730",
     "date": "2026-10-23"
   },
   "/subjects/pakistan-studies-2059": {
-    "hash": "0e3c7c98aded391c",
+    "hash": "f3866846fa785b28",
     "date": "2026-10-23"
   },
   "/subjects/urdu-3247": {
-    "hash": "157a66a50c3d74b2",
+    "hash": "8a26e103b27cbb75",
     "date": "2026-10-23"
   },
   "/subjects/urdu-3248": {
-    "hash": "2cc44d399210c189",
+    "hash": "ecd47a2d76d52197",
     "date": "2026-10-23"
   },
   "/subjects/mathematics-9709": {
-    "hash": "ef3ec7967099cb04",
+    "hash": "baac9315878f3741",
     "date": "2026-10-23"
   },
   "/subjects/physics-9702": {
-    "hash": "705c8a8ad46bab7b",
+    "hash": "a10a885669112772",
     "date": "2026-10-23"
   },
   "/subjects/chemistry-9701": {
-    "hash": "48a2633d2c5d14b1",
+    "hash": "ed9cc5d4df761472",
     "date": "2026-10-23"
   },
   "/subjects/biology-9700": {
-    "hash": "b225afb7af4ece16",
+    "hash": "874bf149e15bec81",
     "date": "2026-10-23"
   },
   "/subjects/english-9093": {
-    "hash": "c6b81aa49222c5cd",
+    "hash": "f16df4ae714d28f0",
     "date": "2026-10-23"
   },
   "/subjects/computer-science-9618": {
-    "hash": "6c7fe7d44319d1a9",
+    "hash": "6b76099bb7b34094",
     "date": "2026-10-23"
   },
   "/subjects/urdu-9866": {
-    "hash": "ad80ed6d82d58466",
+    "hash": "092486f2e2c7eccb",
     "date": "2026-10-23"
   },
   "/online-school/saudi-arabia": {

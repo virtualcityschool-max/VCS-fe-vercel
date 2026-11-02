@@ -31,11 +31,12 @@ const StudentAttendance = () => {
   useEffect(() => {
     setCoursesLoading(true);
     axiosInstance
-      .get("/courses/")
+      .get("/courses/my-enrollments/")
       .then((res) => {
         const data = res.data?.results ?? res.data?.data ?? res.data;
         const all  = Array.isArray(data) ? data : [];
-        const enrolled = all.filter((c) => c.is_enrolled === true);
+        // only this student's active enrollments, not the whole catalogue
+        const enrolled = all.filter((e) => e.status === "active" && e.course).map((e) => e.course);
         setCourses(enrolled);
         if (enrolled.length) setCourseId(String(enrolled[0].id));
       })

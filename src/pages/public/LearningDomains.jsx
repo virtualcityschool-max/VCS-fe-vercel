@@ -95,6 +95,8 @@ const LearningDomains = () => {
           <figure>
             <img
               src="/images/play-area/domains.webp"
+                srcSet="/images/play-area/domains-800.webp 800w, /images/play-area/domains.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A teacher reading a book with a young student in a library"
               width="1600"
               height="1067"
@@ -170,6 +172,8 @@ const LearningDomains = () => {
             <figure className="hidden lg:block">
               <img
                 src="/images/play-area/domains-rider.webp"
+                srcSet="/images/play-area/domains-rider-800.webp 800w, /images/play-area/domains-rider.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
                 alt="A skilled rider in a helmet sitting calmly on a dark horse in an arena"
                 width="1200"
                 height="1500"

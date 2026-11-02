@@ -222,7 +222,7 @@ const PrivacyPolicy = () => {
                       <div className="absolute -inset-10 bg-indigo-500/10 blur-[100px] rounded-full opacity-50"></div>
                       <div className="aspect-[4/3] md:aspect-square rounded-3xl border border-white/10 overflow-hidden relative shadow-2xl">
                          <img 
-                           src="/assets/security.png" 
+                           src="/assets/security.webp" 
                            alt="Data Security" 
                            className="w-full h-full object-cover"
                          />

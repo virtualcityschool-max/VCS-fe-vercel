@@ -65,6 +65,8 @@ const PlayArea = () => {
           <figure className="relative">
             <img
               src="/images/play-area/puzzle.webp"
+                srcSet="/images/play-area/puzzle-800.webp 800w, /images/play-area/puzzle.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A colourful pile of jigsaw puzzle pieces"
               width="1400"
               height="935"

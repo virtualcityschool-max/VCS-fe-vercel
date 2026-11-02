@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { adminService } from "../../services/adminService";
 import { parentService } from "../../services/parentService";
+import { injectReducer } from "../index";
 
 // Async thunks
 export const fetchPendingChildLinks = createAsyncThunk(
@@ -272,5 +273,7 @@ export const selectAvailableStudentsLoading = (state) =>
 export const selectAvailableStudentsError = (state) =>
   state.childLinks.availableStudentsError;
 export const selectChildLinksLinking = (state) => state.childLinks.isLinking;
+
+injectReducer("childLinks", childLinksSlice.reducer);
 
 export default childLinksSlice.reducer;

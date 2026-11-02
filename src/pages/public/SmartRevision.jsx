@@ -101,6 +101,8 @@ const SmartRevision = () => {
           <figure>
             <img
               src="/images/play-area/sticky-notes.webp"
+                srcSet="/images/play-area/sticky-notes-800.webp 800w, /images/play-area/sticky-notes.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="Colourful sticky notes pinned to a board"
               width="1600"
               height="1067"

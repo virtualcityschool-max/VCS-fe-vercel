@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
 import { adminService } from "../../services/adminService";
+import { injectReducer } from "../index";
 
 // Async thunks
 export const fetchPendingApprovals = createAsyncThunk(
@@ -256,5 +257,7 @@ export const selectPendingEnrollments = (state) => state.approvals.pendingEnroll
 export const selectEnrollmentsLoading = (state) => state.approvals.enrollmentsLoading;
 export const selectEnrollmentsError = (state) => state.approvals.enrollmentsError;
 export const selectEnrollmentsProcessing = (state) => state.approvals.enrollmentsProcessing;
+
+injectReducer("approvals", approvalsSlice.reducer);
 
 export default approvalsSlice.reducer;

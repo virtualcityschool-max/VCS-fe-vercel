@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { getCourseImage } from "../../utils/courseImageUtils";
+import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 
 /**
  * Shared course card used across student dashboard (enrolled/pending/rejected)
@@ -47,7 +48,10 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           <div className="block h-full">
             {thumbnail ? (
               <img
-                src={thumbnail}
+                src={sizedImage(thumbnail, 640)}
+                loading="lazy"
+                decoding="async"
+                onError={fallbackToOriginal(thumbnail)}
                 className="w-full h-full object-cover opacity-75 group-hover:scale-105 group-hover:opacity-100 transition duration-700"
                 alt={courseData.title || "Course"}
               />
@@ -61,7 +65,10 @@ const CourseCard = ({ course, index = 0, mode, onClick, onNavigate, ctaLabel, on
           <Link to={`/courses/${courseData.id}`} className="block h-full">
             {thumbnail ? (
               <img
-                src={thumbnail}
+                src={sizedImage(thumbnail, 640)}
+                loading="lazy"
+                decoding="async"
+                onError={fallbackToOriginal(thumbnail)}
                 className="w-full h-full object-cover opacity-60 group-hover:scale-105 group-hover:opacity-100 transition duration-700"
                 alt={courseData.title || "Course"}
               />

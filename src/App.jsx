@@ -22,12 +22,15 @@ import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
 import { applyTheme } from "./utils/theme";
 
 // Inner app - inside BrowserRouter so useLocation works
+// Admin-only slices load with the admin area; until then there is nothing pending.
+const NO_LIST = {};
+
 const AppInner = () => {
   const { isLoggedIn, role } = useSelector(
     (state) => state.auth,
   );
-  const { pendingApprovals, pendingEnrollments } = useSelector((state) => state.approvals);
-  const { pendingChildLinks } = useSelector((state) => state.childLinks);
+  const { pendingApprovals, pendingEnrollments } = useSelector((state) => state.approvals || NO_LIST);
+  const { pendingChildLinks } = useSelector((state) => state.childLinks || NO_LIST);
   const pendingHireCount = useSelector((state) =>
     (state.hire?.adminRequests || []).filter((r) => r.status === "pending").length
   );

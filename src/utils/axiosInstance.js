@@ -49,11 +49,15 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Add X-Timezone header - profile timezone takes priority, browser timezone as fallback
-    const timezone =
-      authStorage.getAuthState()?.user?.timezone ||
-      Intl.DateTimeFormat().resolvedOptions().timeZone;
-    config.headers["X-Timezone"] = timezone;
+    // X-Timezone (profile timezone first, then the browser's) is only read by
+    // signed-in endpoints. Anonymous requests skip it: a custom header makes the
+    // browser send an extra CORS "preflight" round trip before every request.
+    if (token) {
+      const timezone =
+        authStorage.getAuthState()?.user?.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone;
+      config.headers["X-Timezone"] = timezone;
+    }
 
     // Enhanced debugging for auth endpoints
     if (config.url?.includes("auth/me")) {

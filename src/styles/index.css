@@ -53,7 +53,9 @@
 
 @font-face {
   font-family: "SF Pro Display";
-  src: url("/fonts/SF-Pro-Display-Black.woff2") format("woff2"), url("/fonts/SF-Pro-Display-Black.otf") format("opentype");
+  /* The "Black" file we had was an exact copy of Bold: reuse Bold, so pages
+     with font-black don't download the same 57 KB a second time. */
+  src: url("/fonts/SF-Pro-Display-Bold.woff2") format("woff2"), url("/fonts/SF-Pro-Display-Bold.otf") format("opentype");
   font-display: swap;
   font-weight: 900;
   font-style: normal;

@@ -1,5 +1,4 @@
-import React, { useEffect, useRef } from "react";
-import Quill from "quill";
+import React from "react";
 import "quill/dist/quill.snow.css";
 import { safeRichHtml } from "../../utils/safeHtml";
 
@@ -11,29 +10,14 @@ import { safeRichHtml } from "../../utils/safeHtml";
 const demoteH1s = (html) =>
   (html || "").replace(/<h1(\s[^>]*)?>/gi, "<h2$1>").replace(/<\/h1>/gi, "</h2>");
 
-const QuillViewer = ({ value = "" }) => {
-  const containerRef = useRef(null);
-  const quillRef = useRef(null);
-
-  useEffect(() => {
-    if (!containerRef.current || quillRef.current) return;
-
-    const quill = new Quill(containerRef.current, {
-      theme: "snow",
-      readOnly: true,
-      modules: { toolbar: false },
-    });
-
-    quill.root.innerHTML = safeRichHtml(demoteH1s(value));
-    quillRef.current = quill;
-  }, []);
-
-  useEffect(() => {
-    if (!quillRef.current) return;
-    quillRef.current.root.innerHTML = safeRichHtml(demoteH1s(value));
-  }, [value]);
-
-  return <div className="ql-viewer-root" ref={containerRef} />;
-};
+// Shows saved editor content read-only. The HTML was written by the Quill
+// editor, so Quill's own stylesheet and the same wrapper classes Quill uses
+// in read-only mode display it identically - without downloading the editor
+// itself (about 58 KB compressed) on every blog post.
+const QuillViewer = ({ value = "" }) => (
+  <div className="ql-viewer-root ql-container ql-snow ql-disabled">
+    <div className="ql-editor" dangerouslySetInnerHTML={{ __html: safeRichHtml(demoteH1s(value)) }} />
+  </div>
+);
 
 export default QuillViewer;

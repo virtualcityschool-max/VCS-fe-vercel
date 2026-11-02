@@ -196,6 +196,8 @@ const StarSigns = () => {
           <figure>
             <img
               src="/images/play-area/night-sky.webp"
+                srcSet="/images/play-area/night-sky-800.webp 800w, /images/play-area/night-sky.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A person standing under the Milky Way in a starry night sky"
               width="1400"
               height="933"

@@ -12,6 +12,7 @@ import { toastManager } from "../../utils/toastManager";
 import { getDisplayName } from "../../utils/userDisplay";
 import { TagChip, StudentTagsModal, LabelFilterDropdown } from "./StudentTags";
 import { useStudentTags } from "../../hooks/useStudentTags";
+import { sizedImage } from "../../utils/imageCdn";
 
 // Subject department definitions for Tutor classification
 const TUTOR_DEPARTMENTS = [
@@ -329,7 +330,7 @@ const StudentCard = ({
           <div className="relative shrink-0">
             {getStorageUrl(user.avatar) ? (
               <img
-                src={getStorageUrl(user.avatar)}
+                src={sizedImage(getStorageUrl(user.avatar), 128)}
                 alt={user.username}
                 className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-800"
               />
@@ -548,7 +549,7 @@ const TutorCard = ({
           <div className="relative shrink-0">
             {getStorageUrl(user.avatar) ? (
               <img
-                src={getStorageUrl(user.avatar)}
+                src={sizedImage(getStorageUrl(user.avatar), 128)}
                 alt={user.username}
                 className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-800"
               />
@@ -2159,7 +2160,7 @@ const UsersTab = ({
                   <div className="relative">
                     {getStorageUrl(user.avatar) ? (
                       <img
-                        src={getStorageUrl(user.avatar)}
+                        src={sizedImage(getStorageUrl(user.avatar), 128)}
                         alt={user.username}
                         className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
                       />
@@ -2383,7 +2384,7 @@ const UsersTab = ({
                             <div className="flex items-center gap-2.5">
                               {getStorageUrl(user.avatar) ? (
                                 <img
-                                  src={getStorageUrl(user.avatar)}
+                                  src={sizedImage(getStorageUrl(user.avatar), 128)}
                                   alt={user.username}
                                   className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-700 shrink-0"
                                 />
@@ -2560,7 +2561,7 @@ const UsersTab = ({
                             <div className="flex items-center gap-2.5">
                               {getStorageUrl(user.avatar) ? (
                                 <img
-                                  src={getStorageUrl(user.avatar)}
+                                  src={sizedImage(getStorageUrl(user.avatar), 128)}
                                   alt={user.username}
                                   className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-700 shrink-0"
                                 />
@@ -2748,7 +2749,7 @@ const UsersTab = ({
                             <div className="flex items-center gap-2.5">
                               {getStorageUrl(user.avatar) ? (
                                 <img
-                                  src={getStorageUrl(user.avatar)}
+                                  src={sizedImage(getStorageUrl(user.avatar), 128)}
                                   alt={user.username}
                                   className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-700 shrink-0"
                                 />
@@ -2994,7 +2995,7 @@ const UsersTab = ({
                           <div className="flex items-center gap-2.5">
                             {getStorageUrl(user.avatar) ? (
                               <img
-                                src={getStorageUrl(user.avatar)}
+                                src={sizedImage(getStorageUrl(user.avatar), 128)}
                                 alt={user.username}
                                 className="w-7 h-7 rounded-lg object-cover ring-1 ring-slate-700 shrink-0"
                               />

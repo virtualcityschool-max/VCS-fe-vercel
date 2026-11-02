@@ -448,7 +448,7 @@ const Sidebar = ({
               navigate(dashboardPaths[role] || "/");
             }}
           >
-            <img src="/assets/logo02.png" alt="VCS" className="w-full h-full object-contain" />
+            <img src="/assets/logo02.webp" alt="VCS" width="36" height="30" className="w-full h-full object-contain" />
           </div>
         </div>
 

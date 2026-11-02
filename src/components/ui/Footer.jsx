@@ -39,7 +39,8 @@ const Footer = ({ variant = "full" }) => {
           {/* Brand - left */}
           <div className="max-w-sm">
             <img
-              src="/assets/logo1.png"
+              src="/assets/logo1.webp"
+              loading="lazy"
               alt="Virtual City School"
               className="theme-logo w-40 h-28 object-contain cursor-pointer -ml-2 mb-1 hover:opacity-90 transition-opacity"
               onClick={() => handleNavigation("/")}

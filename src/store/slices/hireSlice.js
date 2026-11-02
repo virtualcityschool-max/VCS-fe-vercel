@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { hireService } from "../../services/hireService";
+import { injectReducer } from "../index";
 
 export const fetchAdminHireRequests = createAsyncThunk(
   "hire/fetchAdminHireRequests",
@@ -86,5 +87,7 @@ const hireSlice = createSlice({
       });
   },
 });
+
+injectReducer("hire", hireSlice.reducer);
 
 export default hireSlice.reducer;

@@ -45,6 +45,7 @@ const GlobalReachSection = () => (
               <div className="w-full aspect-[3/2] rounded-md overflow-hidden border border-white/10 bg-slate-800 shadow-[0_4px_12px_-4px_rgba(0,0,0,0.6)] transition-transform duration-200 group-hover:-translate-y-1 group-hover:scale-105">
                 <img
                   src={`/assets/flags/${country.code}.svg`}
+                  loading="lazy"
                   alt={`${country.name} flag`}
                   className="w-full h-full object-cover block"
                 />

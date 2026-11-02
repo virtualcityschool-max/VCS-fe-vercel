@@ -12,6 +12,7 @@ import FilterSelect from "../../components/ui/FilterSelect";
 import { getStorageUrl } from "../../utils/storageUrl";
 import DistinctionsEditor from "../../components/admin/DistinctionsEditor";
 import { getDisplayName } from "../../utils/userDisplay";
+import { sizedImage } from "../../utils/imageCdn";
 
 // ── Tiny helpers ──────────────────────────────────────────────────────────────
 
@@ -311,7 +312,7 @@ const ProfilePage = () => {
             <div className="relative flex-shrink-0 group">
               <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/20 overflow-hidden">
                 {profile?.avatar ? (
-                  <img src={getStorageUrl(profile.avatar)} alt="avatar" className="w-full h-full object-cover" />
+                  <img src={sizedImage(getStorageUrl(profile.avatar), 256)} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-white text-2xl font-black">{initials}</span>
                 )}

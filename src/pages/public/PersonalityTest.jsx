@@ -100,6 +100,8 @@ const Intro = ({ saved, onStart, onResume, onReport }) => {
       <figure>
         <img
           src="/images/play-area/classroom.webp"
+                srcSet="/images/play-area/classroom-800.webp 800w, /images/play-area/classroom.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
           alt="Students in a classroom listening to their teacher"
           width="1600"
           height="996"

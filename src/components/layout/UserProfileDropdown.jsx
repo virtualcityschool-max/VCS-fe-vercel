@@ -6,6 +6,7 @@ import { ROLES, ROUTES } from "../../constants";
 import { toastManager } from "../../utils/toastManager";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { getDisplayName } from "../../utils/userDisplay";
+import { sizedImage } from "../../utils/imageCdn";
 
 const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -102,7 +103,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
           <div className="w-7 h-7 rounded-full border border-slate-700 group-hover:border-indigo-500/60 transition-all duration-200 bg-slate-900 flex items-center justify-center overflow-hidden">
             {auth.user?.avatar ? (
               <img
-                src={getStorageUrl(auth.user.avatar)}
+                src={sizedImage(getStorageUrl(auth.user.avatar), 128)}
                 alt="User Avatar"
                 className="w-full h-full object-cover"
               />
@@ -163,7 +164,7 @@ const UserProfileDropdown = ({ dropUp = false, isCollapsed = false }) => {
                 <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
                   {auth.user?.avatar ? (
                     <img
-                      src={getStorageUrl(auth.user.avatar)}
+                      src={sizedImage(getStorageUrl(auth.user.avatar), 128)}
                       alt="User Avatar"
                       className="w-full h-full object-cover"
                     />

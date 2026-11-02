@@ -6,6 +6,7 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { getStorageUrl } from "../../utils/storageUrl";
+import { sizedImage } from "../../utils/imageCdn";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -396,7 +397,7 @@ const StudentTutors = () => {
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0 shadow-lg">
                         {avatarUrl ? (
-                          <img src={avatarUrl} alt={teacherName} className="w-full h-full object-cover" />
+                          <img src={sizedImage(avatarUrl, 128)} alt={teacherName} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-lg font-black">
                             {initial}

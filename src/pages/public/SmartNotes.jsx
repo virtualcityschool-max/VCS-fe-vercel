@@ -93,6 +93,8 @@ const SmartNotes = () => {
           <figure>
             <img
               src="/images/play-area/notes.webp"
+                srcSet="/images/play-area/notes-800.webp 800w, /images/play-area/notes.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A student writing notes in a notebook next to a laptop"
               width="1600"
               height="1067"

@@ -20,6 +20,7 @@ import SessionCountdown from "../common/SessionCountdown";
 import GmailNotice from "../common/GmailNotice";
 import IssueInJoiningClassBanner from "../common/IssueInJoiningClassBanner";
 import StudentSessionCard from "../sessions/StudentSessionCard";
+import { sizedImage } from "../../utils/imageCdn";
 
 const tzToUTCMs = (dateStr, timeStr, tz) => {
   if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
@@ -272,7 +273,7 @@ const LiveScheduleList = () => {
                   <div className="flex-shrink-0 w-16 h-16 rounded-2xl border border-indigo-500/20 overflow-hidden shadow-lg">
                     {getStorageUrl(slot.teacher_avatar) ? (
                       <img
-                        src={getStorageUrl(slot.teacher_avatar)}
+                        src={sizedImage(getStorageUrl(slot.teacher_avatar), 128)}
                         alt={slot.teacher_name}
                         className="w-full h-full object-cover"
                       />
@@ -383,7 +384,7 @@ const LiveScheduleList = () => {
               renderAvatar={() =>
                 getStorageUrl(session.instructor_avatar) ? (
                   <img
-                    src={getStorageUrl(session.instructor_avatar)}
+                    src={sizedImage(getStorageUrl(session.instructor_avatar), 128)}
                     alt={session.instructor_name}
                     className="w-16 h-16 rounded-2xl border border-white/10 object-cover shadow-lg"
                   />

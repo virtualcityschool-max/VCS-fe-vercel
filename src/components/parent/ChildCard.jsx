@@ -12,6 +12,7 @@ import { showApiError } from "../../utils/apiErrorHandler";
 import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../ui/TimezoneTag";
 import { getDisplayName } from "../../utils/userDisplay";
+import { sizedImage } from "../../utils/imageCdn";
 
 
 const fmt12 = (t) => {
@@ -95,7 +96,7 @@ const ChildCard = ({ child }) => {
         <div className="flex items-center gap-4 min-w-0">
           {child.avatar ? (
             <img
-              src={child.avatar}
+              src={sizedImage(child.avatar, 128)}
               alt={getDisplayName(child)}
               className="w-16 h-16 rounded-2xl border-2 border-indigo-500/30 shadow-xl object-cover shrink-0"
             />

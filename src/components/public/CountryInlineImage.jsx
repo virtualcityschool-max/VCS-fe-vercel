@@ -14,6 +14,8 @@ const CountryInlineImage = ({ image, countrySlug, side = "right" }) => {
     <figure className={`w-full sm:w-[42%] ${floatClass} mb-4`}>
       <img
         src={`/assets/countries/${countrySlug}/${image.src}`}
+        srcSet={`/assets/countries/${countrySlug}/${image.src.replace(/\.webp$/, "-800.webp")} 800w, /assets/countries/${countrySlug}/${image.src} ${image.width || 1600}w`}
+        sizes="(max-width: 640px) 100vw, 42vw"
         alt={image.alt}
         width={image.width}
         height={image.height}

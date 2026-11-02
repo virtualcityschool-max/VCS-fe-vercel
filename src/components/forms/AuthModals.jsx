@@ -887,7 +887,7 @@ const AuthModals = () => {
         {isOpen === "login" ? (
           <div className="p-6 sm:p-8 relative overflow-y-auto flex-1 scrollbar-hide">
             <div className="flex flex-col items-center mb-6">
-              <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
+              <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
               <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                 {adminMode ? "Admin Login" : "Secure Login"}
               </h2>
@@ -1087,7 +1087,7 @@ const AuthModals = () => {
                 {fpStep === "request" && (
                   <form onSubmit={handleFpRequestOtp} className="space-y-5 flex-1">
                     <div className="text-center mb-6 flex flex-col items-center">
-                      <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                      <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                       <h2 className="text-xl font-black font-poppins text-white mb-1">Forgot Password</h2>
                       <p className="text-slate-400 text-xs">Enter your email to receive a reset code</p>
                     </div>
@@ -1116,7 +1116,7 @@ const AuthModals = () => {
                 {fpStep === "verify" && (
                   <form onSubmit={handleFpVerifyOtp} className="space-y-5 flex-1">
                     <div className="text-center mb-6 flex flex-col items-center">
-                      <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                      <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                       <h2 className="text-xl font-black font-poppins text-white mb-1">Check Your Email</h2>
                       <p className="text-slate-400 text-xs">Enter the 6-digit code sent to <strong className="text-slate-300">{fpEmail}</strong></p>
                     </div>
@@ -1164,7 +1164,7 @@ const AuthModals = () => {
                 {fpStep === "reset" && (
                   <form onSubmit={handleFpReset} className="space-y-5 flex-1">
                     <div className="text-center mb-6 flex flex-col items-center">
-                      <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                      <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                       <div className="w-16 h-16 bg-amber-500/20 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-4">
                         <i className="fas fa-key text-amber-400" />
                       </div>
@@ -1215,7 +1215,7 @@ const AuthModals = () => {
 
                 {fpStep === "success" && (
                   <div className="flex flex-col items-center justify-center flex-1 text-center animate-fadeIn">
-                    <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                    <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                     <div className="w-16 h-16 bg-emerald-500/20 rounded-3xl flex items-center justify-center text-2xl mb-6">
                       <i className="fas fa-check-circle text-emerald-400" />
                     </div>
@@ -1238,7 +1238,7 @@ const AuthModals = () => {
             {/* ── STEP 1: GOOGLE SIGNUP PROMPT ───────────────────────────── */}
             {registrationStep === "google_prompt" && (
               <div className="flex flex-col items-center max-w-sm mx-auto animate-fadeIn">
-                <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
+                <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-4" />
                 <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                   Create Account
                 </h2>
@@ -1321,7 +1321,7 @@ const AuthModals = () => {
             {registrationStep === "google_onboarding" && (
               <div className="max-w-xl mx-auto animate-fadeIn">
                 <div className="flex flex-col items-center mb-6">
-                  <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-3" />
+                  <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-3" />
                   <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                     Complete Your Profile
                   </h2>
@@ -1625,7 +1625,7 @@ const AuthModals = () => {
             {registrationStep === "form" && (
               <form onSubmit={handleRegisterSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 flex flex-col items-center mb-8">
-                  <img src="/assets/logo.png" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-6" />
+                  <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-12 sm:h-14 object-contain mb-6" />
                   <h2 className="text-xl sm:text-2xl font-black font-poppins text-white text-center uppercase tracking-[0.15em]">
                     Create Account
                   </h2>
@@ -2127,7 +2127,7 @@ const AuthModals = () => {
             {registrationStep === "otp" && (
               <form onSubmit={handleOtpVerification} className="space-y-5">
                 <div className="text-center mb-8 flex flex-col items-center">
-                  <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
+                  <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-8" />
                   <h2 className="text-xl font-black font-poppins text-white mb-2">
                     Check Your Email
                   </h2>
@@ -2205,7 +2205,7 @@ const AuthModals = () => {
 
             {registrationStep === "success" && (
               <div className="text-center py-10 animate-fadeIn flex flex-col items-center">
-                <img src="/assets/logo.png" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-10" />
+                <img src="/assets/logo-auth.webp" alt="Virtual City School" className="h-10 sm:h-12 object-contain mb-10" />
                 <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-3xl flex items-center justify-center text-2xl mx-auto mb-6">
                   <i className="fas fa-check-circle"></i>
                 </div>

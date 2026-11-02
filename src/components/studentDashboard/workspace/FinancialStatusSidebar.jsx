@@ -7,6 +7,7 @@ import { getDisplayName } from "../../../utils/userDisplay";
 import { authService } from "../../../services/authService";
 import { profileUpdated } from "../../../store/slices/authSlice";
 import { toastManager } from "../../../utils/toastManager";
+import { sizedImage } from "../../../utils/imageCdn";
 
 const FinancialStatusSidebar = ({
   onRequestTranscript,
@@ -65,7 +66,7 @@ const FinancialStatusSidebar = ({
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden border border-white/15">
               {avatarUrl ? (
                 <img
-                  src={avatarUrl}
+                  src={sizedImage(avatarUrl, 128)}
                   alt={displayName}
                   className="w-full h-full object-cover"
                 />

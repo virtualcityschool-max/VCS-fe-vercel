@@ -1,16 +1,11 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { configureStore, combineSlices } from "@reduxjs/toolkit";
 import uiReducer from "./slices/uiSlice";
 import authReducer, { logout } from "./slices/authSlice";
 import studentDashboardReducer from "./slices/studentDashboardSlice";
-import adminReducer from "./slices/adminSlice";
 import coursesReducer from "./slices/coursesSlice";
 import blogsReducer from "./slices/blogsSlice";
-import approvalsReducer from "./slices/approvalsSlice";
 import teachersReducer from "./slices/teacherSlice";
 import announcementsReducer from "./slices/announcementsSlice";
-import parentReducer from "./slices/parentSlice";
-import childLinksReducer from "./slices/childLinksSlice";
-import hireReducer from "./slices/hireSlice";
 import platformSettingsReducer from "./slices/platformSettingsSlice";
 import freeAccessReducer from "./slices/freeAccessSlice";
 import referralReducer from "./slices/referralSlice";
@@ -64,24 +59,23 @@ const saveAuthState = (authState) => {
 
 const preloadedAuthState = loadAuthState();
 
-const appReducer = combineReducers({
+// Slices used by every visitor. The admin, parent, approvals, child-links and
+// hire slices are only needed inside the admin/parent/teacher areas: they add
+// themselves (injectReducer below) when that area's code loads, so public
+// visitors don't download them.
+const appReducer = combineSlices({
   ui: uiReducer,
   auth: authReducer,
   studentDashboard: studentDashboardReducer,
-  admin: adminReducer,
   courses: coursesReducer,
   blogs: blogsReducer,
-  approvals: approvalsReducer,
   teachers: teachersReducer,
   announcements: announcementsReducer,
-  parent: parentReducer,
-  childLinks: childLinksReducer,
-  hire: hireReducer,
   platformSettings: platformSettingsReducer,
   freeAccess: freeAccessReducer,
   referrals: referralReducer,
   testimonials: testimonialsReducer,
-});
+}).withLazyLoadedSlices();
 
 // Reset all slices to their initial state when the user logs out
 const rootReducer = (state, action) => {
@@ -95,6 +89,13 @@ export const store = configureStore({
   reducer: rootReducer,
   preloadedState: preloadedAuthState ? { auth: preloadedAuthState } : undefined,
 });
+
+// Add a slice when its area's code loads. The no-op action gives the new slice
+// its initial state straight away, so components can read it on first render.
+export const injectReducer = (reducerPath, reducer) => {
+  appReducer.inject({ reducerPath, reducer });
+  store.dispatch({ type: `@@vcs/inject/${reducerPath}` });
+};
 
 // Persist auth state on every Redux update
 store.subscribe(() => {

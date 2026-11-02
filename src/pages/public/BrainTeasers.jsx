@@ -398,6 +398,8 @@ const BrainTeasers = () => {
           <figure>
             <img
               src="/images/play-area/chess.webp"
+                srcSet="/images/play-area/chess-800.webp 800w, /images/play-area/chess.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="Wooden chess pieces in play on a chessboard"
               width="1600"
               height="1067"

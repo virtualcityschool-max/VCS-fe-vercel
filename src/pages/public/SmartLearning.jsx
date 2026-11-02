@@ -92,6 +92,8 @@ const SmartLearning = () => {
           <figure>
             <img
               src="/images/play-area/smart-learning.webp"
+                srcSet="/images/play-area/smart-learning-800.webp 800w, /images/play-area/smart-learning.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A laptop showing an online class with many students in a video call"
               width="1600"
               height="1067"

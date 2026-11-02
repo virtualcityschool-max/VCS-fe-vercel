@@ -4,6 +4,7 @@ import { coursesService } from "../../services/coursesService";
 import { adminSessionService } from "../../services/adminSessionService";
 import { adminTeacherSessionService } from "../../services/adminTeacherSessionService";
 import { axiosInstance } from "../../utils";
+import { injectReducer } from "../index";
 
 // Initial state
 const initialState = {
@@ -979,5 +980,7 @@ export const selectEnrollmentsLoading = (state) =>
 export const selectSessionsLoading = (state) => state.admin.sessions.loading;
 export const selectAvailableStudentsLoading = (state) =>
   state.admin.availableStudents.loading;
+
+injectReducer("admin", adminSlice.reducer);
 
 export default adminSlice.reducer;

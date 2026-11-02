@@ -262,7 +262,9 @@ const EQSelfCheck = () => {
                 </div>
               </div>
               <figure>
-                <img src="/images/play-area/eq.webp" alt="A group of smiling students working together around a laptop" width="1600" height="1067" className="w-full aspect-[3/2] object-cover rounded-3xl border border-white/10" />
+                <img src="/images/play-area/eq.webp"
+                srcSet="/images/play-area/eq-800.webp 800w, /images/play-area/eq.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px" alt="A group of smiling students working together around a laptop" width="1600" height="1067" className="w-full aspect-[3/2] object-cover rounded-3xl border border-white/10" />
                 <figcaption className="mt-2 text-xs text-slate-400">Photo: Unsplash</figcaption>
               </figure>
             </header>

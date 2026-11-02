@@ -286,6 +286,8 @@ const MemoryChallenge = () => {
           <figure>
             <img
               src="/images/play-area/library.webp"
+                srcSet="/images/play-area/library-800.webp 800w, /images/play-area/library.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A student studying with a laptop in a large library"
               width="1600"
               height="1067"

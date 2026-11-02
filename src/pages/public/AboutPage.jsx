@@ -86,6 +86,8 @@ const AboutPage = () => {
           <figure className="relative">
             <img
               src="/images/about/students.webp"
+                srcSet="/images/about/students-800.webp 800w, /images/about/students.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="Students studying together with laptops"
               width="1400"
               height="1000"
@@ -118,6 +120,8 @@ const AboutPage = () => {
           <figure className="relative order-2 lg:order-1">
             <img
               src="/images/about/online-class.webp"
+                srcSet="/images/about/online-class-800.webp 800w, /images/about/online-class.webp 1600w"
+                sizes="(max-width: 768px) 100vw, 1440px"
               alt="A student in a live online class with classmates on screen"
               width="1400"
               height="1000"
@@ -185,7 +189,14 @@ const AboutPage = () => {
                   aria-label={label}
                   className="w-12 h-12 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-center text-slate-300 hover:text-white hover:border-indigo-400/40 transition"
                 >
-                  <i className={`${icon} text-base`} />
+                  {key === "social_twitter" ? (
+                    // Font Awesome 6.4 has no X logo (the button was blank): draw it.
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <path d="M18.9 2H22l-6.8 7.8L23 22h-6.1l-4.8-6.3L6.6 22H3.5l7.3-8.3L1 2h6.2l4.4 5.8L18.9 2Zm-1.1 18.1h1.7L6.3 3.8H4.5l13.3 16.3Z" />
+                    </svg>
+                  ) : (
+                    <i className={`${icon} text-base`} />
+                  )}
                 </a>
               ))}
             </div>
