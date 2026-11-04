@@ -8,6 +8,7 @@ import {
   pointDisplayLabel,
   buildExamEvents,
 } from "../../utils/examTimeline";
+import { upcomingSeries } from "../../utils/examSeason";
 import Reveal from "../../components/ui/Reveal";
 import ExamTimeline from "../../components/public/ExamTimeline";
 import ExamZoneCallout from "../../components/public/ExamZoneCallout";
@@ -32,11 +33,13 @@ const ExamDatesPage = () => {
   const seriesByType = pickCurrentSeriesByType(EXAM_SERIES, today);
   const nextMilestone = getNextMilestone(EXAM_SERIES, today);
   const events = buildExamEvents(EXAM_SERIES, SITE_URL);
+  // The next two series by date (e.g. "Oct/Nov 2026 & May/June 2027"), so the
+  // title always matches what students are searching for.
+  const [s1, s2] = upcomingSeries(today);
 
   useSeo({
-    title: "Cambridge O Level & A Level Exam Dates and Deadlines",
-    description:
-      "O Level results dates, A Level exam registration deadlines and IGCSE results release dates for Cambridge students in Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman - sourced directly from Cambridge International.",
+    title: `Cambridge Exam Dates ${s1.label} & ${s2.label} – O Level, IGCSE & A Level`,
+    description: `Cambridge ${s1.label} and ${s2.label} exam dates: entry deadlines, exam period and results day for O Level, IGCSE and AS & A Level, taken from Cambridge International's own key-dates documents.`,
     url: PAGE_URL,
     jsonLd: [
       ...events,
@@ -69,10 +72,10 @@ const ExamDatesPage = () => {
             Cambridge Key Dates
           </span>
           <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
-            Cambridge O Level & A Level <span className="text-gradient">Exam Dates and Deadlines</span>
+            Cambridge Exam Dates <span className="text-gradient">{s1.label} & {s2.label}</span>
           </h1>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
-            Registration deadlines, exam windows and results release dates for Cambridge IGCSE, O Level and International AS & A Level - sourced directly from Cambridge International, for Pakistani families across Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman.
+            Entry deadlines, exam periods and results days for Cambridge O Level, IGCSE and International AS & A Level - sourced directly from Cambridge International, for Pakistani families across Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman.
           </p>
         </header>
 

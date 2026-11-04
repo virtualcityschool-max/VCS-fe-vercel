@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronRight, CheckCircle2 } from "lucide-react";
+import { ChevronRight, CheckCircle2, FileText, ListTree, ClipboardCheck } from "lucide-react";
 import { useSeo } from "../../hooks/useSeo";
 import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { SITE_URL } from "../../data/examDates";
@@ -8,6 +8,7 @@ import { guideBySlug, guideForCourse, SUBJECT_GUIDES } from "../../data/subjectG
 import { coursesService } from "../../services/coursesService";
 import { getDisplayName } from "../../utils/userDisplay";
 import GuideBody from "../../components/subjects/GuideBody";
+import { syllabusYearRange, mockExamsHref } from "../../utils/examSeason";
 import { ACCENT, guidePhoto, guidePhotoSrcSet, guideSections } from "../../components/subjects/guideSections";
 
 // One Cambridge subject explained for students: what it is, why it is taught,
@@ -99,8 +100,8 @@ const SubjectGuidePage = () => {
   const gridRef = useRef(null);
   useFollowingBox(tocSlotRef, tocBoxRef, gridRef, g);
 
-  // Titles phrased the way students search ("O Level Chemistry 5070 syllabus"),
-  // plus breadcrumb and article data for Google.
+  // Titles phrased the way students search ("9709 syllabus 2027"), naming the
+  // exam years still ahead, plus breadcrumb and article data for Google.
   const seo = useMemo(() => {
     if (!g) return { title: "Subject guide | Virtual City School", description: "", url: `${SITE_URL}/subjects` };
     const lvl = g.level === "O Level" ? "O Level" : "A Level";
@@ -109,8 +110,8 @@ const SubjectGuidePage = () => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const iso = y ? `${y}-${String(months.indexOf(m) + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}` : undefined;
     return {
-      title: `${lvl} ${g.subject} ${g.code}: Syllabus, Exam Pattern${g.grades ? " & Grade Boundaries" : ""} | Virtual City School`,
-      description: `${g.title} explained: ${g.papers?.length ? `${g.papers.length} papers, ` : ""}topics, question types, command words${g.grades ? `, ${g.grades.thresholds.series} grade boundaries` : ""}, books and a study plan — from the official Cambridge syllabus for ${g.syllabusYears}.`,
+      title: `${g.code} ${lvl} ${g.subject} Syllabus ${syllabusYearRange(g.syllabusYears)} – Topics, Papers & ${mockExamsHref(g.code) ? "Mock Exams" : "Grades"} | Virtual City School`,
+      description: `Cambridge ${g.code} ${g.subject} syllabus for ${syllabusYearRange(g.syllabusYears)} exams on one page: ${g.papers?.length ? `all ${g.papers.length} papers, ` : ""}the full topic list${g.grades ? ", grade boundaries" : ""}${mockExamsHref(g.code) ? " and timed mock exams on real Cambridge past papers" : ", exam tips and a study plan"}.`,
       url,
       jsonLd: [
         {
@@ -176,6 +177,8 @@ const SubjectGuidePage = () => {
           </figure>
         </header>
 
+        <SyllabusAtAGlance g={g} accent={accent} />
+
         {/* Phone: table of contents as a scrollable strip */}
         <div className="lg:hidden sticky top-0 z-20 -mx-4 px-4 py-2 bg-[#020617]/95 backdrop-blur border-b border-white/5 mb-2">
           <div className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
@@ -222,5 +225,73 @@ const SubjectGuidePage = () => {
     </main>
   );
 };
+
+// A short syllabus summary at the top, for students who searched "<code> syllabus":
+// the papers and topic areas from the guide (all from Cambridge's syllabus), with
+// links to the full topic list, the exam pattern and the subject's mock exams.
+function SyllabusAtAGlance({ g, accent }) {
+  const years = syllabusYearRange(g.syllabusYears);
+  const areas = g.topics
+    ? g.topics.map((t) => t.name)
+    : (g.topicGroups || []).flatMap((grp) => grp.groups.map((x) => x.area));
+  const topicCount = g.topics
+    ? g.topics.length
+    : (g.topicGroups || []).reduce((n, grp) => n + grp.groups.reduce((m, x) => m + x.topics.length, 0), 0);
+  const shown = areas.slice(0, 8);
+  return (
+    <section aria-labelledby="glance-title" className={`mb-10 rounded-3xl border p-5 md:p-7 ${accent.soft}`}>
+      <h2 id="glance-title" className="text-2xl md:text-3xl font-black tracking-tight text-white mb-1">
+        {g.code} syllabus {years} <span className={accent.text}>at a glance</span>
+      </h2>
+      <p className="text-base text-slate-300 mb-6">
+        What Cambridge examines in {g.level} {g.subject}, from the official syllabus. Details of every topic and paper are below.
+      </p>
+      <div className="grid md:grid-cols-2 gap-6">
+        {g.papers?.length > 0 && (
+          <div>
+            <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
+              <FileText className="w-4 h-4" aria-hidden="true" /> {g.papers.length} papers
+            </h3>
+            <ul className="space-y-2">
+              {g.papers.map((p) => (
+                <li key={p.name} className="flex items-baseline justify-between gap-3 text-base">
+                  <span className="text-slate-100">{p.name}</span>
+                  {p.time && <span className="shrink-0 text-sm text-slate-400">{p.time}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {shown.length > 0 && (
+          <div>
+            <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
+              <ListTree className="w-4 h-4" aria-hidden="true" /> {topicCount} topics
+            </h3>
+            <ul className="flex flex-wrap gap-2">
+              {shown.map((a) => (
+                <li key={a} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-slate-200">{a}</li>
+              ))}
+              {areas.length > shown.length && (
+                <li className="px-1 py-1 text-sm text-slate-400">+ {areas.length - shown.length} more</li>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
+      <div className="mt-6 flex flex-wrap gap-3">
+        {/* The Mock Exams app is served under /mocks: a full page load, not a router link. */}
+        {mockExamsHref(g.code) && <a href={mockExamsHref(g.code)} className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 px-5 py-2.5 text-base font-semibold text-white transition">
+          <ClipboardCheck className="w-4 h-4" aria-hidden="true" /> {g.subject} {g.code} mock exams
+        </a>}
+        <a href="#topics" className="inline-flex items-center gap-1 rounded-xl border border-white/15 px-4 py-2.5 text-base font-semibold text-slate-200 hover:text-white hover:border-indigo-400/50 transition">
+          Full topic list <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        </a>
+        <a href="#exam" className="inline-flex items-center gap-1 rounded-xl border border-white/15 px-4 py-2.5 text-base font-semibold text-slate-200 hover:text-white hover:border-indigo-400/50 transition">
+          Exam pattern <ChevronRight className="w-4 h-4" aria-hidden="true" />
+        </a>
+      </div>
+    </section>
+  );
+}
 
 export default SubjectGuidePage;
