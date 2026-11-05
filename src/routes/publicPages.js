@@ -66,7 +66,12 @@ export const PUBLIC_PAGES = [
 ];
 
 // The page for a path, preloaded by src/main.jsx before the first render.
+// A subject guide page also needs that one subject's content.
 export const preloadPublicPage = (pathname) => {
   const hit = PUBLIC_PAGES.find(([re]) => re.test(pathname));
-  return hit ? hit[1].preload() : Promise.resolve();
+  const guide = pathname.match(/^\/subjects\/([^/]+)\/?$/);
+  return Promise.all([
+    hit ? hit[1].preload() : undefined,
+    guide ? import("../data/subjectGuides/load").then((m) => m.loadGuide(decodeURIComponent(guide[1]))) : undefined,
+  ]);
 };

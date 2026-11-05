@@ -2,7 +2,7 @@
 // the menu and footer) doesn't match the guides in src/data/subjectGuides/index.js,
 // or if scripts/prerender.js / generate-sitemap.js miss a guide, or if
 // src/data/countryList.js doesn't match the country pages.
-// `--print` writes a fresh catalog.js body to stdout instead.
+// `--print` writes a fresh catalog.js body to stdout instead; `--print-cards` the rows of cards.js.
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -16,6 +16,12 @@ const guides = [];
 for (const name of order) guides.push((await import(pathToFileURL(join(DIR, `${files[name]}.js`)).href)).default);
 const rows = guides.map((g) => ({ slug: g.slug, subject: g.subject, level: g.level, code: g.code, ...(g.aliases ? { aliases: g.aliases } : {}) }));
 
+const cardRows = guides.map((g) => ({ slug: g.slug, accent: g.accent, tagline: g.tagline }));
+if (process.argv.includes("--print-cards")) {
+  console.log(cardRows.map((r) => `  { slug: "${r.slug}", accent: "${r.accent}", tagline: ${JSON.stringify(r.tagline)} },`).join("\n"));
+  process.exit(0);
+}
+
 if (process.argv.includes("--print")) {
   console.log(rows.map((r) => `  { slug: "${r.slug}", subject: ${JSON.stringify(r.subject)}, level: "${r.level}", code: "${r.code}"${r.aliases ? `, aliases: ${JSON.stringify(r.aliases)}` : ""} },`).join("\n"));
   process.exit(0);
@@ -23,6 +29,8 @@ if (process.argv.includes("--print")) {
 
 const { GUIDE_CATALOG } = await import(pathToFileURL(join(DIR, "catalog.js")).href);
 const problems = [];
+const { GUIDE_CARDS } = await import(pathToFileURL(join(DIR, "cards.js")).href);
+if (JSON.stringify(GUIDE_CARDS) !== JSON.stringify(cardRows)) problems.push("src/data/subjectGuides/cards.js is out of step with the guides (run: node scripts/check-guide-catalog.mjs --print-cards)");
 if (JSON.stringify(GUIDE_CATALOG) !== JSON.stringify(rows)) problems.push("src/data/subjectGuides/catalog.js is out of step with index.js (run: node scripts/check-guide-catalog.mjs --print)");
 for (const r of rows) {
   try { readFileSync(join(ROOT, "public/images/subjects", `${r.slug}.webp`)); } catch { problems.push(`public/images/subjects/${r.slug}.webp (guide photo) is missing`); }

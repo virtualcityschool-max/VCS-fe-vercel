@@ -10,6 +10,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          // One file for all the icons instead of one file per icon: a subject
+          // page used about 15 tiny icon downloads, too many for Google's renderer.
+          manualChunks: (id) => (id.includes("node_modules/lucide-react/") ? "icons" : undefined),
+        },
+      },
+    },
     // Leftover console.log debugging is removed from the live build (it can
     // print personal data and slows pages). console.warn/error stay.
     esbuild: mode === "production" ? { pure: ["console.log", "console.debug"] } : undefined,

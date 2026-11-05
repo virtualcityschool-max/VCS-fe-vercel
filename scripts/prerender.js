@@ -169,6 +169,12 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     // Tell the app it is being pre-built for the live site (imageCdn.js then
     // writes resized picture links into the HTML, not the full-size originals).
     await page.evaluateOnNewDocument(() => { window.__VCS_PRERENDER__ = true; });
+    // Every code file the page needed, so the HTML can ask for them all at once.
+    const scripts = new Set();
+    page.on("request", (req) => {
+      const url = req.url();
+      if (req.resourceType() === "script" && url.startsWith(`${ORIGIN}/assets/`)) scripts.add(url.slice(ORIGIN.length));
+    });
     await page.goto(`${ORIGIN}${route}`, { waitUntil: "networkidle0", timeout });
     await new Promise((r) => setTimeout(r, SETTLE_MS));
     // List pages: the data they were drawn with (everything but sign-in and UI
@@ -202,9 +208,16 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
       .replace(/<\/body>(?![\s\S]*<\/body>)/, (tag) => stateJson
         ? `<script>window.__VCS_STATE__=${stateJson.replace(/</g, "\\u003c")};</script>\n${tag}`
         : tag);
+    // Code files the page loads that the HTML doesn't already list (e.g. a
+    // subject guide's own content): add them so the browser (and Google's
+    // renderer) fetches them straight away, in parallel.
+    const missing = [...scripts].filter((src) => !html.includes(`"${src}"`));
+    const withPreloads = missing.length
+      ? html.replace("</head>", `${missing.map((src) => `<link rel="modulepreload" crossorigin="" href="${src}">`).join("")}</head>`)
+      : html;
     const outFile = routeToOutputFile(route);
     mkdirSync(dirname(outFile), { recursive: true });
-    writeFileSync(outFile, html);
+    writeFileSync(outFile, withPreloads);
     return { route, ok: true };
   } catch (err) {
     return { route, ok: false, error: err.message };

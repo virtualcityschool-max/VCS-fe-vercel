@@ -28,5 +28,12 @@ const app = (
 const render = () => createRoot(document.getElementById("root")).render(app);
 
 // Load the current public page's code first, so the prerendered page is
-// replaced by the same page, never by a loading spinner. Render regardless.
-preloadPublicPage(window.location.pathname).catch(() => {}).finally(render);
+// replaced by the same page, never by a loading spinner. If that code can't
+// be downloaded (even after a retry), keep the prerendered page as it is
+// rather than replacing it with an error screen; a page that wasn't
+// prerendered is rendered anyway (the error screen offers a refresh).
+const prerendered = () => document.getElementById("root")?.childElementCount > 0;
+preloadPublicPage(window.location.pathname).then(render, (error) => {
+  if (prerendered()) console.warn("Page code could not be loaded; showing the pre-built page.", error);
+  else render();
+});

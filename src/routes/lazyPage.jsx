@@ -5,7 +5,10 @@ import React from "react";
 // the app takes over. `name` picks a named export instead of the default.
 export const lazyPage = (factory, name = "default") => {
   let Loaded = null;
-  const load = () => factory().then((m) => { Loaded = m[name]; return { default: m[name] }; });
+  // A failed download is tried once more before giving up (slow connections,
+  // and Google's page renderer, sometimes drop a request).
+  const fetchOnce = () => factory().catch(() => new Promise((r) => setTimeout(r, 800)).then(factory));
+  const load = () => fetchOnce().then((m) => { Loaded = m[name]; return { default: m[name] }; });
   const Lazy = React.lazy(load);
   const Page = (props) => (Loaded ? <Loaded {...props} /> : <Lazy {...props} />);
   Page.preload = () => (Loaded ? Promise.resolve() : load().then(() => undefined));

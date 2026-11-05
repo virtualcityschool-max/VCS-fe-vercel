@@ -4,7 +4,9 @@ import { ChevronRight, CheckCircle2, FileText, ListTree, ClipboardCheck } from "
 import { useSeo } from "../../hooks/useSeo";
 import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { SITE_URL } from "../../data/examDates";
-import { guideBySlug, guideForCourse, SUBJECT_GUIDES } from "../../data/subjectGuides";
+import { GUIDE_CATALOG, catalogGuideFor } from "../../data/subjectGuides/catalog";
+import { GUIDE_CARDS } from "../../data/subjectGuides/cards";
+import { loadGuide, loadedGuide } from "../../data/subjectGuides/load";
 import { coursesService } from "../../services/coursesService";
 import { getDisplayName } from "../../utils/userDisplay";
 import GuideBody from "../../components/subjects/GuideBody";
@@ -14,6 +16,10 @@ import { ACCENT, guidePhoto, guidePhotoSrcSet, guideSections } from "../../compo
 // One Cambridge subject explained for students: what it is, why it is taught,
 // how it is examined and graded, and how to do well. Content lives in
 // src/data/subjectGuides; every exam fact there comes from the official syllabus.
+// Only the guide being shown is downloaded (src/main.jsx loads it before the
+// first render); the list page uses the small catalogue and card files.
+
+const CARD = Object.fromEntries(GUIDE_CARDS.map((c) => [c.slug, c]));
 
 export const SubjectGuidesIndex = () => {
   useSeo({
@@ -35,7 +41,7 @@ export const SubjectGuidesIndex = () => {
           <section key={lvl} id={lvl === "O Level" ? "o-level" : "as-a-level"} className="mb-10 scroll-mt-24">
             <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">{lvl}</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {SUBJECT_GUIDES.filter((g) => g.level === lvl).map((g) => (
+              {GUIDE_CATALOG.filter((g) => g.level === lvl).map((c) => ({ ...c, ...CARD[c.slug] })).map((g) => (
                 <Link key={g.slug} to={`/subjects/${g.slug}`} className="group flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] hover:border-indigo-400/50 overflow-hidden transition">
                   <div className="relative aspect-[5/2] overflow-hidden bg-slate-900">
                     <img src={guidePhoto(g.slug)} srcSet={guidePhotoSrcSet(g.slug, { card: true })} sizes="(max-width: 640px) 100vw, 400px" alt="" loading="lazy" width="1600" height="640" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-500" />
@@ -61,7 +67,18 @@ export const SubjectGuidesIndex = () => {
 
 const SubjectGuidePage = () => {
   const { slug } = useParams();
-  const g = guideBySlug(slug);
+  // Already loaded by src/main.jsx on a first visit; loaded here when the
+  // visitor arrives from another page. undefined = still loading, null = no such guide.
+  const [loadedFor, setLoadedFor] = useState(() => ({ slug, g: loadedGuide(slug) }));
+  const g = loadedFor.slug === slug ? loadedFor.g : loadedGuide(slug);
+  useEffect(() => {
+    if (loadedGuide(slug) !== undefined) return undefined;
+    let live = true;
+    loadGuide(slug)
+      .then((guide) => live && setLoadedFor({ slug, g: guide }))
+      .catch(() => live && setLoadedFor({ slug, g: null }));
+    return () => { live = false; };
+  }, [slug]);
   const accent = ACCENT[g?.accent] || ACCENT.violet;
 
   const sections = useMemo(() => guideSections(g), [g]);
@@ -78,7 +95,7 @@ const SubjectGuidePage = () => {
         if (!live) return;
         setCourses(
           list
-            .filter((c) => c.status === "published" && guideForCourse(c)?.slug === g.slug)
+            .filter((c) => c.status === "published" && catalogGuideFor(c)?.slug === g.slug)
             .map((c) => ({
               id: c.id,
               title: (c.title || "").replace(/\s+/g, " ").trim(),
@@ -136,6 +153,9 @@ const SubjectGuidePage = () => {
     };
   }, [g]);
   useSeo(seo);
+
+  // Still downloading (arrived from another page): a plain dark page for a moment.
+  if (g === undefined) return <main className="min-h-screen bg-[#020617]" aria-busy="true" />;
 
   if (!g) {
     return (
