@@ -71,7 +71,7 @@ const TermsAndConditions = () => {
             {/* Last Updated Box */}
             <div className="mt-8 p-6 rounded-2xl bg-white/[0.02] border border-white/5 hidden lg:block">
               <p className="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-2">Last Updated</p>
-              <p className="text-sm text-slate-400 font-medium">November 2, 2026</p>
+              <p className="text-sm text-slate-400 font-medium">November 6, 2026</p>
             </div>
           </div>
 
@@ -222,7 +222,7 @@ const TermsAndConditions = () => {
                     <p>
                       virtualcityschool.com is a product of <strong className="text-amber-300 font-semibold">Grayphite LLC</strong>,
                       a limited liability company registered in Wyoming, United States. In these terms, &ldquo;VirtualCitySchool&rdquo;,
-                      &ldquo;we&rdquo; and &ldquo;us&rdquo; mean Grayphite LLC.
+                      &ldquo;we&rdquo; and &ldquo;us&rdquo; mean Grayphite LLC. Virtual City School also has an office in Saudi Arabia.
                     </p>
                     <address className="not-italic grid gap-2 sm:grid-cols-2">
                       <span className="flex items-start gap-3">

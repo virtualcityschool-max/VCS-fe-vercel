@@ -56,9 +56,9 @@ export const COUNTRY_PAGES = [
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in Saudi Arabia",
     metaTitle: "Online School in Saudi Arabia for Pakistani Families – Cambridge O & A Level",
     metaDescription:
-      "Live online O Level and A Level classes for Pakistani expatriate families in Riyadh, Jeddah, Dammam, Khobar and Yanbu - taught by a school based in Saudi Arabia.",
+      "Live online O Level and A Level classes for Pakistani expatriate families in Riyadh, Jeddah, Dammam, Khobar and Yanbu - taught by a school with an office in Saudi Arabia.",
     intro: [
-      "Virtual City School is based in Saudi Arabia - not a foreign platform beamed in from elsewhere, but a school run in the same country, on the same weekend, in the same reality Pakistani families here already live in.",
+      "Virtual City School has an office in Saudi Arabia and runs its classes on Saudi time - not a foreign platform beamed in from elsewhere, but a school working in the same country, on the same weekend, in the same reality Pakistani families here already live in.",
       "That matters more in Saudi Arabia than almost anywhere else in the Gulf, because schooling access here isn't just about cost - it's about geography. A family in Riyadh or Jeddah has real (if competitive) options. A family in Yanbu, Jubail, or a smaller industrial city built around a single employer often doesn't.",
     ],
     schoolingLandscape: {
@@ -83,8 +83,8 @@ export const COUNTRY_PAGES = [
       "Saudi Arabia's Pakistani community is large and genuinely spread across the country - not concentrated in one or two cities the way it is in the UAE or Qatar. That spread is exactly the problem an online school is built to solve: a doctor's or engineer's family posted to Yanbu or Jubail for a multi-year contract shouldn't have to choose between their child's Cambridge education and their job.",
     faq: [
       {
-        q: "Is Virtual City School actually based in Saudi Arabia, or is this a foreign platform?",
-        a: "Virtual City School is based in Saudi Arabia. Classes are scheduled and run with the Kingdom as the home base, not as an afterthought for a platform built for another market.",
+        q: "Does Virtual City School have a presence in Saudi Arabia, or is this a foreign platform?",
+        a: "Virtual City School is a product of Grayphite LLC, registered in Wyoming, USA, and has an office in Saudi Arabia. Classes are scheduled and run on Saudi time, with the Kingdom as the home base, not as an afterthought for a platform built for another market.",
       },
       {
         q: "My family lives in Yanbu / Jubail / a smaller city with no British-curriculum school nearby - can my child still do O Level or A Level?",
@@ -900,7 +900,7 @@ export const COUNTRY_PAGES = [
       ],
     },
     diaspora:
-      "This isn't a diaspora page - VCS is based in Saudi Arabia, but Pakistan is only two hours behind Saudi Arabia (PKT vs. AST), which makes live class scheduling straightforward in a way it isn't for the Gulf's more distant Western counterparts. A meaningful share of VCS's own teaching staff are based in Pakistan, teaching students there and across the Gulf from the same live classroom.",
+      "This isn't a diaspora page - VCS has an office in Saudi Arabia and runs classes on Saudi time, and Pakistan is only two hours behind Saudi Arabia (PKT vs. AST), which makes live class scheduling straightforward in a way it isn't for the Gulf's more distant Western counterparts. A meaningful share of VCS's own teaching staff are based in Pakistan, teaching students there and across the Gulf from the same live classroom.",
     faq: [
       {
         q: "There are already Cambridge schools in our city - why choose an online one?",

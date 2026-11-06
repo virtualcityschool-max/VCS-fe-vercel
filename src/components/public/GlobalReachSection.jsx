@@ -28,11 +28,11 @@ const GlobalReachSection = () => (
         Global Community
       </p>
       <h2 className="text-3xl md:text-5xl font-black font-poppins tracking-tight text-white text-balance">
-        Based in Saudi Arabia.{" "}
+        An office in Saudi Arabia.{" "}
         <span className="text-gradient">Trusted by families across 13 countries.</span>
       </h2>
       <p className="mt-4 text-slate-400 text-sm md:text-base leading-relaxed">
-        A Saudi Arabia-based school with teachers from Pakistan and beyond — serving expatriate and local families across 13 countries.
+        Virtual City School is a product of Grayphite LLC (Wyoming, USA), with an office in Saudi Arabia and teachers from Pakistan and beyond — serving expatriate and local families across 13 countries.
       </p>
     </Reveal>
 

@@ -1,6 +1,6 @@
 # Virtual City School
 
-> Virtual City School (VCS) is a live online school teaching the Cambridge O Level and A Level curriculum (alongside Grade 5-12 curricula), based in Saudi Arabia and serving expatriate Pakistani families across the Gulf and beyond.
+> Virtual City School (VCS) is a live online school teaching the Cambridge O Level and A Level curriculum (alongside Grade 5-12 curricula), a product of Grayphite LLC (Wyoming, USA) with an office in Saudi Arabia, serving expatriate Pakistani families across the Gulf and beyond.
 
 Classes are live and taught in real time by qualified subject teachers - not pre-recorded video. VCS exists for families whose local Pakistani-curriculum schools don't offer a Cambridge track, and for families facing long waiting lists, high tuition, or no nearby seat at all in their country's British-curriculum schools. Class times are set in Arabian Standard Time (AST, UTC+3) / Gulf Standard Time (GST, UTC+4 for the UAE and Oman) and scheduled to work across the served countries.
 
