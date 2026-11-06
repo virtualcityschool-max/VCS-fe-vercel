@@ -193,7 +193,7 @@ const PublicHome = () => {
   }, [availableCourses]);
 
   useSeo({
-      title: "Online Cambridge O & A Level School",
+      title: "Online O Level & A Level School – Live Cambridge Classes",
       description: "Online Cambridge O Level and A Level classes based in Saudi Arabia, serving students across the UAE, Qatar, Kuwait, Bahrain, Oman, Pakistan and beyond.",
       url: typeof window !== "undefined" ? window.location.href : undefined,
       jsonLd: {

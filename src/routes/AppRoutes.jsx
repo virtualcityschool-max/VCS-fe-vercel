@@ -11,7 +11,7 @@ import PublicHome from "../pages/public/PublicHome";
 import {
   Marketplace, CourseDetails, Blogs, BlogDetails, TeachersDirectory, TeacherProfile, PrivacyPolicy,
   TermsAndConditions, AboutPage, OnlineSchoolHub, CountryLandingPage, ExamDatesPage, SubjectGuidePage,
-  SubjectGuidesIndex, PlayArea, PersonalityTest, SixteenPersonalities, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision, SmartNotes, LearningDomains, SmartLearning, CareerInterests, EQSelfCheck, ReasoningTest, AptitudePractice,
+  SubjectGuidesIndex, OnlineOLevelPage, OnlineALevelPage, PrivateCandidatePage, PlayArea, PersonalityTest, SixteenPersonalities, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision, SmartNotes, LearningDomains, SmartLearning, CareerInterests, EQSelfCheck, ReasoningTest, AptitudePractice,
 } from "./publicPages";
 
 // Authenticated dashboards are code-split so public visitors never download them.
@@ -223,6 +223,9 @@ const AppRoutes = () => {
       <Route path="/online-school" element={<OnlineSchoolHub />} />
       <Route path="/online-school/:countrySlug" element={<CountryLandingPage />} />
       <Route path="/exam-dates" element={<ExamDatesPage />} />
+      <Route path="/online-o-level" element={<OnlineOLevelPage />} />
+      <Route path="/online-a-level" element={<OnlineALevelPage />} />
+      <Route path="/private-candidate" element={<PrivateCandidatePage />} />
       <Route path="/subjects" element={<SubjectGuidesIndex />} />
       <Route path="/subjects/:slug" element={<SubjectGuidePage />} />
       <Route path="/mind-lab" element={<PlayArea />} />

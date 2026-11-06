@@ -14,6 +14,9 @@ export const AboutPage = lazyPage(() => import("../pages/public/AboutPage"));
 export const OnlineSchoolHub = lazyPage(() => import("../pages/public/OnlineSchoolHub"));
 export const CountryLandingPage = lazyPage(() => import("../pages/public/CountryLandingPage"));
 export const ExamDatesPage = lazyPage(() => import("../pages/public/ExamDatesPage"));
+export const OnlineOLevelPage = lazyPage(() => import("../pages/public/OnlineLevelPage"), "OnlineOLevelPage");
+export const OnlineALevelPage = lazyPage(() => import("../pages/public/OnlineLevelPage"), "OnlineALevelPage");
+export const PrivateCandidatePage = lazyPage(() => import("../pages/public/PrivateCandidatePage"));
 export const SubjectGuidePage = lazyPage(() => import("../pages/public/SubjectGuidePage"));
 export const SubjectGuidesIndex = lazyPage(() => import("../pages/public/SubjectGuidePage"), "SubjectGuidesIndex");
 export const PlayArea = lazyPage(() => import("../pages/public/PlayArea"));
@@ -46,6 +49,9 @@ export const PUBLIC_PAGES = [
   [/^\/online-school\/?$/, OnlineSchoolHub],
   [/^\/online-school\/[^/]+\/?$/, CountryLandingPage],
   [/^\/exam-dates\/?$/, ExamDatesPage],
+  [/^\/online-o-level\/?$/, OnlineOLevelPage],
+  [/^\/online-a-level\/?$/, OnlineALevelPage],
+  [/^\/private-candidate\/?$/, PrivateCandidatePage],
   [/^\/subjects\/?$/, SubjectGuidesIndex],
   [/^\/subjects\/[^/]+\/?$/, SubjectGuidePage],
   [/^\/mind-lab\/?$/, PlayArea],

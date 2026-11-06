@@ -54,7 +54,7 @@ export const COUNTRY_PAGES = [
     currency: "SAR",
     heroKicker: "Cambridge Online School - Saudi Arabia",
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in Saudi Arabia",
-    metaTitle: "Online Cambridge School in Saudi Arabia | Virtual City School",
+    metaTitle: "Online School in Saudi Arabia for Pakistani Families – Cambridge O & A Level",
     metaDescription:
       "Live online O Level and A Level classes for Pakistani expatriate families in Riyadh, Jeddah, Dammam, Khobar and Yanbu - taught by a school based in Saudi Arabia.",
     intro: [
@@ -143,7 +143,7 @@ export const COUNTRY_PAGES = [
     currency: "AED",
     heroKicker: "Cambridge Online School - UAE",
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in the UAE",
-    metaTitle: "Online Cambridge School in the UAE | Virtual City School",
+    metaTitle: "Online School in the UAE for Pakistani Families – Cambridge O & A Level",
     metaDescription:
       "Live online O Level and A Level classes for Pakistani families in Dubai, Sharjah, Abu Dhabi and Ajman - built for KHDA-waitlist and cost pressure, not a shortage of schools.",
     intro: [
@@ -232,7 +232,7 @@ export const COUNTRY_PAGES = [
     currency: "QAR",
     heroKicker: "Cambridge Online School - Qatar",
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in Qatar",
-    metaTitle: "Online Cambridge School in Qatar | Virtual City School",
+    metaTitle: "Online School in Qatar for Pakistani Families – Cambridge O & A Level",
     metaDescription:
       "Live online O Level and A Level classes for Pakistani families in Doha - built for Qatar's smaller, competitive private-school market and Education City university pathways.",
     intro: [
@@ -322,7 +322,7 @@ export const COUNTRY_PAGES = [
     currency: "KWD",
     heroKicker: "Cambridge Online School - Kuwait",
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in Kuwait",
-    metaTitle: "Online Cambridge School in Kuwait | Virtual City School",
+    metaTitle: "Online School in Kuwait for Pakistani Families – Cambridge O & A Level",
     metaDescription:
       "Live online O Level and A Level classes for Kuwait's long-settled Pakistani community - a Cambridge track that isn't dependent on a single private-school seat.",
     intro: [
@@ -411,7 +411,7 @@ export const COUNTRY_PAGES = [
     currency: "BHD",
     heroKicker: "Cambridge Online School - Bahrain",
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in Bahrain",
-    metaTitle: "Online Cambridge School in Bahrain | Virtual City School",
+    metaTitle: "Online School in Bahrain for Pakistani Families – Cambridge O & A Level",
     metaDescription:
       "Live online O Level and A Level classes for Pakistani families in Manama, Isa Town and across Bahrain - built for multi-year waiting lists at Bahrain's British-curriculum schools.",
     intro: [
@@ -501,7 +501,7 @@ export const COUNTRY_PAGES = [
     currency: "OMR",
     heroKicker: "Cambridge Online School - Oman",
     h1: "Online Cambridge O Level & A Level School for Pakistani Families in Oman",
-    metaTitle: "Online Cambridge School in Oman | Virtual City School",
+    metaTitle: "Online School in Oman for Pakistani Families – Cambridge O & A Level",
     metaDescription:
       "Live online O Level and A Level classes for Pakistani families across Muscat, Sohar, Nizwa, Salalah and beyond - a Cambridge track that doesn't depend on where in Oman you live.",
     intro: [
@@ -873,8 +873,8 @@ export const COUNTRY_PAGES = [
     timeZone: "Asia/Karachi",
     currency: "PKR",
     heroKicker: "Cambridge Online School - Pakistan",
-    h1: "Online Cambridge O Level & A Level School for Families in Pakistan",
-    metaTitle: "Online Cambridge School in Pakistan | Virtual City School",
+    h1: "Online O Level & A Level School in Pakistan – Live Cambridge Classes",
+    metaTitle: "Online O Level & A Level School in Pakistan – Live Cambridge Classes",
     metaDescription:
       "Live online O Level and A Level classes for families in Pakistan - an affordable alternative to city-concentrated private Cambridge schools, live-taught by qualified teachers.",
     intro: [

@@ -15,7 +15,7 @@
 {"id":137,"title":"Biology — A2 Level (9700)","level":"A2 Level","code":"9700","stage":"A2","teacher":303,"canonical":null},
 {"id":138,"title":"Computer Science — O Level (2210)","level":"O levels/ IGCSE","code":"2210","stage":null,"teacher":408,"canonical":null},
 {"id":139,"title":"Computer Science — AS Level (9618)","level":"AS level","code":"9618","stage":"AS","teacher":313,"canonical":null},
-{"id":140,"title":"Computer Science — A2 Level (9618)","level":"A2 Level","code":"9618","stage":"A2","teacher":313,"canonical":null},
+{"id":140,"title":"Computer Science — A2 Level (9818)","level":"A2 Level","code":"9818","stage":"A2","teacher":313,"canonical":null},
 {"id":147,"title":"Pre 9th Course","level":"Matric/ SSC - Class 9 & 10","code":null,"stage":null,"teacher":213,"canonical":null},
 {"id":150,"title":"Tafseer al Quran al Kareem — تفسیر القرآن الکریم","level":"Special and Professional Development Courses","code":null,"stage":null,"teacher":240,"canonical":null},
 {"id":152,"title":"Islamic Studies — Islamiyat | اسلامی تعلیم — اسلامیات","level":"Middle School - Grade 6,7,8","code":null,"stage":null,"teacher":240,"canonical":null},
@@ -26,7 +26,7 @@
 {"id":211,"title":"Urdu (9686)","level":"A2 Level","code":"9686","stage":"A2","teacher":298,"canonical":null},
 {"id":212,"title":"Urdu (8686)","level":"AS level","code":"8686","stage":"AS","teacher":298,"canonical":null},
 {"id":213,"title":"Pakistan Studies — O Level (2059)","level":"O levels/ IGCSE","code":"2059","stage":null,"teacher":351,"canonical":null},
-{"id":214,"title":"Islamiat — O Level (2058)","level":"O levels/ IGCSE","code":"2058","stage":null,"teacher":287,"canonical":null},
+{"id":214,"title":"Islmiat — O Level (2058)","level":"O levels/ IGCSE","code":"2058","stage":null,"teacher":287,"canonical":null},
 {"id":217,"title":"English Grade 5 (Oxford Curriculum)","level":"Primary School - KG to Grade 5","code":null,"stage":null,"teacher":316,"canonical":null},
 {"id":218,"title":"Mathematics Grade 5 (Oxford Curriculum)","level":"Primary School - KG to Grade 5","code":null,"stage":null,"teacher":213,"canonical":null},
 {"id":219,"title":"Social Studies Grade 5 (Oxford Curriculum)","level":"Primary School - KG to Grade 5","code":null,"stage":null,"teacher":316,"canonical":null},
@@ -91,7 +91,7 @@
 {"id":308,"title":"English Speaking Course","level":"Special and Professional Development Courses","code":null,"stage":null,"teacher":177,"canonical":null},
 {"id":309,"title":"Physics IGCSE II (0625)","level":"O levels/ IGCSE","code":"0625","stage":null,"teacher":415,"canonical":317},
 {"id":311,"title":"Mathematics IGCSE 0580","level":"O levels/ IGCSE","code":"0580","stage":null,"teacher":304,"canonical":316},
-{"id":312,"title":"Biology 0610","level":"O levels/ IGCSE","code":"0610","stage":null,"teacher":419,"canonical":null},
+{"id":312,"title":"Biology 0620","level":"O levels/ IGCSE","code":"0620","stage":null,"teacher":419,"canonical":null},
 {"id":313,"title":"Computer Science IGCSE 0478","level":"O levels/ IGCSE","code":"0478","stage":null,"teacher":423,"canonical":null},
 {"id":314,"title":"Chemistry IGCSE 1 (0620)","level":"O levels/ IGCSE","code":"0620","stage":null,"teacher":412,"canonical":315},
 {"id":315,"title":"Chemistry IGCSE 2 (0620)","level":"O levels/ IGCSE","code":"0620","stage":null,"teacher":412,"canonical":null},
@@ -99,5 +99,4 @@
 {"id":317,"title":"Physics IGCSE I (0625)","level":"O levels/ IGCSE","code":"0625","stage":null,"teacher":297,"canonical":null},
 {"id":318,"title":"English IGCSE 1 (0500)","level":"O levels/ IGCSE","code":"0500","stage":null,"teacher":177,"canonical":null},
 {"id":319,"title":"Biology IGCSE I (0610)","level":"O levels/ IGCSE","code":"0610","stage":null,"teacher":425,"canonical":null},
-{"id":320,"title":"Mathematics Grade 6 (Cambridge)","level":"Middle School - Grade 6,7,8","code":null,"stage":null,"teacher":407,"canonical":null},
-{"id":321,"title":"English as a Second Language IGCSE (0510)","level":"O levels/ IGCSE","code":"0510","stage":null,"teacher":177,"canonical":null}]
+{"id":320,"title":"Mathematics Grade 6 (Cambridge)","level":"Middle School - Grade 6,7,8","code":null,"stage":null,"teacher":407,"canonical":null}]

@@ -79,6 +79,18 @@
     "hash": "0fcb83fbc09ecb95",
     "date": "2026-10-20"
   },
+  "/online-o-level": {
+    "hash": "bdbf1220aa65a614",
+    "date": "2026-11-06"
+  },
+  "/online-a-level": {
+    "hash": "bdbf1220aa65a614",
+    "date": "2026-11-06"
+  },
+  "/private-candidate": {
+    "hash": "f407cb3e84009ca9",
+    "date": "2026-11-06"
+  },
   "/subjects/mathematics-4024": {
     "hash": "126447f7849c839d",
     "date": "2026-11-04"
@@ -152,47 +164,47 @@
     "date": "2026-11-04"
   },
   "/online-school/saudi-arabia": {
-    "hash": "986dc60d7f4c8944",
-    "date": "2026-10-23"
+    "hash": "a2ee043b173118fd",
+    "date": "2026-11-06"
   },
   "/online-school/uae": {
-    "hash": "01f20cca34f2fbd8",
-    "date": "2026-10-23"
+    "hash": "442bab404df41601",
+    "date": "2026-11-06"
   },
   "/online-school/qatar": {
-    "hash": "9a7330e97d9bf9e7",
-    "date": "2026-10-23"
+    "hash": "f64d589f280edbbb",
+    "date": "2026-11-06"
   },
   "/online-school/kuwait": {
-    "hash": "a60b414570fde364",
-    "date": "2026-10-23"
+    "hash": "ea3d19bae30e4591",
+    "date": "2026-11-06"
   },
   "/online-school/bahrain": {
-    "hash": "60bb1b9d1699a430",
-    "date": "2026-10-23"
+    "hash": "5f8e9768022ed737",
+    "date": "2026-11-06"
   },
   "/online-school/oman": {
-    "hash": "0979ef6091bb6c30",
-    "date": "2026-10-23"
+    "hash": "5d32c98c5e9bf4fb",
+    "date": "2026-11-06"
   },
   "/online-school/uk": {
-    "hash": "c5d25581fa7ac616",
-    "date": "2026-10-23"
+    "hash": "21467c8d6918364e",
+    "date": "2026-11-06"
   },
   "/online-school/us": {
-    "hash": "be47f277a698e3ac",
-    "date": "2026-10-23"
+    "hash": "cd8360099f05cfc2",
+    "date": "2026-11-06"
   },
   "/online-school/canada": {
-    "hash": "c8ce25f7cf9738e8",
-    "date": "2026-10-23"
+    "hash": "e3fca2a76f28042c",
+    "date": "2026-11-06"
   },
   "/online-school/australia": {
-    "hash": "46ce10a9b9b51315",
-    "date": "2026-10-23"
+    "hash": "6146e0f106c1e724",
+    "date": "2026-11-06"
   },
   "/online-school/pakistan": {
-    "hash": "dbb485eed0a5eac1",
-    "date": "2026-10-23"
+    "hash": "17f95a5ed110bbd8",
+    "date": "2026-11-06"
   }
 }

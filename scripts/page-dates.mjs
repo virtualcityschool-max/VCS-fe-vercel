@@ -44,6 +44,9 @@ async function pageContents() {
     // the backend's updated_at for each page).
     "/teachers/:id": file("src/pages/public/TeacherProfile.jsx"),
     "/courses/:id": file("src/pages/public/CourseDetails.jsx"),
+    "/online-o-level": file("src/pages/public/OnlineLevelPage.jsx"),
+    "/online-a-level": file("src/pages/public/OnlineLevelPage.jsx"),
+    "/private-candidate": file("src/pages/public/PrivateCandidatePage.jsx"),
   };
   // A guide or country page is its own content plus the layout every page of
   // that kind shares (so a new section on all guides dates all of them).

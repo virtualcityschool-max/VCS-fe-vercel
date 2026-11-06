@@ -55,6 +55,9 @@ const CountrySubjects = ({ countryName }) => (
     <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
       <Link to="/courses" className="text-indigo-300 hover:text-white text-sm font-black uppercase tracking-widest transition">All courses →</Link>
       <Link to="/subjects" className="text-indigo-300 hover:text-white text-sm font-black uppercase tracking-widest transition">All subject guides →</Link>
+      <Link to="/online-o-level" className="text-indigo-300 hover:text-white text-sm font-black uppercase tracking-widest transition">Online O Level →</Link>
+      <Link to="/online-a-level" className="text-indigo-300 hover:text-white text-sm font-black uppercase tracking-widest transition">Online A Level →</Link>
+      <Link to="/private-candidate" className="text-indigo-300 hover:text-white text-sm font-black uppercase tracking-widest transition">Registering for the exam →</Link>
     </div>
   </Reveal>
 );

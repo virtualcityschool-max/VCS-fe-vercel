@@ -98,7 +98,16 @@ const Footer = ({ variant = "full" }) => {
                   <Link to="/teachers" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Meet Our Tutors</Link>
                 </li>
                 <li>
+                  <Link to="/online-o-level" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Online O Level</Link>
+                </li>
+                <li>
+                  <Link to="/online-a-level" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Online A Level</Link>
+                </li>
+                <li>
                   <Link to="/exam-dates" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Exam Dates & Deadlines</Link>
+                </li>
+                <li>
+                  <Link to="/private-candidate" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Private Candidate Registration</Link>
                 </li>
                 <li>
                   <Link to="/mind-lab" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Mind Lab: Tests & Brain Games</Link>

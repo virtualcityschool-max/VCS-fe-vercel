@@ -42,3 +42,22 @@ export function syllabusYearRange(syllabusYearsText, today = new Date()) {
 // mock yet (Urdu 9866, listed there under its old code 9686, is "coming soon").
 const NO_MOCK_YET = new Set(["9866"]);
 export const mockExamsHref = (code) => (NO_MOCK_YET.has(String(code)) ? null : `/mocks/exams/${code}`);
+
+// When private candidates can usually register with the British Council for
+// each series (its published pattern; exact dates are set each year):
+//   June series:     opens around the end of November (year before), closes in
+//                    late February, late entries (with a penalty fee) until early April.
+//   November series: opens around early August, closes in mid-September, late
+//                    entries until early October.
+// Returns the next `count` series whose late stage hasn't ended yet.
+export function registrationWindows(today = new Date(), count = 2) {
+  const out = [];
+  for (let year = today.getUTCFullYear(); out.length < count; year += 1) {
+    const series = [
+      { label: `May/June ${year}`, opens: `end of November ${year - 1}`, closes: `late February ${year}`, late: `early April ${year}`, lateEnd: Date.UTC(year, 3, 10) },
+      { label: `Oct/Nov ${year}`, opens: `early August ${year}`, closes: `mid-September ${year}`, late: `early October ${year}`, lateEnd: Date.UTC(year, 9, 10) },
+    ];
+    for (const s of series) if (s.lateEnd > today.getTime() && out.length < count) out.push(s);
+  }
+  return out;
+}
