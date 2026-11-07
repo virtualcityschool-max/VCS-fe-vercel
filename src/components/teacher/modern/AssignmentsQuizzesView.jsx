@@ -124,7 +124,10 @@ export const AssignmentsQuizzesView = ({
     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeSection === "assignments" ? "bg-[#5B46F8] text-white shadow-lg" : "text-slate-400 hover:text-white hover:bg-[#161C30]"}`}
   >
             <FileText className="w-3.5 h-3.5" />
-            <span>Assignments ({assignments.length})</span>
+            {/* Say "set" and "submitted" so a teacher doesn't read the number of assignments as hand-ins. */}
+            <span>
+              Assignments: {assignments.length} set · {assignments.reduce((n, a) => n + (a.submissionsCount || 0), 0)} submitted
+            </span>
           </button>
           <button
     onClick={() => setActiveSection("quizzes")}
@@ -195,7 +198,14 @@ export const AssignmentsQuizzesView = ({
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-white leading-snug">{asg.title}</h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-sm font-bold text-white leading-snug">{asg.title}</h3>
+                    <span
+                      className={`shrink-0 px-2 py-0.5 rounded-lg text-xs font-bold tabular-nums border ${asg.submissionsCount > 0 ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30" : "bg-slate-800 text-slate-300 border-slate-700"}`}
+                    >
+                      {asg.submissionsCount || 0} submitted
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-300 mt-2 line-clamp-2 leading-relaxed">
                     {asg.description}
                   </p>
