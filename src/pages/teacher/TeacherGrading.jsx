@@ -14,6 +14,9 @@ import {
   clearSelectedSubmission,
 } from "../../store/slices/teacherSlice";
 import { toastManager } from "../../utils/toastManager";
+
+// Teachers typed totals like 111111111 (2026-11-07); a real assignment is never out of more than this.
+const MAX_ASSIGNMENT_MARKS = 500;
 import { showApiError } from "../../utils/apiErrorHandler";
 import { validateFile, ACCEPT_STRING } from "../../utils/fileValidation";
 import GradingForm from "../../components/teacher/GradingForm";
@@ -242,6 +245,8 @@ const TeacherGrading = ({
     if (!form.max_score) return "Total marks are required";
     if (Number(form.max_score) <= 0)
       return "Total marks must be greater than 0";
+    if (Number(form.max_score) > MAX_ASSIGNMENT_MARKS)
+      return `Total marks can be at most ${MAX_ASSIGNMENT_MARKS}`;
 
     return null;
   };
@@ -923,6 +928,11 @@ const TeacherGrading = ({
                   savingEdit || !editForm.title.trim() || !editForm.max_score
                 }
                 onClick={async () => {
+                  const marks = Number(editForm.max_score);
+                  if (!(marks > 0) || marks > MAX_ASSIGNMENT_MARKS) {
+                    toastManager.error(`Total marks must be between 1 and ${MAX_ASSIGNMENT_MARKS}`);
+                    return;
+                  }
                   setSavingEdit(true);
                   try {
                     await dispatch(

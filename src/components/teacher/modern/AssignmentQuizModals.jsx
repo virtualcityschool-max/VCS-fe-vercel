@@ -114,6 +114,11 @@ export const CreateAssignmentModal = ({
       setFormError("Max marks must be more than 0.");
       return;
     }
+    // Teachers typed totals like 111111111 (2026-11-07); a real assignment is never out of more than this.
+    if (Number(maxMarks) > 500) {
+      setFormError("Max marks can be at most 500.");
+      return;
+    }
     if (allowSchedule && publishLater && `${publishDate}T${publishTime}` >= `${dueDate}T${dueTime}`) {
       setFormError("The deadline must be after the publish time.");
       return;
@@ -304,7 +309,7 @@ export const CreateAssignmentModal = ({
               <input
     type="number"
     min={1}
-    max={1000}
+    max={500}
     value={maxMarks}
     onChange={(e) => setMaxMarks(e.target.value)}
     className="w-full px-3.5 py-2 rounded-xl bg-[#0B0E1A] border border-[#1E2642] text-xs font-mono font-bold text-white tabular-nums"
