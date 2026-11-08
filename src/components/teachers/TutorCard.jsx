@@ -13,7 +13,7 @@ const Star = ({ filled }) => (
   </svg>
 );
 
-const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire }) => {
+const TutorCard = ({ teacher, isAuthenticated, onViewProfile, onHire }) => {
   const theme = getTeacherTheme(teacher);
   const experience = teacher.experience ?? 0;
   const isExpert = experience >= 10;
@@ -23,9 +23,8 @@ const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire 
   return (
     <div
       key={teacher.id}
-      style={{ animationDelay: `${0.1 + index * 0.07}s` }}
       onClick={() => onViewProfile(teacher.id)}
-      className="group relative bg-slate-900 border border-slate-800 rounded-2xl p-5 pt-[22px] flex flex-col gap-4 overflow-hidden transition-all duration-200 hover:border-slate-600 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer animate-springyReveal opacity-0"
+      className="group relative bg-slate-900 border border-slate-800 rounded-2xl p-5 pt-[22px] flex flex-col gap-4 overflow-hidden transition-all duration-200 hover:border-slate-600 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
     >
       {/* Subject accent bar */}
       <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${theme.accentBar}`} />
