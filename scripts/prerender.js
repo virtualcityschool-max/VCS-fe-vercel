@@ -163,6 +163,24 @@ function startServer(shellHtml) {
   });
 }
 
+// SF Pro Regular and Bold cut down to basic Latin (7-8 KB each, made with
+// pyftsubset from the full files), written into each pre-built page. The
+// first paint then uses SF Pro's own letter shapes and sizes on every device,
+// so the app's redraw a moment later (once the full files have loaded) is
+// the same size, and Google counts the page as loaded at the first paint.
+// With the device's own font the redraw came out bigger: LCP 3.9 s.
+// font-display: block: the font is already in the page, so text waits only
+// the few milliseconds the browser needs to unpack it (with swap it painted
+// in the device's font first when the page was drawn very early).
+const INLINE_FONTS = [["SF-Pro-Display-Regular-latin.woff2", "100 500"], ["SF-Pro-Display-Bold-latin.woff2", "600 900"]]
+  .map(([file, weight]) => `@font-face{font-family:"SF Pro Inline";src:url(data:font/woff2;base64,${readFileSync(join(ROOT, "public/fonts", file)).toString("base64")}) format("woff2");font-weight:${weight};font-style:normal;font-display:block}`)
+  .join("");
+
+// Browsers unpack a font only when text first needs it, which here was the
+// moment the full SF Pro file timed out: too late for the first paint. Start
+// both straight away.
+const INLINE_FONTS_LOAD = `<script>document.fonts&&document.fonts.load&&(document.fonts.load('400 16px "SF Pro Inline"'),document.fonts.load('900 16px "SF Pro Inline"'))</script>`;
+
 const MAIN_CSS_LINK = /<link rel="stylesheet" crossorigin(?:="")? href="(\/assets\/index-[\w-]+\.css)">/;
 
 // Runs inside the page: the rules of the site stylesheet that style something
@@ -280,7 +298,7 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
       // without holding up the first paint (it was 50 KB the phone had to
       // download before showing anything).
       .replace(MAIN_CSS_LINK, (tag, href) => criticalCss
-        ? `<style>${criticalCss.replace(/<\//g, "<\\/")}</style><link rel="stylesheet" crossorigin="" href="${href}" media="print" onload="this.media='all'"><noscript>${tag}</noscript>`
+        ? `<style>${INLINE_FONTS}${criticalCss.replace(/<\//g, "<\\/")}</style>${INLINE_FONTS_LOAD}<link rel="stylesheet" crossorigin="" href="${href}" media="print" onload="this.media='all'"><noscript>${tag}</noscript>`
         : tag)
       // Hand the data to the app ("<" escaped so the JSON can never close the
       // script tag). It goes at the very end of <body>: the page content above

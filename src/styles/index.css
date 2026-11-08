@@ -77,6 +77,9 @@
   font-style: normal;
 }
 
+/* "SF Pro Inline" (basic-Latin SF Pro written into each pre-built page by
+   scripts/prerender.js) is the first stand-in. Then, on pages that aren't
+   pre-built, or for other characters: */
 /* Stand-in while an SF Pro file is still downloading: the device's own
    Helvetica / Arial / Roboto (Liberation / DejaVu on Linux), 4% wider and
    with a taller text box (ascent/descent; SF Pro Bold is as wide as
@@ -108,8 +111,8 @@
 }
 
 @theme {
-  --font-sans: "SF Pro Display", "SF Pro System Fallback", system-ui, sans-serif;
-  --font-poppins: "SF Pro Display", "SF Pro System Fallback", sans-serif;
+  --font-sans: "SF Pro Display", "SF Pro Inline", "SF Pro System Fallback", system-ui, sans-serif;
+  --font-poppins: "SF Pro Display", "SF Pro Inline", "SF Pro System Fallback", sans-serif;
 }
 
 html,
@@ -125,7 +128,7 @@ html {
 }
 
 :root {
-  --font-sf-pro: "SF Pro Display", "SF Pro System Fallback", sans-serif;
+  --font-sf-pro: "SF Pro Display", "SF Pro Inline", "SF Pro System Fallback", sans-serif;
   --bg-dark: #020617;
   --text-white: white;
 
