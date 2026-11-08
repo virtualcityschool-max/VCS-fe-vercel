@@ -1,16 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useSyncExternalStore } from "react";
 import { currentTheme, setTheme } from "../../utils/theme";
+
+// The switch as drawn into pre-built pages (scripts/prerender.js). When the
+// app adopts such a page, React first draws the switch this way too (so the
+// saved HTML matches) and then straight away in the visitor's own mode.
+const PREBUILT_THEME = "dark";
+
+const subscribe = (onChange) => {
+  window.addEventListener("vcs-theme", onChange);
+  const mq = window.matchMedia?.("(prefers-color-scheme: light)");
+  mq?.addEventListener?.("change", onChange);
+  return () => { window.removeEventListener("vcs-theme", onChange); mq?.removeEventListener?.("change", onChange); };
+};
+const getTheme = () => (window.__VCS_PRERENDER__ ? PREBUILT_THEME : currentTheme());
+const getPrebuiltTheme = () => PREBUILT_THEME;
 
 // Sun/moon switch for day and night mode (DESIGN.md §5).
 const ThemeToggle = ({ className = "" }) => {
-  const [theme, setThemeState] = useState(() => (typeof window !== "undefined" ? currentTheme() : "dark"));
-  useEffect(() => {
-    const sync = () => setThemeState(currentTheme());
-    window.addEventListener("vcs-theme", sync);
-    const mq = window.matchMedia?.("(prefers-color-scheme: light)");
-    mq?.addEventListener?.("change", sync);
-    return () => { window.removeEventListener("vcs-theme", sync); mq?.removeEventListener?.("change", sync); };
-  }, []);
+  const theme = useSyncExternalStore(subscribe, getTheme, getPrebuiltTheme);
   const light = theme === "light";
   return (
     <button

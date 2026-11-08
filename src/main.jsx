@@ -1,5 +1,5 @@
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import "./styles/index.css";
 import App from "./App.jsx";
 import { Provider } from "react-redux";
@@ -20,19 +20,34 @@ const app = (
   </StrictMode>
 );
 
-// The pre-built page (scripts/prerender.js) is replaced by the app here. On
-// the list pages the HTML also carries the data it was drawn with (see
-// store/index.js), so the app's first drawing is the same page: nothing jumps.
-// (Adopting the HTML with hydrateRoot is not possible: the pre-built HTML is a
-// browser snapshot without React's Suspense markers.)
-const render = () => createRoot(document.getElementById("root")).render(app);
+// A pre-built page (scripts/prerender.js marks it data-prebuilt and writes
+// React's markers into it) is adopted, not redrawn: the text already on
+// screen stays, so Chrome doesn't count it as new (Google's LCP). Where the
+// app's first drawing differs from the saved HTML (data that loads later,
+// a signed-in menu), React redraws just that part, inside the nearest
+// Suspense boundary; nothing breaks. On the list pages the HTML also carries
+// the data it was drawn with (see store/index.js).
+const container = document.getElementById("root");
+const render = () => {
+  if (container.hasAttribute("data-prebuilt")) {
+    hydrateRoot(container, app, {
+      // Expected now and then (see above): note it quietly, don't alarm.
+      onRecoverableError: (error, info) => {
+        if (window.__VCS_HYDRATION_LOG__) window.__VCS_HYDRATION_LOG__.push({ message: String(error?.message || error).slice(0, 300), stack: String(info?.componentStack || "").slice(0, 600) });
+        else console.warn("[vcs] part of the pre-built page was redrawn:", error?.message || error);
+      },
+    });
+  } else {
+    createRoot(container).render(app);
+  }
+};
 
 // Load the current public page's code first, so the prerendered page is
 // replaced by the same page, never by a loading spinner. If that code can't
 // be downloaded (even after a retry), keep the prerendered page as it is
 // rather than replacing it with an error screen; a page that wasn't
 // prerendered is rendered anyway (the error screen offers a refresh).
-const prerendered = () => document.getElementById("root")?.childElementCount > 0;
+const prerendered = () => container?.childElementCount > 0;
 preloadPublicPage(window.location.pathname).then(render, (error) => {
   if (prerendered()) console.warn("Page code could not be loaded; showing the pre-built page.", error);
   else render();

@@ -243,6 +243,67 @@ function pageCriticalCss() {
   return css;
 }
 
+// Runs inside the page, after React has drawn it. Writes into the DOM what
+// React's own server rendering would have written, so the visitor's browser
+// can adopt the saved HTML (hydrateRoot) instead of deleting and redrawing it.
+// The redraw made Chrome count the page's main text as new: Google's LCP
+// landed after the app had started (4 s instead of 1 s).
+//  - <!--$--> ... <!--/$--> around what each Suspense boundary shows;
+//  - <!-- --> between two text nodes React made separately (the saved HTML
+//    would otherwise read them back as one);
+//  - data-prebuilt on #root, which src/main.jsx checks.
+function markForHydration() {
+  const container = document.getElementById("root");
+  const key = container && Object.keys(container).find((k) => k.startsWith("__reactContainer$"));
+  if (!key) return false;
+  const HOST = new Set([5, 6, 26, 27]); // HostComponent, HostText, HostHoistable, HostSingleton
+  const PORTAL = 4, SUSPENSE = 13, HOST_ROOT = 3;
+  const hostNodes = (first) => {
+    const out = [];
+    const visit = (f) => { for (let c = f; c; c = c.sibling) { if (HOST.has(c.tag)) out.push(c.stateNode); else if (c.tag !== PORTAL) visit(c.child); } };
+    visit(first);
+    return out;
+  };
+  const selfHostNodes = (f) => (HOST.has(f.tag) ? [f.stateNode] : f.tag === PORTAL ? [] : hostNodes(f.child));
+  const parentDom = (f) => {
+    for (let p = f.return; p; p = p.return) { if (p.tag === 5 || p.tag === 27) return p.stateNode; if (p.tag === HOST_ROOT) return p.stateNode.containerInfo; if (p.tag === PORTAL) return null; }
+    return null;
+  };
+  const nextHostNode = (f) => {
+    for (let cur = f; cur; cur = cur.return) {
+      for (let s = cur.sibling; s; s = s.sibling) { const n = selfHostNodes(s); if (n.length) return n[0]; }
+      const up = cur.return;
+      if (!up || HOST.has(up.tag) || up.tag === HOST_ROOT || up.tag === PORTAL) return null;
+    }
+    return null;
+  };
+  const boundaries = [];
+  const walk = (f) => { for (let c = f; c; c = c.sibling) { if (c.tag === PORTAL) continue; if (c.tag === SUSPENSE) boundaries.push(c); walk(c.child); } };
+  walk(container[key].child);
+  for (const b of boundaries) {
+    const shown = b.memoizedState === null;
+    const nodes = shown ? hostNodes(b.child) : [];
+    const start = document.createComment(shown ? "$" : "$!");
+    const end = document.createComment("/$");
+    if (nodes.length) {
+      nodes[0].parentNode.insertBefore(start, nodes[0]);
+      nodes[nodes.length - 1].parentNode.insertBefore(end, nodes[nodes.length - 1].nextSibling);
+    } else {
+      const parent = parentDom(b);
+      if (!parent) continue;
+      const next = nextHostNode(b);
+      parent.insertBefore(start, next && next.parentNode === parent ? next : null);
+      parent.insertBefore(end, start.nextSibling);
+    }
+  }
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  const texts = [];
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) if (n.previousSibling && n.previousSibling.nodeType === 3) texts.push(n);
+  for (const t of texts) t.parentNode.insertBefore(document.createComment(" "), t);
+  container.setAttribute("data-prebuilt", "1");
+  return true;
+}
+
 function routeToOutputFile(route) {
   if (route === "/") return join(DIST, "index.html");
   return join(DIST, route.replace(/^\//, ""), "index.html");
@@ -284,6 +345,9 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     // origin before writing the file, or every prerendered page's canonical
     // and og:url would point at an unreachable localhost address.
     const criticalCss = await page.evaluate(pageCriticalCss);
+    // Last DOM change before saving: React's markers, so the app can adopt
+    // this HTML instead of redrawing it (see markForHydration).
+    await page.evaluate(markForHydration);
     const rawHtml = await page.content();
     // Never publish the error screen as the page's content.
     if (rawHtml.includes("We encountered an unexpected error")) throw new Error("page showed the error screen");

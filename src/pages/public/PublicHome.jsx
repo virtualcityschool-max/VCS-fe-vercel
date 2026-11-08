@@ -10,6 +10,12 @@ import { fetchTestimonials } from "../../store/slices/testimonialsSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 // The two forms load when a visitor opens them.
+// Parts drawn from data that loads after the page opens (courses, tutors,
+// posts, testimonials): each is its own Suspense boundary, so when the app
+// adopts the pre-built page (src/main.jsx) and its first drawing here differs
+// from the saved HTML, React redraws only that part, not the whole page.
+const DataPart = ({ children }) => <React.Suspense fallback={null}>{children}</React.Suspense>;
+
 const HireTutorModal = React.lazy(() => import("../../components/public/HireTutorModal"));
 const ApplyFreeAccessModal = React.lazy(() => import("../../components/public/ApplyFreeAccessModal"));
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
@@ -301,7 +307,7 @@ const PublicHome = () => {
       <section className="relative z-10 max-w-[1440px] mx-auto px-6 py-12 md:py-16">
         <FivePillarsSection />
         {/* Enrolled Courses Section - Only for logged-in students */}
-        {auth.isLoggedIn &&
+        <DataPart>{auth.isLoggedIn &&
           auth.role === "student" &&
           enrolledList.length > 0 && (
             <div className="mb-16">
@@ -336,7 +342,7 @@ const PublicHome = () => {
                 ))}
               </div>
             </div>
-          )}
+          )}</DataPart>
 
         {/* Available Courses Section */}
         <Reveal className="flex justify-between items-end mb-10">
@@ -359,7 +365,7 @@ const PublicHome = () => {
         </Reveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {coursesLoading && courses.length === 0
+          <DataPart>{coursesLoading && courses.length === 0
             ? [...Array(4)].map((_, i) => (
                 <div key={i} className="skeleton rounded-2xl overflow-hidden border border-white/5 aspect-[4/5]" />
               ))
@@ -377,7 +383,7 @@ const PublicHome = () => {
                 variant="large"
               />
           ))
-          }
+          }</DataPart>
         </div>
 
         {/* Free Access - scholarship entry point (compact, under the courses) */}
@@ -553,7 +559,7 @@ const PublicHome = () => {
           </Reveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {teachersLoading && teachers.length === 0
+            <DataPart>{teachersLoading && teachers.length === 0
               ? [...Array(4)].map((_, i) => (
                   <div key={i} className="skeleton rounded-[2.5rem] p-8 border border-white/5 h-[320px]" />
                 ))
@@ -576,13 +582,13 @@ const PublicHome = () => {
                       setHireModal(teacher);
                     }}
                   />
-                ))}
+                ))}</DataPart>
           </div>
         </div>
 
         {/* From the Blog Section - articles and vlogs kept separate so a "Latest
             from Our Blog" reader isn't surprised by a video, and vice versa */}
-        {(blogsLoading || articleBlogs.length > 0) && (
+        <DataPart>{(blogsLoading || articleBlogs.length > 0) && (
           <div className="mt-16 md:mt-24 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
@@ -620,10 +626,10 @@ const PublicHome = () => {
               </button>
             </div>
           </div>
-        )}
+        )}</DataPart>
 
         {/* Latest Vlogs - only appears once a video post actually exists */}
-        {(blogsLoading || videoBlogs.length > 0) && (
+        <DataPart>{(blogsLoading || videoBlogs.length > 0) && (
           <div className="mt-16 md:mt-24 pb-4">
             <Reveal className="flex justify-between items-end mb-16">
               <div className="text-left">
@@ -661,11 +667,11 @@ const PublicHome = () => {
               </button>
             </div>
           </div>
-        )}
+        )}</DataPart>
         {/* Testimonials Section - only appears once at least one testimonial
             is published (Admin -> Testimonials); no placeholder content
             shown in the meantime. */}
-        {testimonials.length > 0 && (
+        <DataPart>{testimonials.length > 0 && (
         <div className="mt-16 md:mt-24 pb-20">
           <Reveal className="text-center mb-16 max-w-2xl mx-auto">
             <p className="text-sm font-black uppercase tracking-[0.4em] text-blue-400 mb-2">
@@ -694,7 +700,7 @@ const PublicHome = () => {
             ))}
           </div>
         </div>
-        )}
+        )}</DataPart>
 
         <GlobalReachSection /> <FaqSection />
 
