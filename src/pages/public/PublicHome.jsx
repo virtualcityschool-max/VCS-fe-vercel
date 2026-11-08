@@ -229,21 +229,21 @@ const PublicHome = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-14">
           {/* Left: Badge + Heading */}
           <div className="text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-8 animate-fadeInUp">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
               Gulf's Premier Online School
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-poppins leading-[1.08] tracking-tight text-white animate-fadeInUp" style={{ animationDelay: "0.1s" }}>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-poppins leading-[1.08] tracking-tight text-white">
               Online <span className="text-gradient">Cambridge O Level and A Level</span> School for the UAE, Saudi Arabia, Qatar and beyond
             </h1>
-            <p className="italic text-slate-400 text-sm md:text-base mt-3 animate-fadeInUp" style={{ animationDelay: "0.15s" }}>
+            <p className="italic text-slate-400 text-sm md:text-base mt-3">
               "Your borderless digital classroom starts here."
             </p>
-            <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-6 max-w-xl animate-fadeInUp" style={{ animationDelay: "0.2s" }}>
+            <p className="text-slate-400 text-base md:text-lg leading-relaxed mt-6 max-w-xl">
               A premium online learning platform for Cambridge students. Cambridge O Level, AS Level, and A2 Level programmes alongside Grade 5-12 curricula, with expert teachers and live classes, across the UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Pakistan and beyond — open to students of all nationalities worldwide.
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-9 animate-fadeInUp" style={{ animationDelay: "0.3s" }}>
+            <div className="flex flex-wrap gap-4 mt-9">
               <button
                 onClick={() => navigate("/courses")}
                 className="group btn-glow px-8 py-4 text-white rounded-xl font-bold text-sm tracking-wide flex items-center gap-2.5"
@@ -263,8 +263,8 @@ const PublicHome = () => {
             {/* Subtle scholarship entry - visible without scrolling */}
             <button
               onClick={() => openFreeAccess()}
-              className="group mt-6 inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition animate-fadeInUp"
-              style={{ animationDelay: "0.4s" }}
+              className="group mt-6 inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+             
             >
               <i className="fas fa-hand-holding-heart text-indigo-400"></i>
               <span>
@@ -273,13 +273,13 @@ const PublicHome = () => {
                 </span>
               </span>
             </button>
-            <p className="mt-6 text-sm text-slate-400 animate-fadeInUp" style={{ animationDelay: "0.45s" }}>
+            <p className="mt-6 text-sm text-slate-400">
               <span className="text-cyan-400 font-extrabold text-base">125</span> students &middot; <span className="text-cyan-400 font-extrabold text-base">13</span> countries served &middot; <span className="text-cyan-400 font-extrabold text-base">Launched</span> July 2026
             </p>
           </div>
 
           {/* Right: Image */}
-          <div className="relative group perspective-1000 w-full max-w-md lg:ml-auto animate-fadeInRight" style={{ animationDelay: "0.25s" }}>
+          <div className="relative group perspective-1000 w-full max-w-md lg:ml-auto">
             <div className="relative z-10 rounded-[2.5rem] border border-cyan-500/30 overflow-hidden bg-slate-900/40 backdrop-blur-3xl aspect-[1.4/1] shadow-2xl shadow-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-500">
               <img
                 src="/assets/digital-learning.webp"
