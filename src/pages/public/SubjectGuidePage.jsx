@@ -127,8 +127,10 @@ const SubjectGuidePage = () => {
     const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const iso = y ? `${y}-${String(months.indexOf(m) + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}` : undefined;
     return {
-      title: `${g.code} ${lvl} ${g.subject} Syllabus ${syllabusYearRange(g.syllabusYears)} – Topics, Papers & ${mockExamsHref(g.code) ? "Mock Exams" : "Grades"} | Virtual City School`,
-      description: `Cambridge ${g.code} ${g.subject} syllabus for ${syllabusYearRange(g.syllabusYears)} exams on one page: ${g.papers?.length ? `all ${g.papers.length} papers, ` : ""}the full topic list${g.grades ? ", grade boundaries" : ""}${mockExamsHref(g.code) ? " and timed mock exams on real Cambridge past papers" : ", exam tips and a study plan"}.`,
+      // Code + "Syllabus" first: Search Console shows people type "9709 syllabus"
+      // and "9709 syllabus 2027" (Nov 2026: position ~8, almost no clicks).
+      title: `${g.code} Syllabus ${syllabusYearRange(g.syllabusYears)} – ${lvl} ${g.subject} Topics, Papers & ${mockExamsHref(g.code) ? "Mock Exams" : "Grades"} | Virtual City School`,
+      description: `${g.code} syllabus for ${syllabusYearRange(g.syllabusYears)} exams (Cambridge ${lvl} ${g.subject}) on one page: ${g.papers?.length ? `all ${g.papers.length} papers, ` : ""}the full topic list${g.grades ? ", grade boundaries" : ""}${mockExamsHref(g.code) ? ", timed mock exams on real past papers" : ", exam tips"} and links to Cambridge's official syllabus PDF.`,
       url,
       jsonLd: [
         {

@@ -256,6 +256,7 @@ const TeachersDirectory = () => {
                   index={index}
                   isAuthenticated={isAuthenticated}
                   onViewProfile={(id) => navigate(`/teachers/${id}`)}
+                  profileHref={`/teachers/${teacher.id}`}
                   onHire={handleHireClick}
                 />
               ))}

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { getTeacherTheme } from "../../utils/subjectTheme";
 import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
@@ -13,7 +14,9 @@ const Star = ({ filled }) => (
   </svg>
 );
 
-const TutorCard = ({ teacher, isAuthenticated, onViewProfile, onHire }) => {
+// profileHref: on public pages the name is a real link to the tutor's page, so
+// search engines can follow it (the card itself opens the profile on click).
+const TutorCard = ({ teacher, isAuthenticated, onViewProfile, onHire, profileHref }) => {
   const theme = getTeacherTheme(teacher);
   const experience = teacher.experience ?? 0;
   const isExpert = experience >= 10;
@@ -42,7 +45,11 @@ const TutorCard = ({ teacher, isAuthenticated, onViewProfile, onHire }) => {
         </div>
         <div className="min-w-0">
           <h3 className="font-bold text-white text-sm truncate">
-            {teacher.teacher_name || "Unnamed Tutor"}
+            {profileHref ? (
+              <Link to={profileHref} onClick={(e) => e.stopPropagation()} className="hover:text-indigo-300 transition">
+                {teacher.teacher_name || "Unnamed Tutor"}
+              </Link>
+            ) : (teacher.teacher_name || "Unnamed Tutor")}
           </h3>
           <p className={`text-xs truncate mt-0.5 font-semibold ${theme.text}`}>
             {teacher.expertise || "General Tutor"}

@@ -41,6 +41,14 @@ const SOURCES = {
     "https://help.cambridgeinternational.org/hc/en-gb/articles/29567611785234-When-will-June-2026-results-be-released",
   EXAMS_OFFICERS_GUIDE: "https://www.cambridgeinternational.org/examsofficersguide",
   ADMIN_ZONE_TOOL: "https://www.cambridgeinternational.org/adminzone",
+  // Checked 9 Nov 2026: news item dated 03 Nov 2026, "Results for the June
+  // 2027 series will be released on 28 July 2027" (AS & A Level only; "All
+  // other exam results will remain the same").
+  RESULTS_2027_NEWS:
+    "https://www.cambridgeinternational.org/news/news-details/view/as-a-level-june-results-released-earlier-from-2027-20261030/",
+  // One timetable PDF per administrative zone (June 2027 ones were up on 9 Nov 2026).
+  TIMETABLES_PAGE:
+    "https://www.cambridgeinternational.org/exam-administration/cambridge-exams-officers-guide/phase-1-preparation/timetabling-exams/exam-timetables/",
 };
 
 // Column headings on the timeline graphic, and the grouping used in the
@@ -343,7 +351,24 @@ export const EXAM_SERIES = [
     // last year's dates - leave them null until a real source exists.
     published: false,
     unpublishedNote:
-      "Cambridge has not yet published entry, exam or results dates for this series. Check Cambridge's exams officers guide directly, or check back here closer to the time.",
+      "Cambridge has not yet published the entry deadlines for this series. Check Cambridge's exams officers guide directly, or check back here closer to the time.",
+    // Single dates Cambridge has already announced for a not-yet-published
+    // series (shown as a short list; same rules: real source, no guesses).
+    announced: [
+      {
+        label: "Results released - Cambridge International AS & A Level",
+        displayDate: "28 July 2027",
+        date: "2027-07-28",
+        sourceUrl: SOURCES.RESULTS_2027_NEWS,
+        sourceLabel: "Cambridge news, 3 November 2026",
+      },
+      {
+        label: "Exam timetable (one per administrative zone)",
+        displayDate: "Published - use your zone's timetable",
+        sourceUrl: SOURCES.TIMETABLES_PAGE,
+        sourceLabel: "Cambridge exam timetables",
+      },
+    ],
     unpublishedSourceUrl: SOURCES.EXAMS_OFFICERS_GUIDE,
     registration: null,
     exam: null,
@@ -355,6 +380,9 @@ export const EXAM_SERIES = [
 // cambridgeinternational.org. Deliberately does not map any country to a
 // zone: the candidate's exam centre determines the zone, sources disagree,
 // and a wrong zone can mean a missed exam.
+export const TIMETABLES_URL = SOURCES.TIMETABLES_PAGE;
+export const RESULTS_2027_NEWS_URL = SOURCES.RESULTS_2027_NEWS;
+
 export const ZONE_INFO = {
   quote:
     "Each location is allocated to one of six administrative zones. This helps us maintain exam security, and manage the timetabling of our exams.",

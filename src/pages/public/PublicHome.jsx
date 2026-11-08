@@ -573,6 +573,7 @@ const PublicHome = () => {
                     index={i}
                     isAuthenticated={auth.isLoggedIn}
                     onViewProfile={(id) => navigate(`/teachers/${id}`)}
+                    profileHref={`/teachers/${t.id}`}
                     onHire={(teacher) => {
                       if (!auth.isLoggedIn) {
                         dispatch(setAuthModal({ type: "login", intendedRole: "student" }));

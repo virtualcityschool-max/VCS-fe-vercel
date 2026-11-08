@@ -154,7 +154,7 @@ const ExamTimeline = ({ seriesByType }) => {
                     <>
                       <span className="text-slate-400 font-semibold">{entry.series.seriesLabel} (completed)</span>
                       {entry.nextUnpublished && (
-                        <> &mdash; {entry.nextUnpublished.examYear} dates not yet published</>
+                        <> &mdash; {entry.nextUnpublished.examYear} entry dates not yet published</>
                       )}
                     </>
                   ) : (

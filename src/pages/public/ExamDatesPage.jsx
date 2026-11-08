@@ -9,6 +9,7 @@ import {
   buildExamEvents,
 } from "../../utils/examTimeline";
 import { upcomingSeries } from "../../utils/examSeason";
+import { buildExamFaq } from "../../utils/examFaq";
 import Reveal from "../../components/ui/Reveal";
 import ExamTimeline from "../../components/public/ExamTimeline";
 import ExamZoneCallout from "../../components/public/ExamZoneCallout";
@@ -36,13 +37,22 @@ const ExamDatesPage = () => {
   // The next two series by date (e.g. "Oct/Nov 2026 & May/June 2027"), so the
   // title always matches what students are searching for.
   const [s1, s2] = upcomingSeries(today);
+  // The year people search for ("o level exam dates 2027"): the next May/June.
+  const searchYear = [s1, s2].find((s) => s.type === "may-june").year;
+  const faq = buildExamFaq(EXAM_SERIES, today);
 
   useSeo({
-    title: `Cambridge Exam Dates ${s1.label} & ${s2.label} – O Level, IGCSE & A Level`,
-    description: `Cambridge ${s1.label} and ${s2.label} exam dates: entry deadlines, exam period and results day for O Level, IGCSE and AS & A Level, taken from Cambridge International's own key-dates documents.`,
+    // Worded like the searches in Search Console (Nov 2026): "o level exam dates
+    // 2027", "registration deadline", "results 2027", "date sheet".
+    title: `O Level & A Level Exam Dates ${searchYear} – Registration Deadlines & Results Day`,
+    description: `Cambridge O Level, IGCSE and A Level exam dates for ${s1.label} and ${s2.label}: registration deadlines, retakes, results days and where to find your zone's timetable (date sheet), from Cambridge's own documents.`,
     url: PAGE_URL,
     jsonLd: [
       ...events,
+      {
+        "@type": "FAQPage",
+        mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
@@ -72,7 +82,7 @@ const ExamDatesPage = () => {
             Cambridge Key Dates
           </span>
           <h1 className="text-3xl md:text-5xl font-black font-poppins tracking-tight leading-[1.1] text-white mb-6">
-            Cambridge Exam Dates <span className="text-gradient">{s1.label} & {s2.label}</span>
+            O Level & A Level Exam Dates <span className="text-gradient">{s1.label} & {s2.label}</span>
           </h1>
           <p className="text-slate-400 text-base md:text-lg leading-relaxed max-w-2xl">
             Entry deadlines, exam periods and results days for Cambridge O Level, IGCSE and International AS & A Level - sourced directly from Cambridge International, for Pakistani families across Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain and Oman.
@@ -155,6 +165,35 @@ const ExamDatesPage = () => {
           <ExamDatesTable allSeries={EXAM_SERIES} today={today} />
         </Reveal>
 
+        {/* 6. Questions people search for, answered from the same data */}
+        <section aria-labelledby="exam-faq" className="mt-16">
+          <Reveal className="mb-6">
+            <h2 id="exam-faq" className="text-xl md:text-2xl font-black font-poppins tracking-tight text-white mb-1">
+              Registration deadlines, retakes, results and date sheets
+            </h2>
+            <p className="text-slate-400 text-sm">The questions families ask us most, answered from the dates above.</p>
+          </Reveal>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {faq.map((f) => (
+              <Reveal key={f.q}>
+                <div className="h-full rounded-2xl border border-white/5 border-l-4 border-l-amber-400/60 bg-[#1a2235]/60 p-5">
+                  <h3 className="text-lg font-black font-poppins text-white mb-2">{f.q}</h3>
+                  <p className="text-slate-200 text-base leading-relaxed max-w-3xl">{f.a}</p>
+                  {f.link && (
+                    <Link to={f.link.to} className="inline-flex items-center gap-2 mt-3 text-sm font-bold text-indigo-300 hover:text-white transition">
+                      {f.link.label} <i className="fas fa-arrow-right text-xs" aria-hidden="true" />
+                    </Link>
+                  )}
+                  {f.href && (
+                    <a href={f.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-3 text-sm font-bold text-indigo-300 hover:text-white transition">
+                      {f.hrefLabel} <i className="fas fa-arrow-up-right-from-square text-xs" aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
         <p className="text-slate-600 text-sm mt-10 pt-6 border-t border-white/5">
           Last verified against cambridgeinternational.org on {LAST_VERIFIED}. Registration deadlines shown are Cambridge's cutoff for your school to submit entries, not necessarily your own school's internal deadline - always confirm with your exams officer.
         </p>

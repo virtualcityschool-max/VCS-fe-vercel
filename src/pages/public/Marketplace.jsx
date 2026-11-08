@@ -710,6 +710,43 @@ const Marketplace = () => {
             );
           })()}
 
+          {/* Every course as a plain link. The rows above draw only their first
+              cards (speed), so without this list Google never saw links to most
+              course pages and left them unindexed (Search Console, Nov 2026). */}
+          {activeCategory === "all" && visibleCourses.length > 0 && (
+            <section aria-labelledby="all-courses-list" className="mt-16 pt-10 border-t border-white/5">
+              <h2 id="all-courses-list" className="text-2xl md:text-3xl font-black text-white tracking-tight mb-2">
+                All courses
+              </h2>
+              <p className="text-slate-300 text-sm mb-8">
+                Every live course by level. Open one to see the tutor, class times and fee.
+              </p>
+              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-8">
+                {activeCats.map((cat) => (
+                  <div key={cat.id || cat.name} className="break-inside-avoid mb-8">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-indigo-300 mb-3">
+                      {formatCategoryLabel(cat.name)}
+                    </h3>
+                    <ul className="space-y-2">
+                      {filteredCourses
+                        .filter((c) => getCategoryName(c) === cat.name)
+                        .map((c) => (
+                          <li key={c.id}>
+                            <Link to={`/courses/${c.id}`} className="text-sm text-slate-200 hover:text-indigo-300 transition">
+                              {(c.title || "Course").replace(/\s+/g, " ").trim()}
+                            </Link>
+                            {getDisplayName(c.instructor) && (
+                              <span className="text-sm text-slate-400"> · {getDisplayName(c.instructor)}</span>
+                            )}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
         </main>
       </div>
 

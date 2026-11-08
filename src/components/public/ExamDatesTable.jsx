@@ -147,6 +147,19 @@ const ExamDatesTable = ({ allSeries, today }) => {
         series.published === false ? (
           <div key={series.id} className="mb-8 last:mb-0">
             <h3 className="text-white font-black text-base sm:text-lg mb-3">{series.seriesLabel}</h3>
+            {series.announced?.length > 0 && (
+              <ul className="mb-3 space-y-2">
+                {series.announced.map((a) => (
+                  <li key={a.label} className="rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-sm">
+                    <span className="text-slate-200">{a.label}: </span>
+                    <span className="font-bold text-emerald-300">{a.displayDate}</span>{" "}
+                    <a href={a.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-white underline transition">
+                      ({a.sourceLabel})
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
             <p className="text-slate-400 text-sm rounded-2xl border border-dashed border-white/10 px-5 py-4">
               {series.unpublishedNote}{" "}
               <a
