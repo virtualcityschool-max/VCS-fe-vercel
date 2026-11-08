@@ -70,6 +70,8 @@ const PROPS = {
   stroke: (c) => `stroke: ${c}`,
 };
 
+const PALE_HUES = new Set(["cyan", "amber", "yellow", "orange", "lime"]);
+
 // The light colour for one utility, or null to leave it alone.
 function lightValue(prefix, name, shade, alpha, hex) {
   const isText = prefix === "text" || prefix === "fill" || prefix === "stroke";
@@ -107,9 +109,10 @@ function lightValue(prefix, name, shade, alpha, hex) {
     // Accent text needs a deep shade to read on white (amber-500 is too pale).
     const t = NEUTRAL.has(name)
       ? { 50: 950, 100: 900, 200: 800, 300: 700, 400: 600, 500: 500, 600: 600, 700: 700 }[s]
-      // cyan is the palest hue: its 700 fell just short of readable on tinted
-      // backgrounds (4.3:1 on the home page), so it goes one shade deeper.
-      : name === "cyan"
+      // Pale hues (cyan, amber, yellow, orange, lime): their 700 fell just short
+      // of readable on their own tinted backgrounds (4.3:1 on the home page), so
+      // they go one shade deeper.
+      : PALE_HUES.has(name)
         ? { 50: 950, 100: 900, 200: 800, 300: 800, 400: 800, 500: 800, 600: 800 }[s]
         : { 50: 950, 100: 900, 200: 800, 300: 700, 400: 700, 500: 700, 600: 700 }[s];
     return t ? withAlpha(palette[name][t], alpha) : null;

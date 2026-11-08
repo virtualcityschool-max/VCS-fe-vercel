@@ -252,11 +252,11 @@ html.theme-light .divide-slate-800\/50:not(.theme-keep, .theme-keep *) { --tw-di
 html.theme-light .divide-slate-800\/60:not(.theme-keep, .theme-keep *) { --tw-divide-color: color-mix(in oklab, oklch(96.8% 0.007 247.896) 60%, transparent); border-color: color-mix(in oklab, oklch(96.8% 0.007 247.896) 60%, transparent) !important; }
 html.theme-light .divide-white\/5:not(.theme-keep, .theme-keep *) { --tw-divide-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 8%, transparent); border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 8%, transparent) !important; }
 html.theme-light .fill-amber-200:not(.theme-keep, .theme-keep *) { fill: oklch(47.3% 0.137 46.201) !important; }
-html.theme-light .fill-amber-300:not(.theme-keep, .theme-keep *) { fill: oklch(55.5% 0.163 48.998) !important; }
-html.theme-light .fill-amber-500\/15:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(55.5% 0.163 48.998) 15%, transparent) !important; }
-html.theme-light .fill-amber-500\/30:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(55.5% 0.163 48.998) 30%, transparent) !important; }
-html.theme-light .fill-amber-500\/70:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(55.5% 0.163 48.998) 70%, transparent) !important; }
-html.theme-light .fill-amber-500\/85:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(55.5% 0.163 48.998) 85%, transparent) !important; }
+html.theme-light .fill-amber-300:not(.theme-keep, .theme-keep *) { fill: oklch(47.3% 0.137 46.201) !important; }
+html.theme-light .fill-amber-500\/15:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(47.3% 0.137 46.201) 15%, transparent) !important; }
+html.theme-light .fill-amber-500\/30:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(47.3% 0.137 46.201) 30%, transparent) !important; }
+html.theme-light .fill-amber-500\/70:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(47.3% 0.137 46.201) 70%, transparent) !important; }
+html.theme-light .fill-amber-500\/85:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(47.3% 0.137 46.201) 85%, transparent) !important; }
 html.theme-light .fill-cyan-200:not(.theme-keep, .theme-keep *) { fill: oklch(45% 0.085 224.283) !important; }
 html.theme-light .fill-cyan-400:not(.theme-keep, .theme-keep *) { fill: oklch(45% 0.085 224.283) !important; }
 html.theme-light .fill-cyan-500\/15:not(.theme-keep, .theme-keep *) { fill: color-mix(in oklab, oklch(45% 0.085 224.283) 15%, transparent) !important; }
@@ -320,7 +320,7 @@ html.theme-light .group:hover .group-hover\:bg-slate-800:not(.theme-keep, .theme
 html.theme-light .group:hover .group-hover\:bg-white:not(.theme-keep, .theme-keep *) { background-color: #ffffff !important; }
 html.theme-light .group:hover .group-hover\:border-slate-500:not(.theme-keep, .theme-keep *) { border-color: oklch(86.9% 0.022 252.894) !important; }
 html.theme-light .group:hover .group-hover\:border-slate-600:not(.theme-keep, .theme-keep *) { border-color: oklch(92.9% 0.013 255.508) !important; }
-html.theme-light .group:hover .group-hover\:text-amber-400:not(.theme-keep, .theme-keep *) { color: oklch(55.5% 0.163 48.998) !important; }
+html.theme-light .group:hover .group-hover\:text-amber-400:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
 html.theme-light .group:hover .group-hover\:text-blue-400:not(.theme-keep, .theme-keep *) { color: oklch(48.8% 0.243 264.376) !important; }
 html.theme-light .group:hover .group-hover\:text-blue-400\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(48.8% 0.243 264.376) 80%, transparent) !important; }
 html.theme-light .group:hover .group-hover\:text-emerald-300:not(.theme-keep, .theme-keep *) { color: oklch(50.8% 0.118 165.612) !important; }
@@ -405,8 +405,8 @@ html.theme-light .hover\:border-white\/5:hover:not(.theme-keep, .theme-keep *) {
 html.theme-light .hover\:border-white\/50:hover:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 30%, transparent) !important; }
 html.theme-light .hover\:ring-white\/20:hover:not(.theme-keep, .theme-keep *) { --tw-ring-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 30%, transparent) !important; }
 html.theme-light .hover\:text-amber-200:hover:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
-html.theme-light .hover\:text-amber-300:hover:not(.theme-keep, .theme-keep *) { color: oklch(55.5% 0.163 48.998) !important; }
-html.theme-light .hover\:text-amber-400:hover:not(.theme-keep, .theme-keep *) { color: oklch(55.5% 0.163 48.998) !important; }
+html.theme-light .hover\:text-amber-300:hover:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
+html.theme-light .hover\:text-amber-400:hover:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
 html.theme-light .hover\:text-blue-400:hover:not(.theme-keep, .theme-keep *) { color: oklch(48.8% 0.243 264.376) !important; }
 html.theme-light .hover\:text-cyan-400:hover:not(.theme-keep, .theme-keep *) { color: oklch(45% 0.085 224.283) !important; }
 html.theme-light .hover\:text-emerald-200:hover:not(.theme-keep, .theme-keep *) { color: oklch(43.2% 0.095 166.913) !important; }
@@ -438,8 +438,8 @@ html.theme-light .ring-white\/80:not(.theme-keep, .theme-keep *) { --tw-ring-col
 @media (min-width: 40rem) { html.theme-light .sm\:border-slate-700\/50:not(.theme-keep, .theme-keep *) { border-color: color-mix(in oklab, oklch(92.9% 0.013 255.508) 50%, transparent) !important; } }
 @media (min-width: 40rem) { html.theme-light .sm\:border-slate-800:not(.theme-keep, .theme-keep *) { border-color: oklch(96.8% 0.007 247.896) !important; } }
 html.theme-light .stroke-amber-100:not(.theme-keep, .theme-keep *) { stroke: oklch(41.4% 0.112 45.904) !important; }
-html.theme-light .stroke-amber-300:not(.theme-keep, .theme-keep *) { stroke: oklch(55.5% 0.163 48.998) !important; }
-html.theme-light .stroke-amber-400\/40:not(.theme-keep, .theme-keep *) { stroke: color-mix(in oklab, oklch(55.5% 0.163 48.998) 40%, transparent) !important; }
+html.theme-light .stroke-amber-300:not(.theme-keep, .theme-keep *) { stroke: oklch(47.3% 0.137 46.201) !important; }
+html.theme-light .stroke-amber-400\/40:not(.theme-keep, .theme-keep *) { stroke: color-mix(in oklab, oklch(47.3% 0.137 46.201) 40%, transparent) !important; }
 html.theme-light .stroke-cyan-300:not(.theme-keep, .theme-keep *) { stroke: oklch(45% 0.085 224.283) !important; }
 html.theme-light .stroke-cyan-400:not(.theme-keep, .theme-keep *) { stroke: oklch(45% 0.085 224.283) !important; }
 html.theme-light .stroke-cyan-400\/40:not(.theme-keep, .theme-keep *) { stroke: color-mix(in oklab, oklch(45% 0.085 224.283) 40%, transparent) !important; }
@@ -461,18 +461,18 @@ html.theme-light .text-amber-100\/80:not(.theme-keep, .theme-keep *) { color: co
 html.theme-light .text-amber-200:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
 html.theme-light .text-amber-200\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 80%, transparent) !important; }
 html.theme-light .text-amber-200\/90:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 90%, transparent) !important; }
-html.theme-light .text-amber-300:not(.theme-keep, .theme-keep *) { color: oklch(55.5% 0.163 48.998) !important; }
-html.theme-light .text-amber-300\/60:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 60%, transparent) !important; }
-html.theme-light .text-amber-300\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 80%, transparent) !important; }
-html.theme-light .text-amber-400:not(.theme-keep, .theme-keep *) { color: oklch(55.5% 0.163 48.998) !important; }
-html.theme-light .text-amber-400\/70:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 70%, transparent) !important; }
-html.theme-light .text-amber-400\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 80%, transparent) !important; }
-html.theme-light .text-amber-400\/90:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 90%, transparent) !important; }
-html.theme-light .text-amber-500:not(.theme-keep, .theme-keep *) { color: oklch(55.5% 0.163 48.998) !important; }
-html.theme-light .text-amber-500\/60:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 60%, transparent) !important; }
-html.theme-light .text-amber-500\/70:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 70%, transparent) !important; }
-html.theme-light .text-amber-500\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 80%, transparent) !important; }
-html.theme-light .text-amber-600\/90:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.5% 0.163 48.998) 90%, transparent) !important; }
+html.theme-light .text-amber-300:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
+html.theme-light .text-amber-300\/60:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 60%, transparent) !important; }
+html.theme-light .text-amber-300\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 80%, transparent) !important; }
+html.theme-light .text-amber-400:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
+html.theme-light .text-amber-400\/70:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 70%, transparent) !important; }
+html.theme-light .text-amber-400\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 80%, transparent) !important; }
+html.theme-light .text-amber-400\/90:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 90%, transparent) !important; }
+html.theme-light .text-amber-500:not(.theme-keep, .theme-keep *) { color: oklch(47.3% 0.137 46.201) !important; }
+html.theme-light .text-amber-500\/60:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 60%, transparent) !important; }
+html.theme-light .text-amber-500\/70:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 70%, transparent) !important; }
+html.theme-light .text-amber-500\/80:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 80%, transparent) !important; }
+html.theme-light .text-amber-600\/90:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.3% 0.137 46.201) 90%, transparent) !important; }
 html.theme-light .text-blue-200:not(.theme-keep, .theme-keep *) { color: oklch(42.4% 0.199 265.638) !important; }
 html.theme-light .text-blue-300:not(.theme-keep, .theme-keep *) { color: oklch(48.8% 0.243 264.376) !important; }
 html.theme-light .text-blue-400:not(.theme-keep, .theme-keep *) { color: oklch(48.8% 0.243 264.376) !important; }
@@ -515,9 +515,9 @@ html.theme-light .text-indigo-500\/5:not(.theme-keep, .theme-keep *) { color: co
 html.theme-light .text-indigo-500\/50:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(45.7% 0.24 277.023) 50%, transparent) !important; }
 html.theme-light .text-indigo-600:not(.theme-keep, .theme-keep *) { color: oklch(45.7% 0.24 277.023) !important; }
 html.theme-light .text-lime-200:not(.theme-keep, .theme-keep *) { color: oklch(45.3% 0.124 130.933) !important; }
-html.theme-light .text-lime-300:not(.theme-keep, .theme-keep *) { color: oklch(53.2% 0.157 131.589) !important; }
-html.theme-light .text-orange-300:not(.theme-keep, .theme-keep *) { color: oklch(55.3% 0.195 38.402) !important; }
-html.theme-light .text-orange-400:not(.theme-keep, .theme-keep *) { color: oklch(55.3% 0.195 38.402) !important; }
+html.theme-light .text-lime-300:not(.theme-keep, .theme-keep *) { color: oklch(45.3% 0.124 130.933) !important; }
+html.theme-light .text-orange-300:not(.theme-keep, .theme-keep *) { color: oklch(47% 0.157 37.304) !important; }
+html.theme-light .text-orange-400:not(.theme-keep, .theme-keep *) { color: oklch(47% 0.157 37.304) !important; }
 html.theme-light .text-pink-400:not(.theme-keep, .theme-keep *) { color: oklch(52.5% 0.223 3.958) !important; }
 html.theme-light .text-purple-200:not(.theme-keep, .theme-keep *) { color: oklch(43.8% 0.218 303.724) !important; }
 html.theme-light .text-purple-300:not(.theme-keep, .theme-keep *) { color: oklch(49.6% 0.265 301.924) !important; }
@@ -574,10 +574,10 @@ html.theme-light .text-white\/80:not(.theme-keep, .theme-keep *) { color: color-
 html.theme-light .text-white\/85:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 85%, transparent) !important; }
 html.theme-light .text-white\/90:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 90%, transparent) !important; }
 html.theme-light .text-yellow-200:not(.theme-keep, .theme-keep *) { color: oklch(47.6% 0.114 61.907) !important; }
-html.theme-light .text-yellow-300:not(.theme-keep, .theme-keep *) { color: oklch(55.4% 0.135 66.442) !important; }
-html.theme-light .text-yellow-400:not(.theme-keep, .theme-keep *) { color: oklch(55.4% 0.135 66.442) !important; }
-html.theme-light .text-yellow-500:not(.theme-keep, .theme-keep *) { color: oklch(55.4% 0.135 66.442) !important; }
-html.theme-light .text-yellow-500\/60:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(55.4% 0.135 66.442) 60%, transparent) !important; }
+html.theme-light .text-yellow-300:not(.theme-keep, .theme-keep *) { color: oklch(47.6% 0.114 61.907) !important; }
+html.theme-light .text-yellow-400:not(.theme-keep, .theme-keep *) { color: oklch(47.6% 0.114 61.907) !important; }
+html.theme-light .text-yellow-500:not(.theme-keep, .theme-keep *) { color: oklch(47.6% 0.114 61.907) !important; }
+html.theme-light .text-yellow-500\/60:not(.theme-keep, .theme-keep *) { color: color-mix(in oklab, oklch(47.6% 0.114 61.907) 60%, transparent) !important; }
 html.theme-light .to-\[\#121831\]:not(.theme-keep, .theme-keep *) { --tw-gradient-to: #ffffff !important; }
 html.theme-light .to-\[\#1E293B\]:not(.theme-keep, .theme-keep *) { --tw-gradient-to: #ffffff !important; }
 html.theme-light .to-\[\#4F46E5\]:not(.theme-keep, .theme-keep *) { --tw-gradient-to: #e2e8f0 !important; }
