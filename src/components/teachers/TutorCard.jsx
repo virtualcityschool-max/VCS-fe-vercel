@@ -94,7 +94,7 @@ const TutorCard = ({ teacher, index = 0, isAuthenticated, onViewProfile, onHire 
                 </span>
               ))}
               {teacher.courses.length > 2 && (
-                <span className="text-xs px-2 py-1 rounded-lg bg-slate-800 text-slate-500 border border-slate-700 font-medium">
+                <span className="text-xs px-2 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-medium">
                   +{teacher.courses.length - 2} more
                 </span>
               )}

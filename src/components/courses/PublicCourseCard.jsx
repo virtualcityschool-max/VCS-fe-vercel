@@ -149,6 +149,7 @@ const PublicCourseCard = ({
             to={`/subjects/${guide.slug}`}
             onClick={(e) => e.stopPropagation()}
             title={`Cambridge ${guide.level} ${guide.subject} (${guide.code}) — subject guide`}
+            aria-label={`${guide.subject} ${guide.code} subject guide`}
             className="self-start inline-flex items-center gap-1.5 rounded-md border border-indigo-400/30 bg-indigo-500/10 px-2 py-0.5 text-xs font-bold text-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-transparent transition"
           >
             <i className="fas fa-book-open text-xs" aria-hidden="true"></i> Subject guide

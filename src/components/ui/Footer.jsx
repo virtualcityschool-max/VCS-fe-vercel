@@ -49,33 +49,33 @@ const Footer = ({ variant = "full" }) => {
               Live, teacher-led Cambridge O Level and A Level classes for
               Pakistani families across the Gulf and beyond.
             </p>
-            <div className="flex items-center gap-3 mt-4">
+            <div className="flex items-center gap-1 mt-3 -ml-2.5">
               <a
                 href="https://www.facebook.com/virtualcityschool"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition"
                 aria-label="Virtual City School on Facebook"
               >
-                <i className="fab fa-facebook-f text-sm"></i>
+                <i className="fab fa-facebook-f text-base" aria-hidden="true"></i>
               </a>
               <a
                 href="https://www.instagram.com/virtualcityschool/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition"
                 aria-label="Virtual City School on Instagram"
               >
-                <i className="fab fa-instagram text-sm"></i>
+                <i className="fab fa-instagram text-base" aria-hidden="true"></i>
               </a>
               <a
                 href="https://www.youtube.com/@VirtualCitySchool"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-400 hover:text-white transition"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition"
                 aria-label="Virtual City School on YouTube"
               >
-                <i className="fab fa-youtube text-sm"></i>
+                <i className="fab fa-youtube text-base" aria-hidden="true"></i>
               </a>
             </div>
           </div>

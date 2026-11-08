@@ -693,9 +693,9 @@ const PublicHome = () => {
         <GlobalReachSection /> <FaqSection />
 
         <div className="text-center mt-14 pt-10 border-t border-white/5">
-          <p className="text-slate-500 text-sm leading-relaxed">
+          <p className="text-slate-400 text-sm leading-relaxed">
             Looking for O Level or A Level exam dates instead?{" "}
-            <Link to="/exam-dates" className="text-indigo-400 hover:text-white transition">
+            <Link to="/exam-dates" className="font-semibold text-indigo-300 hover:text-white underline decoration-indigo-400/50 underline-offset-4 transition">
               See Cambridge exam dates and deadlines
             </Link>
             {" "}- registration windows, exam periods and results release dates.

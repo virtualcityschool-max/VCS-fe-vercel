@@ -255,11 +255,9 @@ h3,
   0% {
     opacity: 0;
     transform: translateY(40px) scale(0.96);
-    filter: blur(10px);
   }
   60% {
     transform: translateY(-4px) scale(1.01);
-    filter: blur(0);
   }
   100% {
     opacity: 1;

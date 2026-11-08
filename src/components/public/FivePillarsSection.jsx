@@ -6,7 +6,7 @@ const PILLARS = [
     label: "Reach",
     headline: "Learn from anywhere.",
     body: "Every city, every country, even remote compounds where good schools don't exist — if you have a connection, your child has a classroom.",
-    photo: "/assets/pillars/reach.jpg",
+    photo: "/assets/pillars/reach.webp",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9" />
@@ -19,7 +19,7 @@ const PILLARS = [
     label: "Quality",
     headline: "Real Cambridge, real teachers.",
     body: "Live, teacher-led classes in a globally recognised curriculum — not recorded videos or a screen full of strangers.",
-    photo: "/assets/pillars/quality.jpg",
+    photo: "/assets/pillars/quality.webp",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M22 9L12 4 2 9l10 5 10-5z" />
@@ -33,7 +33,7 @@ const PILLARS = [
     label: "Affordability",
     headline: "World-class, within reach.",
     body: "The education families dream of, at a fraction of private-school fees — with no waiting lists and no hidden charges.",
-    photo: "/assets/pillars/affordability.jpg",
+    photo: "/assets/pillars/affordability.webp",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.6 15.5a2 2 0 0 0 0-3l-6-6a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v8.1c0 .5.2 1 .6 1.4l6 6a2 2 0 0 0 3 0l8-8z" />
@@ -46,7 +46,7 @@ const PILLARS = [
     label: "Continuity",
     headline: "Moves with your family.",
     body: "A new posting, a move back to Pakistan, a transfer abroad — your child never loses a year. Their school comes with them.",
-    photo: "/assets/pillars/continuity.jpg",
+    photo: "/assets/pillars/continuity.webp",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 2.1l4 4-4 4" />
@@ -61,7 +61,7 @@ const PILLARS = [
     label: "Heritage",
     headline: "Rooted in who they are.",
     body: "Urdu, Islamiat and Pakistan Studies alongside Cambridge — so they never lose their language, faith, or connection to home.",
-    photo: "/assets/pillars/heritage.jpg",
+    photo: "/assets/pillars/heritage.webp",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 21h18" />
@@ -79,7 +79,10 @@ const PillarColumn = ({ pillar, delay = 0 }) => (
       <img
         src={pillar.photo}
         alt={pillar.label}
+        width={76}
+        height={76}
         loading="lazy"
+        decoding="async"
         className="w-[76px] h-[76px] rounded-full object-cover border-[3px] border-indigo-400/55 shadow-[0_0_0_4px_rgba(2,6,23,0.95),0_10px_26px_-6px_rgba(0,0,0,0.55)]"
       />
       <span className="absolute -bottom-0.5 -right-0.5 w-[26px] h-[26px] rounded-full bg-[#0b1220] border border-cyan-400/55 flex items-center justify-center text-cyan-400">
@@ -91,7 +94,7 @@ const PillarColumn = ({ pillar, delay = 0 }) => (
     <div className="w-[84%] h-2.5 rounded-b-sm bg-white/8 shadow-[0_-1px_0_rgba(255,255,255,0.1)_inset] mb-4" />
     <div className="text-center px-2">
       <p className="text-sm font-black tracking-[0.22em] uppercase text-cyan-400 mb-1.5">{pillar.label}</p>
-      <h4 className="font-poppins text-[15px] font-black text-white mb-1.5 leading-snug">{pillar.headline}</h4>
+      <h3 className="font-poppins text-[15px] font-black text-white mb-1.5 leading-snug">{pillar.headline}</h3>
       <p className="text-sm text-slate-400 leading-relaxed">{pillar.body}</p>
     </div>
   </Reveal>

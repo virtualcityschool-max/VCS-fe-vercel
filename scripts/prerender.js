@@ -56,6 +56,10 @@ const CONCURRENCY = 4;
 const NAV_TIMEOUT_MS = 30000;
 const STATE_ROUTES = /^\/(courses|teachers)\/?$/;
 const SETTLE_MS = 400; // small buffer after networkidle for final paint/DOM updates
+// Google Ads / Tag Manager addresses: blocked while pre-building, and any tag
+// they add is removed from the saved HTML (index.html loads them later itself).
+const AD_HOSTS = /^https?:\/\/([a-z0-9-]+\.)*(googletagmanager|doubleclick|googleadservices|google-analytics)\.(com|net)\//i;
+const AD_SCRIPT_TAG = /<script\b[^>]*\bsrc="https?:\/\/([a-z0-9-]+\.)*(googletagmanager|doubleclick|googleadservices|google-analytics)\.(com|net)\/[^"]*"[^>]*><\/script>/gi;
 
 async function fetchJson(url) {
   const res = await fetch(url);
@@ -172,9 +176,15 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     await page.evaluateOnNewDocument(() => { window.__VCS_PRERENDER__ = true; });
     // Every code file the page needed, so the HTML can ask for them all at once.
     const scripts = new Set();
+    // Google's ad tag never runs here: it would be saved into the page (so every
+    // visitor downloaded it at once, before index.html's delayed loader) and it
+    // sent Google Ads a visit from "localhost" on every build.
+    await page.setRequestInterception(true);
     page.on("request", (req) => {
       const url = req.url();
+      if (AD_HOSTS.test(url)) { req.abort(); return; }
       if (req.resourceType() === "script" && url.startsWith(`${ORIGIN}/assets/`)) scripts.add(url.slice(ORIGIN.length));
+      req.continue();
     });
     await page.goto(`${ORIGIN}${route}`, { waitUntil: "networkidle0", timeout });
     await new Promise((r) => setTimeout(r, SETTLE_MS));
@@ -202,6 +212,7 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
       // The icon stylesheet loads without blocking (media="print" until loaded);
       // the browser has flipped it to "all" by now, so put it back.
       .replace(/media="all"(\s+onload="this\.media='all'")/g, 'media="print"$1')
+      .replace(AD_SCRIPT_TAG, "")
       // Hand the data to the app ("<" escaped so the JSON can never close the
       // script tag). It goes at the very end of <body>: the page content above
       // shows first, and this still runs before the app's code (module scripts
