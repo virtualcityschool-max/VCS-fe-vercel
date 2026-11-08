@@ -3,8 +3,9 @@
 <head>
 <!-- Google tag (gtag.js) - Google Ads conversion tracking. Events queue in
      dataLayer straight away; the 166 KB library itself loads on the visitor's
-     first tap/scroll/key, or 5 s after the page has loaded, whichever is first,
-     so it never competes with the page itself (Core Web Vitals). -->
+     first tap/scroll/key, or 10 s after the page has loaded, whichever is first,
+     so it never competes with the page itself (Core Web Vitals; at 5 s it still
+     landed inside PageSpeed's blocking-time window). -->
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -22,7 +23,7 @@ gtag('config', 'AW-18418489308');
     document.head.appendChild(s);
   }
   evs.forEach(function (e) { addEventListener(e, loadTag, { capture: true, passive: true, once: true }); });
-  addEventListener('load', function () { setTimeout(loadTag, 5000); });
+  addEventListener('load', function () { setTimeout(loadTag, 10000); });
 })();
 </script>
 <script>

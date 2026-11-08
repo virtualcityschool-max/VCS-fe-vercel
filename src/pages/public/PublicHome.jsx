@@ -14,7 +14,10 @@ import ConfirmDialog from "../../components/common/ConfirmDialog";
 // posts, testimonials): each is its own Suspense boundary, so when the app
 // adopts the pre-built page (src/main.jsx) and its first drawing here differs
 // from the saved HTML, React redraws only that part, not the whole page.
-const DataPart = ({ children }) => <React.Suspense fallback={null}>{children}</React.Suspense>;
+// The inner box (display: contents, so layout is unchanged) keeps a mismatch
+// inside this part: without it, React blamed the part around it and redrew the
+// whole page whenever the API data differed from the pre-built HTML.
+const DataPart = ({ children }) => <React.Suspense fallback={null}><div className="contents">{children}</div></React.Suspense>;
 
 const HireTutorModal = React.lazy(() => import("../../components/public/HireTutorModal"));
 const ApplyFreeAccessModal = React.lazy(() => import("../../components/public/ApplyFreeAccessModal"));

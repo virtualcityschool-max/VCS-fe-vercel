@@ -25,14 +25,27 @@ import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
 import { applyTheme } from "./utils/theme";
 
+// The page and the footer don't re-run when the shell above them updates, and
+// the footer is its own Suspense part. So when the app adopts a pre-built page
+// (hydrateRoot in main.jsx), React takes them over in small slices that never
+// block the phone, instead of all at once (PageSpeed "Total Blocking Time").
+const PageArea = React.memo(function PageArea() {
+  return <main className="relative"><AppRoutes /></main>;
+});
+const LateFooter = React.memo(function LateFooter() {
+  return <React.Suspense fallback={null}><Footer /></React.Suspense>;
+});
+
 // Inner app - inside BrowserRouter so useLocation works
 // Admin-only slices load with the admin area; until then there is nothing pending.
 const NO_LIST = {};
 
 const AppInner = () => {
-  const { isLoggedIn, role } = useSelector(
-    (state) => state.auth,
-  );
+  // One value per selector: reading the whole auth object re-ran this on every
+  // auth change (e.g. the start-up check), which made React adopt the whole
+  // pre-built page in one long block instead of in small slices.
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const role = useSelector((state) => state.auth.role);
   const { pendingApprovals, pendingEnrollments } = useSelector((state) => state.approvals || NO_LIST);
   const { pendingChildLinks } = useSelector((state) => state.childLinks || NO_LIST);
   const pendingHireCount = useSelector((state) =>
@@ -185,10 +198,8 @@ const AppInner = () => {
           </button>
         )}
 
-        <main className="relative">
-          <AppRoutes />
-        </main>
-        {showNavbar && <Footer />}
+        <PageArea />
+        {showNavbar && <LateFooter />}
 
         {/* Floating WhatsApp support button */}
         {!isAdminArea && (
@@ -228,9 +239,7 @@ const AppInner = () => {
 
 const App = () => {
   const dispatch = useDispatch();
-  const { isInitialized } = useSelector(
-    (state) => state.auth,
-  );
+  const isInitialized = useSelector((state) => state.auth.isInitialized);
 
   React.useEffect(() => {
     if (!isInitialized) dispatch(initializeAuth());

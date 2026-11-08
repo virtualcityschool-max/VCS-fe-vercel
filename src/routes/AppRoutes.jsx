@@ -174,7 +174,9 @@ const AdminAuthGate = () => {
 
 // Application route table
 const AppRoutes = () => {
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
+  // One value per selector, so unrelated auth changes don't re-run the routes.
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const role = useSelector((state) => state.auth.role);
 
   return (
     <>
