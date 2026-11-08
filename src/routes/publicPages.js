@@ -14,6 +14,7 @@ export const AboutPage = lazyPage(() => import("../pages/public/AboutPage"));
 export const OnlineSchoolHub = lazyPage(() => import("../pages/public/OnlineSchoolHub"));
 export const CountryLandingPage = lazyPage(() => import("../pages/public/CountryLandingPage"));
 export const ExamDatesPage = lazyPage(() => import("../pages/public/ExamDatesPage"));
+export const ExamTimetablePage = lazyPage(() => import("../pages/public/ExamTimetablePage"));
 export const OnlineOLevelPage = lazyPage(() => import("../pages/public/OnlineLevelPage"), "OnlineOLevelPage");
 export const OnlineALevelPage = lazyPage(() => import("../pages/public/OnlineLevelPage"), "OnlineALevelPage");
 export const PrivateCandidatePage = lazyPage(() => import("../pages/public/PrivateCandidatePage"));
@@ -49,6 +50,7 @@ export const PUBLIC_PAGES = [
   [/^\/online-school\/?$/, OnlineSchoolHub],
   [/^\/online-school\/[^/]+\/?$/, CountryLandingPage],
   [/^\/exam-dates\/?$/, ExamDatesPage],
+  [/^\/exam-dates\/june-2027\/[^/]+\/?$/, ExamTimetablePage],
   [/^\/online-o-level\/?$/, OnlineOLevelPage],
   [/^\/online-a-level\/?$/, OnlineALevelPage],
   [/^\/private-candidate\/?$/, PrivateCandidatePage],
@@ -76,8 +78,10 @@ export const PUBLIC_PAGES = [
 export const preloadPublicPage = (pathname) => {
   const hit = PUBLIC_PAGES.find(([re]) => re.test(pathname));
   const guide = pathname.match(/^\/subjects\/([^/]+)\/?$/);
+  const zone = pathname.match(/^\/exam-dates\/june-2027\/(zone-\d)\/?$/);
   return Promise.all([
     hit ? hit[1].preload() : undefined,
+    zone ? import("../data/examTimetable/load").then((m) => m.loadTimetable(zone[1])) : undefined,
     guide ? import("../data/subjectGuides/load").then((m) => m.loadGuide(decodeURIComponent(guide[1]))) : undefined,
   ]);
 };

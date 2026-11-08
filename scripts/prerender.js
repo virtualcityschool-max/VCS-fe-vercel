@@ -30,6 +30,7 @@ import { createServer } from "node:http";
 import { existsSync, mkdirSync, writeFileSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { TIMETABLE_ZONES, timetablePath } from "../src/data/examTimetable/index.js";
 
 // Vercel's build environment blocks npm postinstall scripts by default
 // (supply-chain protection), so plain `puppeteer` never gets to download its
@@ -89,6 +90,7 @@ async function buildRouteList() {
     "/online-school",
     ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
     "/exam-dates",
+    ...TIMETABLE_ZONES.map((z) => timetablePath(z)),
     "/online-o-level", "/online-a-level", "/private-candidate",
     "/mind-lab", "/mind-lab/personality-test", "/mind-lab/16-personalities", "/mind-lab/workplace-assessment", "/mind-lab/star-signs", "/mind-lab/memory-challenge", "/mind-lab/brain-teasers", "/mind-lab/smart-revision", "/mind-lab/smart-notes", "/mind-lab/learning-domains", "/mind-lab/smart-learning", "/mind-lab/career-interests", "/mind-lab/eq-check", "/mind-lab/reasoning-test", "/mind-lab/aptitude-practice",
     "/subjects",

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { LAST_VERIFIED as EXAM_DATES_LAST_VERIFIED } from "../src/data/examDates.js";
 import { pageDates } from "./page-dates.mjs";
+import { TIMETABLE_ZONES, TIMETABLE_CHECKED, timetablePath } from "../src/data/examTimetable/index.js";
 import { buildCourseIndex, isThinCourse } from "../src/data/courseRules.js";
 import { catalogGuideFor } from "../src/data/subjectGuides/catalog.js";
 
@@ -33,6 +34,8 @@ const STATIC_PAGES = [
   { loc: "/terms", changefreq: "yearly", lastmod: pageDate("/terms") },
   { loc: "/online-school", changefreq: "monthly", lastmod: pageDate("/online-school") },
   { loc: "/exam-dates", changefreq: "weekly", lastmod: EXAM_DATES_LAST_VERIFIED },
+  // May/June 2027 paper timetables, one page per Cambridge administrative zone
+  ...TIMETABLE_ZONES.map((z) => ({ loc: timetablePath(z), changefreq: "monthly", lastmod: TIMETABLE_CHECKED })),
   { loc: "/online-o-level", changefreq: "monthly", lastmod: pageDate("/online-o-level") },
   { loc: "/online-a-level", changefreq: "monthly", lastmod: pageDate("/online-a-level") },
   { loc: "/private-candidate", changefreq: "monthly", lastmod: pageDate("/private-candidate") },

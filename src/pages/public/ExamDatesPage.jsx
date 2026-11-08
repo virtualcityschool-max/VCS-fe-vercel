@@ -10,6 +10,7 @@ import {
 } from "../../utils/examTimeline";
 import { upcomingSeries } from "../../utils/examSeason";
 import { buildExamFaq } from "../../utils/examFaq";
+import { TIMETABLE_SERIES_LABEL, TIMETABLE_ZONES, timetablePath } from "../../data/examTimetable";
 import Reveal from "../../components/ui/Reveal";
 import ExamTimeline from "../../components/public/ExamTimeline";
 import ExamZoneCallout from "../../components/public/ExamZoneCallout";
@@ -117,6 +118,30 @@ const ExamDatesPage = () => {
         <Reveal>
           <ExamZoneCallout />
         </Reveal>
+        {/* 3b. Paper-by-paper timetables, one page per zone */}
+        <section id="june-2027-timetables" aria-labelledby="tt-heading" className="mt-16">
+          <Reveal className="mb-6">
+            <h2 id="tt-heading" className="text-xl md:text-2xl font-black font-poppins tracking-tight text-white mb-1">
+              {TIMETABLE_SERIES_LABEL} timetable (date sheet) by zone
+            </h2>
+            <p className="text-slate-300 text-sm">
+              Every O Level, IGCSE, AS and A Level paper with its date and morning or afternoon session, from Cambridge's final timetable. Pick the zone your exam centre gives you.
+            </p>
+          </Reveal>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {TIMETABLE_ZONES.map((z) => (
+              <Link
+                key={z}
+                to={timetablePath(z)}
+                className="group rounded-2xl border border-white/5 border-t-4 border-t-cyan-400/60 bg-[#1a2235]/60 hover:border-indigo-400/40 transition p-5"
+              >
+                <span className="block text-xs font-black uppercase tracking-widest text-cyan-300 mb-1">June 2027</span>
+                <span className="block text-2xl font-black text-white group-hover:text-indigo-300 transition">Zone {z}</span>
+                <span className="block text-sm text-slate-400 mt-1">{z === 3 ? "Also the UK" : "Paper by paper"}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         {/* 4. Country cards */}
         <Reveal className="mt-16 mb-4">

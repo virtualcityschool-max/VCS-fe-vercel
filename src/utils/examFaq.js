@@ -58,7 +58,7 @@ export function buildExamFaq(allSeries, today = new Date()) {
     },
     {
       q: "Where is the O Level date sheet (exam timetable) for Pakistan and the Gulf?",
-      a: `Cambridge publishes one exam timetable for each of its six administrative zones, with every paper's date and morning/afternoon session. Your exam centre (your school or the British Council) decides which zone you sit in, so ask them first, then use that zone's timetable from Cambridge's exam timetables page.${ttSeries ? ` The ${ttSeries.seriesLabel.replace(/ series$/, "")} timetables are already published.` : ""}`,
+      a: `Cambridge publishes one exam timetable for each of its six administrative zones, with every paper's date and morning/afternoon session. Your exam centre (your school or the British Council) decides which zone you sit in, so ask them first, then use that zone's timetable from Cambridge's exam timetables page.${ttSeries ? ` The ${ttSeries.seriesLabel.replace(/ series$/, "")} timetables are already published, and this page links to every zone's full timetable, paper by paper.` : ""}`,
       href: tt?.sourceUrl || "https://www.cambridgeinternational.org/exam-administration/cambridge-exams-officers-guide/phase-1-preparation/timetabling-exams/exam-timetables/",
       hrefLabel: "Cambridge exam timetables",
     },
