@@ -153,15 +153,15 @@ const TeachersDirectory = () => {
             <div className="flex justify-center gap-8 sm:gap-14 mb-5 animate-fadeInUp" style={{ animationDelay: "0.09s" }}>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-black font-poppins text-indigo-300 tabular-nums">{stats.tutorCount}</p>
-                <p className="text-sm uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Tutors</p>
+                <p className="text-sm uppercase tracking-widest text-slate-400 font-semibold mt-0.5">Tutors</p>
               </div>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-black font-poppins text-purple-300 tabular-nums">{stats.subjectCount}</p>
-                <p className="text-sm uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Subjects</p>
+                <p className="text-sm uppercase tracking-widest text-slate-400 font-semibold mt-0.5">Subjects</p>
               </div>
               <div className="text-center">
                 <p className="text-xl sm:text-2xl font-black font-poppins text-amber-300 tabular-nums">{stats.avgExperience}</p>
-                <p className="text-sm uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Avg. yrs experience</p>
+                <p className="text-sm uppercase tracking-widest text-slate-400 font-semibold mt-0.5">Avg. yrs experience</p>
               </div>
             </div>
           )}
@@ -245,6 +245,9 @@ const TeachersDirectory = () => {
               </p>
             </div>
           ) : (
+            <>
+            {/* Screen-reader heading so the tutor names (h3) follow an h2. */}
+            <h2 className="sr-only">Our tutors</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {visibleTeachers.map((teacher, index) => (
                 <TutorCard
@@ -257,6 +260,7 @@ const TeachersDirectory = () => {
                 />
               ))}
             </div>
+            </>
           )}
         </div>
       </div>

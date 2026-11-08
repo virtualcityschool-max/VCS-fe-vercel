@@ -116,7 +116,7 @@ const PublicCourseCard = ({
       {/* Course artwork is 2400×1260 with words on it: the box has the same
           shape, so the picture fills it edge to edge and nothing is cut. */}
       <div className="relative aspect-[40/21] overflow-hidden bg-slate-900/50 shrink-0">
-        <Link to={`/courses/${course.id}`} className="block h-full">
+        <Link to={`/courses/${course.id}`} aria-label={course.title || "Course"} className="block h-full">
           {getCourseImage(course, index) && !imgFailed ? (
             <img
               src={sizedImage(getCourseImage(course, index), large ? 640 : 384)}
