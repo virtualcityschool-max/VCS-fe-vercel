@@ -8,7 +8,10 @@ import { fetchPlatformSettings } from "./store/slices/platformSettingsSlice";
 import { toastManager } from "./utils/toastManager";
 
 // Components
-import { Navbar, Footer, ScrollToTop } from "./components";
+// Straight from their files: the "./components" index also pulls in parent-area code.
+import Navbar from "./components/layout/Navbar";
+import Footer from "./components/ui/Footer";
+import ScrollToTop from "./components/common/ScrollToTop";
 // Loaded on demand (home page speed): the sign-in/sign-up modals and the
 // portal sidebar aren't needed to show a public page.
 const AuthModals = React.lazy(() => import("./components/forms/AuthModals"));
@@ -16,7 +19,8 @@ const Sidebar = React.lazy(() => import("./components/layout/Sidebar"));
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
-import CompleteProfileGate from "./components/common/CompleteProfileGate";
+// Signed-in visitors only: loaded on demand so public pages don't download it.
+const CompleteProfileGate = React.lazy(() => import("./components/common/CompleteProfileGate"));
 import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
 import { applyTheme } from "./utils/theme";
@@ -205,7 +209,7 @@ const AppInner = () => {
         {/* Global Overlays */}
         <section className="relative z-[9999]">
           <React.Suspense fallback={null}><AuthModals /></React.Suspense>
-          <CompleteProfileGate />
+          {isLoggedIn && <React.Suspense fallback={null}><CompleteProfileGate /></React.Suspense>}
           <ToastContainer
             position="top-right"
             autoClose={4000}

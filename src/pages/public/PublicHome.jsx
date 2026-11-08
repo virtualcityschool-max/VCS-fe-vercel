@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { fetchAllCourses } from "../../store/slices/coursesSlice";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
 import { fetchStudentDashboard, unenrollFromCourse, withdrawEnrollment } from "../../store/slices/studentDashboardSlice";
 import { fetchTeachers } from "../../store/slices/teacherSlice";
@@ -9,8 +9,9 @@ import { fetchBlogs } from "../../store/slices/blogsSlice";
 import { fetchTestimonials } from "../../store/slices/testimonialsSlice";
 import AuthRequiredModal from "../../components/common/AuthRequiredModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import HireTutorModal from "../../components/public/HireTutorModal";
-import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
+// The two forms load when a visitor opens them.
+const HireTutorModal = React.lazy(() => import("../../components/public/HireTutorModal"));
+const ApplyFreeAccessModal = React.lazy(() => import("../../components/public/ApplyFreeAccessModal"));
 import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
@@ -282,6 +283,8 @@ const PublicHome = () => {
             <div className="relative z-10 rounded-[2.5rem] border border-cyan-500/30 overflow-hidden bg-slate-900/40 backdrop-blur-3xl aspect-[1.4/1] shadow-2xl shadow-cyan-500/10 group-hover:border-cyan-400/50 transition-all duration-500">
               <img
                 src="/assets/digital-learning.webp"
+                srcSet="/assets/digital-learning-720.webp 720w, /assets/digital-learning.webp 900w"
+                sizes="(min-width: 1024px) 448px, (min-width: 640px) 448px, calc(100vw - 32px)"
                 width="900"
                 height="599"
                 fetchpriority="high"
@@ -462,10 +465,13 @@ const PublicHome = () => {
               <div className="relative z-10 rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
                 <img
                   src="/assets/journey.webp"
+                  srcSet="/assets/journey-720.webp 720w, /assets/journey.webp 1000w"
+                  sizes="(min-width: 1440px) 660px, (min-width: 1024px) 45vw, calc(100vw - 32px)"
+                  width="1000"
+                  height="638"
                   loading="lazy"
                   decoding="async"
                   alt="Cambridge-qualified teacher leading a small-group online class with Virtual City School"
-                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               </div>
@@ -705,17 +711,21 @@ const PublicHome = () => {
       </section>
 
       {hireModal && (
-        <HireTutorModal teacher={hireModal} onClose={() => setHireModal(null)} />
+        <React.Suspense fallback={null}>
+          <HireTutorModal teacher={hireModal} onClose={() => setHireModal(null)} />
+        </React.Suspense>
       )}
 
       {freeAccessOpen && (
-        <ApplyFreeAccessModal
-          preselectedCourseIds={freeAccessPreselect}
-          onClose={() => {
-            setFreeAccessOpen(false);
-            setFreeAccessPreselect([]);
-          }}
-        />
+        <React.Suspense fallback={null}>
+          <ApplyFreeAccessModal
+            preselectedCourseIds={freeAccessPreselect}
+            onClose={() => {
+              setFreeAccessOpen(false);
+              setFreeAccessPreselect([]);
+            }}
+          />
+        </React.Suspense>
       )}
 
 

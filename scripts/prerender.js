@@ -163,6 +163,68 @@ function startServer(shellHtml) {
   });
 }
 
+const MAIN_CSS_LINK = /<link rel="stylesheet" crossorigin(?:="")? href="(\/assets\/index-[\w-]+\.css)">/;
+
+// Runs inside the page: the rules of the site stylesheet that style something
+// on this page, in day or night mode (hover/focus states and ::before/::after
+// count as matching). Everything else (portals, admin, modals) comes with the
+// full stylesheet a moment later.
+function pageCriticalCss() {
+  const sheet = [...document.styleSheets].find((s) => s.href && /\/assets\/index-[\w-]+\.css/.test(s.href));
+  if (!sheet) return null;
+  const DYNAMIC = /(?<!\\)::?(?:hover|focus-visible|focus-within|focus|active|visited|target|checked|disabled|enabled|placeholder-shown|autofill|invalid|valid|user-invalid|open|popover-open|before|after|placeholder|selection|marker|file-selector-button|backdrop|first-letter|first-line|-webkit-[a-z-]+|-moz-[a-z-]+)(?![\w-])/g;
+  const splitList = (sel) => {
+    const parts = []; let depth = 0, start = 0;
+    for (let i = 0; i < sel.length; i++) {
+      const c = sel[i];
+      if (c === "\\") { i++; continue; }
+      if (c === "(") depth++;
+      else if (c === ")") depth--;
+      else if (c === "," && depth === 0) { parts.push(sel.slice(start, i)); start = i + 1; }
+    }
+    parts.push(sel.slice(start));
+    return parts;
+  };
+  const styleRules = [];
+  const collect = (rules) => { for (const r of rules) { if (r instanceof CSSStyleRule) styleRules.push(r); else if (r.cssRules) collect(r.cssRules); } };
+  collect(sheet.cssRules);
+  const keep = new Set();
+  const html = document.documentElement;
+  const wasLight = html.classList.contains("theme-light");
+  for (const light of [true, false]) {
+    html.classList.toggle("theme-light", light);
+    for (const r of styleRules) {
+      if (keep.has(r)) continue;
+      const hit = splitList(r.selectorText).some((part) => {
+        let s = part.replace(DYNAMIC, "").trim();
+        if (!s || /[>+~]$/.test(s)) s += "*";
+        try { return !!document.querySelector(s); } catch { return true; }
+      });
+      if (hit) keep.add(r);
+    }
+  }
+  html.classList.toggle("theme-light", wasLight);
+  const keyframes = [];
+  const write = (rules) => {
+    let out = "";
+    for (const r of rules) {
+      if (r instanceof CSSStyleRule) { if (keep.has(r)) out += r.cssText; }
+      else if (r instanceof CSSKeyframesRule) keyframes.push(r);
+      else if (r instanceof CSSMediaRule || r instanceof CSSSupportsRule || r instanceof CSSLayerBlockRule) {
+        const inner = write(r.cssRules);
+        if (!inner) continue;
+        const head = r instanceof CSSMediaRule ? `@media ${r.conditionText}`
+          : r instanceof CSSSupportsRule ? `@supports ${r.conditionText}` : `@layer${r.name ? " " + r.name : ""}`;
+        out += `${head}{${inner}}`;
+      } else out += r.cssText; // @layer order, @property, @font-face
+    }
+    return out;
+  };
+  let css = write(sheet.cssRules);
+  for (const k of keyframes) if (new RegExp(`\\b${k.name}\\b`).test(css)) css += k.cssText;
+  return css;
+}
+
 function routeToOutputFile(route) {
   if (route === "/") return join(DIST, "index.html");
   return join(DIST, route.replace(/^\//, ""), "index.html");
@@ -203,6 +265,7 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     // this crawl is the local server - rewrite it to the real production
     // origin before writing the file, or every prerendered page's canonical
     // and og:url would point at an unreachable localhost address.
+    const criticalCss = await page.evaluate(pageCriticalCss);
     const rawHtml = await page.content();
     // Never publish the error screen as the page's content.
     if (rawHtml.includes("We encountered an unexpected error")) throw new Error("page showed the error screen");
@@ -213,6 +276,12 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
       // the browser has flipped it to "all" by now, so put it back.
       .replace(/media="all"(\s+onload="this\.media='all'")/g, 'media="print"$1')
       .replace(AD_SCRIPT_TAG, "")
+      // The page's own styles go inline; the full site stylesheet then loads
+      // without holding up the first paint (it was 50 KB the phone had to
+      // download before showing anything).
+      .replace(MAIN_CSS_LINK, (tag, href) => criticalCss
+        ? `<style>${criticalCss.replace(/<\//g, "<\\/")}</style><link rel="stylesheet" crossorigin="" href="${href}" media="print" onload="this.media='all'"><noscript>${tag}</noscript>`
+        : tag)
       // Hand the data to the app ("<" escaped so the JSON can never close the
       // script tag). It goes at the very end of <body>: the page content above
       // shows first, and this still runs before the app's code (module scripts

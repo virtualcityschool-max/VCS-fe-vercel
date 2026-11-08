@@ -4,7 +4,8 @@ import { useSearchParams, useLocation, Link } from "react-router-dom";
 import { setAuthModal } from "../../store/slices/uiSlice";
 import { useAuth, useNavigation } from "../../hooks";
 import Button from "../ui/Button";
-import UserProfileDropdown from "./UserProfileDropdown";
+// Signed-in visitors only: loaded on demand so public pages don't download it.
+const UserProfileDropdown = React.lazy(() => import("./UserProfileDropdown"));
 import TopBar from "./TopBar";
 import { GUIDE_CATALOG } from "../../data/subjectGuides/catalog";
 import ThemeToggle from "../common/ThemeToggle";
@@ -81,6 +82,8 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                 >
                   <img
                     src="/assets/logo.webp"
+                    srcSet="/assets/logo-220.webp 220w, /assets/logo.webp 440w"
+                    sizes="(min-width: 640px) 180px, 110px"
                     width="180"
                     height="68"
                     alt="Virtual City School"
@@ -161,7 +164,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                 </div>
               ) : (
                 <div className="flex items-center gap-4 animate-fadeIn">
-                  <UserProfileDropdown />
+                  <React.Suspense fallback={null}><UserProfileDropdown /></React.Suspense>
                 </div>
               )}
 
@@ -249,7 +252,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 shrink-0 ml-4">
-          <UserProfileDropdown />
+          <React.Suspense fallback={null}><UserProfileDropdown /></React.Suspense>
         </div>
       </div>
     </nav>

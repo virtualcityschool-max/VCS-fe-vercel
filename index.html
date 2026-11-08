@@ -48,9 +48,9 @@ gtag('config', 'AW-18418489308');
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content="Online Cambridge O & A Level School | Virtual City School" />
 <meta name="twitter:description" content="Live online Cambridge O Level and A Level classes for students in Saudi Arabia, the UAE, Qatar, Kuwait, Bahrain, Oman, Pakistan and beyond." />
-<link rel="preload" href="/fonts/fa/fa.css?v=1" as="style" />
-<link rel="stylesheet" href="/fonts/fa/fa.css?v=1" media="print" onload="this.media='all'" />
-<noscript><link rel="stylesheet" href="/fonts/fa/fa.css?v=1" /></noscript>
+<link rel="preload" href="/fonts/fa/fa.css?v=2" as="style" />
+<link rel="stylesheet" href="/fonts/fa/fa.css?v=2" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="/fonts/fa/fa.css?v=2" /></noscript>
 <script type="application/ld+json">
 {
 "@context": "https://schema.org",
@@ -100,6 +100,34 @@ gtag('config', 'AW-18418489308');
     var t = localStorage.getItem("vcs_theme") || (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
     document.documentElement.classList.toggle("theme-light", t === "light");
   } catch (e) {}
+})();
+</script>
+<script>
+/* Icons stay hidden until their own font has loaded, so a slow phone never
+   shows empty boxes (the icon font uses font-display: swap so nothing else
+   waits for it). After 3 s they show anyway. Not run while pre-building. */
+(function () {
+  if (window.__VCS_PRERENDER__) return;
+  var h = document.documentElement, groups = [
+    ["fa-rs", '"Font Awesome 6 Free"', "900", ".fa,.fas,.fa-solid"],
+    ["fa-rr", '"Font Awesome 6 Free"', "400", ".far,.fa-regular"],
+    ["fa-rb", '"Font Awesome 6 Brands"', "400", ".fab,.fa-brands"]
+  ], css = "";
+  groups.forEach(function (g) { css += "html:not(." + g[0] + ") :is(" + g[3] + ")::before{visibility:hidden}"; });
+  var st = document.createElement("style");
+  st.textContent = css;
+  document.head.appendChild(st);
+  function check() {
+    if (!document.fonts || !document.fonts.forEach) return;
+    document.fonts.forEach(function (f) {
+      groups.forEach(function (g) {
+        if (f.status === "loaded" && f.family.indexOf(g[1].slice(1, -1)) > -1 && String(f.weight) === g[2]) h.classList.add(g[0]);
+      });
+    });
+  }
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener("loadingdone", check);
+  else groups.forEach(function (g) { h.classList.add(g[0]); });
+  setTimeout(function () { groups.forEach(function (g) { h.classList.add(g[0]); }); }, 3000);
 })();
 </script>
 </head>

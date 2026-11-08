@@ -1,4 +1,3 @@
-import { adminService } from '../services/adminService';
 import authStorage from './authStorage';
 
 /**
@@ -47,6 +46,7 @@ export const restoreAdminSession = (redirectUrl = null) => {
  */
 export const handleImpersonateUser = async (userId, userRole = 'student') => {
   try {
+    const { adminService } = await import('../services/adminService');
     const data = await adminService.impersonateUser(userId);
     if (!data?.access) {
       throw new Error('Failed to obtain impersonation credentials');

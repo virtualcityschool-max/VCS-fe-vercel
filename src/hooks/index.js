@@ -7,4 +7,5 @@ export { useDateFormat, useNumberFormat, useTextFormat } from "./useFormat";
 export { useFieldErrors } from "./useFieldErrors";
 export { useDateFormatters } from "./useDateFormatters";
 export { useCountdown } from "./useCountdown";
-export { useStudentTags } from "./useStudentTags";
+// useStudentTags (admin only) is imported from its own file, so this index
+// doesn't pull the admin service into public pages.

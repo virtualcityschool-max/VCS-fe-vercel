@@ -43,6 +43,9 @@ pieces.append(css[last:]); out = "".join(pieces)
 # fonts: local subset files, woff2 only
 out = re.sub(r'url\("\.\./webfonts/(fa-[a-z0-9-]+)\.woff2"\) format\("woff2"\), url\("\.\./webfonts/[^"]+\.ttf"\) format\("truetype"\)',
              lambda m: f'url("/fonts/fa/{m.group(1)}.woff2") format("woff2")', out)
+# swap, not block: index.html hides the icons itself until their font has
+# loaded (so no empty boxes show), and the rest of the page never waits.
+out = out.replace("font-display: block", "font-display: swap")
 out = re.sub(r"/\*.*?\*/", "", out, flags=re.S)
 out = re.sub(r"\s+", " ", out).replace(" {", "{").replace("{ ", "{").replace("; }", "}").replace(" }", "}")
 out = re.sub(r"\}\s+", "}", out)
