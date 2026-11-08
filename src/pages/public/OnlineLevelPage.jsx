@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Video, ClipboardCheck, LineChart, GraduationCap, CalendarDays, Wallet, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Video, ClipboardCheck, LineChart, GraduationCap, CalendarDays, Wallet, ChevronRight, CheckCircle2, MinusCircle, XCircle } from "lucide-react";
 import { useSeo } from "../../hooks/useSeo";
 import { SITE_URL } from "../../data/examDates";
 import { GUIDE_CATALOG, guideForCode } from "../../data/subjectGuides/catalog";
@@ -30,7 +30,7 @@ const LEVELS = {
       "Choose one subject or a full set. Each subject is a monthly course with its own teacher, classes, assignments and quizzes, and your child sits the official Cambridge exam at the end.",
     ],
     image: { src: "/images/about/online-class.webp", srcSet: "/images/about/online-class-800.webp 800w, /images/about/online-class.webp 1400w", alt: "A student in a live online class on a laptop" },
-    tone: { text: "text-emerald-300", soft: "bg-emerald-500/10 border-emerald-500/25", top: "border-t-emerald-400" },
+    tone: { text: "text-emerald-300", soft: "bg-emerald-500/10 border-emerald-500/25", top: "border-t-emerald-400", left: "border-l-emerald-400" },
     about: {
       heading: "What O Level is",
       paragraphs: [
@@ -61,7 +61,7 @@ const LEVELS = {
       "It suits students whose city has no affordable A Level college, families who move between countries, and students who want to add a subject their college doesn't offer.",
     ],
     image: { src: "/images/about/students.webp", srcSet: "/images/about/students-800.webp 800w, /images/about/students.webp 1400w", alt: "Students studying together" },
-    tone: { text: "text-violet-300", soft: "bg-violet-500/10 border-violet-500/25", top: "border-t-violet-400" },
+    tone: { text: "text-violet-300", soft: "bg-violet-500/10 border-violet-500/25", top: "border-t-violet-400", left: "border-l-violet-400" },
     about: {
       heading: "How AS and A Level work",
       paragraphs: [
@@ -87,6 +87,29 @@ const HOW = [
   { icon: GraduationCap, title: "Mock exams", text: "Timed mocks on official Cambridge past papers, marked by VCS teachers. VCS students pay half." },
 ];
 
+// "Why VCS": only what the site itself already states elsewhere (live Google
+// Meet classes, monthly fee per subject, free access, half-price mocks, class
+// times for Pakistan and the Gulf, private-candidate guidance, WhatsApp help).
+const WHY = [
+  ["A real teacher, live", "Every lesson is taught in real time on Google Meet, so your child asks questions and gets answers in class."],
+  ["Pay per subject, per month", "Choose one subject or a full set; each has its own monthly fee, shown below."],
+  ["Free access if fees are a barrier", "Families who can't cover the fee can apply for free access."],
+  ["Mocks on real past papers", "Timed Cambridge past-paper mocks, marked by VCS teachers; VCS students pay half."],
+  ["Times that suit Pakistan and the Gulf", "Classes run on Arabian Standard Time, so students in both can join live."],
+  ["Help with the real exam", "Private-candidate guidance, exam dates and every zone's timetable, paper by paper."],
+];
+// Compared by what each way of studying is, not by naming other schools.
+const COMPARE = [
+  ["Ask the teacher during the lesson", "yes", "no", "yes"],
+  ["Study from anywhere in Pakistan or the Gulf", "yes", "yes", "no"],
+  ["No travel time", "yes", "yes", "no"],
+  ["Homework and mocks marked by your own teacher", "yes", "varies", "varies"],
+];
+const Mark = ({ v }) =>
+  v === "yes" ? <CheckCircle2 className="w-5 h-5 text-emerald-300 mx-auto" aria-label="Yes" />
+  : v === "no" ? <XCircle className="w-5 h-5 text-rose-300 mx-auto" aria-label="No" />
+  : <span className="inline-flex items-center gap-1 text-sm text-amber-300"><MinusCircle className="w-4 h-4" aria-hidden="true" /> Varies</span>;
+
 const coursesFor = (slug) => COURSE_INDEX.filter((c) => !c.canonical && c.code && guideForCode(c.code)?.slug === slug);
 const stageLabel = (c, level) => (c.stage === "AS" ? "AS" : c.stage === "A2" ? "A2" : level === "O Level" ? "O Level" : "Class");
 
@@ -108,6 +131,10 @@ const OnlineLevelPage = ({ level }) => {
       .catch(() => {});
     return () => { live = false; };
   }, []);
+
+  // Lowest monthly fee among this level's classes (from the live course list).
+  const levelFees = guides.flatMap((g) => coursesFor(g.slug)).map((c) => fees[c.id]).filter(Boolean);
+  const fromFee = levelFees.length ? Math.min(...levelFees) : null;
 
   useSeo({
     title: L.title,
@@ -145,6 +172,12 @@ const OnlineLevelPage = ({ level }) => {
             <div className="space-y-4">
               {L.intro.map((p, i) => <p key={i} className="text-slate-200 text-base md:text-lg leading-relaxed max-w-3xl">{p}</p>)}
             </div>
+            {fromFee && (
+              <p className="mt-5 inline-flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-base text-slate-100">
+                <Wallet className="w-5 h-5 text-emerald-300" aria-hidden="true" />
+                Classes from <strong className="text-emerald-300 font-semibold">${fromFee} a month</strong> per subject
+              </p>
+            )}
             <div className="mt-6 flex flex-wrap gap-3">
               <a href="#subjects" className="inline-flex items-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 px-5 py-2.5 text-base font-semibold text-white transition">See subjects and fees <ChevronRight className="w-4 h-4" aria-hidden="true" /></a>
               <Link to="/private-candidate" className="inline-flex items-center gap-1 rounded-xl border border-white/15 px-4 py-2.5 text-base font-semibold text-slate-200 hover:text-white hover:border-indigo-400/50 transition">How to sit the exam</Link>
@@ -165,6 +198,39 @@ const OnlineLevelPage = ({ level }) => {
                 <p className="text-base text-slate-300 leading-relaxed">{text}</p>
               </div>
             );})}
+          </div>
+        </Reveal>
+
+        <Reveal className="mb-14">
+          <h2 className="text-2xl md:text-3xl font-black tracking-tight mb-6">Why families choose Virtual City School</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {WHY.map(([title, text]) => (
+              <div key={title} className={`rounded-2xl border border-white/10 border-l-4 ${L.tone.left} bg-white/[0.04] p-5`}>
+                <h3 className="text-lg font-bold mb-1">{title}</h3>
+                <p className="text-base text-slate-300 leading-relaxed">{text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.03]">
+            <table className="w-full min-w-[560px] text-left">
+              <caption className="sr-only">Live online classes compared with recorded courses and a local tuition centre</caption>
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th scope="col" className="px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-400">&nbsp;</th>
+                  <th scope="col" className={`px-5 py-3 text-center text-sm font-black ${L.tone.text}`}>VCS live online classes</th>
+                  <th scope="col" className="px-5 py-3 text-center text-sm font-black text-slate-300">Recorded video course</th>
+                  <th scope="col" className="px-5 py-3 text-center text-sm font-black text-slate-300">Local tuition centre</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {COMPARE.map(([row, ...vals]) => (
+                  <tr key={row}>
+                    <th scope="row" className="px-5 py-3 text-base font-semibold text-slate-100">{row}</th>
+                    {vals.map((v, i) => <td key={i} className="px-5 py-3 text-center"><Mark v={v} /></td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Reveal>
 
