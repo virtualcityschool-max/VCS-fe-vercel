@@ -77,42 +77,15 @@
   font-style: normal;
 }
 
-/* "SF Pro Inline" (basic-Latin SF Pro written into each pre-built page by
-   scripts/prerender.js) is the first stand-in. Then, on pages that aren't
-   pre-built, or for other characters: */
-/* Stand-in while an SF Pro file is still downloading: the device's own
-   Helvetica / Arial / Roboto (Liberation / DejaVu on Linux), 4% wider and
-   with a taller text box (ascent/descent; SF Pro Bold is as wide as
-   Helvetica Bold but 3-6% taller). Line heights are fixed, so the taller box
-   doesn't move anything on screen (ascent minus descent equals SF Pro's,
-   so letters sit where SF Pro puts them). Google counts
-   the headline when it is first drawn; with a smaller stand-in, the app's
-   redraw a moment later in real SF Pro looked "bigger" and Google counted
-   the page as loaded only then (LCP 3.9 s instead of 1 s). */
-@font-face {
-  font-family: "SF Pro System Fallback";
-  src: local("Helvetica Neue"), local("HelveticaNeue"), local("Helvetica"), local("Arial"), local("ArialMT"), local("Roboto"), local("Roboto-Regular"), local("Liberation Sans"), local("LiberationSans-Regular"), local("DejaVu Sans"), local("DejaVuSans");
-  font-weight: 100 500;
-  font-style: normal;
-  size-adjust: 104%;
-  ascent-override: 125%;
-  descent-override: 57%;
-  line-gap-override: 0%;
-}
-@font-face {
-  font-family: "SF Pro System Fallback";
-  src: local("Helvetica Neue Bold"), local("HelveticaNeue-Bold"), local("Helvetica Bold"), local("Helvetica-Bold"), local("Arial Bold"), local("Arial-BoldMT"), local("Roboto Bold"), local("Roboto-Bold"), local("Liberation Sans Bold"), local("LiberationSans-Bold"), local("DejaVu Sans Bold"), local("DejaVuSans-Bold");
-  font-weight: 600 900;
-  font-style: normal;
-  size-adjust: 104%;
-  ascent-override: 125%;
-  descent-override: 57%;
-  line-gap-override: 0%;
-}
-
+/* While an SF Pro file is still downloading, pre-built pages use "SF Pro
+   Inline": basic-Latin SF Pro Regular and Bold written into the page itself
+   by scripts/prerender.js, so the first paint already has SF Pro's sizes and
+   the app's redraw is not "bigger" (Google's LCP). No local() stand-ins: on
+   a device without those fonts the browser held the text invisible while it
+   looked for them, which pushed the headline past the app's start. */
 @theme {
-  --font-sans: "SF Pro Display", "SF Pro Inline", "SF Pro System Fallback", system-ui, sans-serif;
-  --font-poppins: "SF Pro Display", "SF Pro Inline", "SF Pro System Fallback", sans-serif;
+  --font-sans: "SF Pro Display", "SF Pro Inline", system-ui, sans-serif;
+  --font-poppins: "SF Pro Display", "SF Pro Inline", sans-serif;
 }
 
 html,
@@ -128,7 +101,7 @@ html {
 }
 
 :root {
-  --font-sf-pro: "SF Pro Display", "SF Pro Inline", "SF Pro System Fallback", sans-serif;
+  --font-sf-pro: "SF Pro Display", "SF Pro Inline", sans-serif;
   --bg-dark: #020617;
   --text-white: white;
 
