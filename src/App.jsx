@@ -12,15 +12,16 @@ import { toastManager } from "./utils/toastManager";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/ui/Footer";
 import ScrollToTop from "./components/common/ScrollToTop";
+import { OptionalPart, lazyRetry } from "./components/common/OptionalPart";
 // Loaded on demand (home page speed): the sign-in/sign-up modals and the
 // portal sidebar aren't needed to show a public page.
-const AuthModals = React.lazy(() => import("./components/forms/AuthModals"));
-const Sidebar = React.lazy(() => import("./components/layout/Sidebar"));
+const AuthModals = lazyRetry(() => import("./components/forms/AuthModals"));
+const Sidebar = lazyRetry(() => import("./components/layout/Sidebar"));
 
 // Routes
 import AppRoutes from "./routes/AppRoutes";
 // Signed-in visitors only: loaded on demand so public pages don't download it.
-const CompleteProfileGate = React.lazy(() => import("./components/common/CompleteProfileGate"));
+const CompleteProfileGate = lazyRetry(() => import("./components/common/CompleteProfileGate"));
 import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
 import { applyTheme } from "./utils/theme";
@@ -152,7 +153,7 @@ const AppInner = () => {
     <div className={`min-h-screen selection:bg-indigo-500/30 overflow-x-hidden ${isAdminArea ? "bg-[#0B1020]" : "bg-slate-950"}`}>
       {/* Unified sidebar for teacher / student / parent */}
       {hasSidebar && (
-        <React.Suspense fallback={null}>
+        <OptionalPart>
         <Sidebar
           role={role}
           isSidebarOpen={isSidebarOpen}
@@ -162,7 +163,7 @@ const AppInner = () => {
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={toggleSidebar}
         />
-        </React.Suspense>
+        </OptionalPart>
       )}
 
       {/* Mobile overlay */}
@@ -219,8 +220,8 @@ const AppInner = () => {
 
         {/* Global Overlays */}
         <section className="relative z-[9999]">
-          <React.Suspense fallback={null}><AuthModals /></React.Suspense>
-          {isLoggedIn && <React.Suspense fallback={null}><CompleteProfileGate /></React.Suspense>}
+          <OptionalPart><AuthModals /></OptionalPart>
+          {isLoggedIn && <OptionalPart><CompleteProfileGate /></OptionalPart>}
           <ToastContainer
             position="top-right"
             autoClose={4000}

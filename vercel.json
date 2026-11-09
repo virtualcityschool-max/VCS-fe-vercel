@@ -1,6 +1,28 @@
 {
   "buildCommand": "node scripts/generate-sitemap.js && npm run build && node scripts/prerender.js",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/a-level-mathematics-9709-p2",
+      "destination": "/subjects/mathematics-9709",
+      "permanent": true
+    },
+    {
+      "source": "/a-level-mathematics-9709-p4",
+      "destination": "/subjects/mathematics-9709",
+      "permanent": true
+    },
+    {
+      "source": "/exams/:id",
+      "destination": "/exam-dates",
+      "permanent": true
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/mocks",
