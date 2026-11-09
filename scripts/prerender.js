@@ -106,7 +106,8 @@ async function buildRouteList() {
   }
 
   try {
-    const teachers = await fetchJson(`${API_BASE_URL}/courses/teachers/`);
+    // only tutors admin shows on the website (?homepage=1)
+    const teachers = await fetchJson(`${API_BASE_URL}/courses/teachers/?homepage=1`);
     for (const t of teachers) if (t.id != null) routes.push(`/teachers/${t.id}`);
     console.log(`  + ${teachers.length} teacher pages`);
   } catch (err) {

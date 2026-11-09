@@ -98,7 +98,7 @@ const PublicHome = () => {
       dispatch(fetchAllCourses());
     }
     if (teachers.length <= 0) {
-      dispatch(fetchTeachers({}));
+      dispatch(fetchTeachers({ homepage: true }));
     }
     if (blogs.length <= 0) {
       dispatch(fetchBlogs({ ordering: "-published_at" }));

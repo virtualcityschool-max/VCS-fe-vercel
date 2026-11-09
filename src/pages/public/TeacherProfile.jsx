@@ -15,6 +15,7 @@ import { catalogGuideFor } from "../../data/subjectGuides/catalog";
 import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 import { isNotFound } from "../../utils/isNotFound";
+import { teacherService } from "../../services/teacherService";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -338,6 +339,22 @@ const TeacherProfile = () => {
     }
   }, [openModalOnLoad, slotsLoaded, loadingSlots]);
 
+  // Is this tutor switched on for the website by admin (Teachers register:
+  // "Homepage")? A hidden tutor's page still opens from their course's link,
+  // but Google is told not to index it. null = not known yet.
+  const [shownOnSite, setShownOnSite] = useState(null);
+  useEffect(() => {
+    if (!id) return undefined;
+    let live = true;
+    teacherService.getTeachers({ homepage: true })
+      .then((data) => {
+        const list = Array.isArray(data) ? data : data?.results || [];
+        if (live) setShownOnSite(list.some((t) => String(t.id) === String(id)));
+      })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [id]);
+
   useEffect(() => {
     if (!id) return;
     if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -381,10 +398,11 @@ const TeacherProfile = () => {
               ].filter(Boolean).join(" ")
             : undefined,
       url: typeof window !== "undefined" ? window.location.href : undefined,
-      // Tutors without a class yet (display-only profiles) and tutors that
-      // don't exist or were removed (404) stay out of Google. Not on other
+      // Tutors without a class yet (display-only profiles), tutors admin hid
+      // from the website, and tutors that don't exist or were removed (404)
+      // stay out of Google. Not on other
       // errors: a temporary failure must not drop a real tutor page.
-      noindex: notFound || (Boolean(teacherDetails) && teach.courses.length === 0),
+      noindex: notFound || shownOnSite === false || (Boolean(teacherDetails) && teach.courses.length === 0),
   });
   
   if (loading && !teacherDetails) {

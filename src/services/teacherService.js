@@ -25,6 +25,13 @@ const getTeachers = async (params = {}) => {
     query.course = params.course.trim();
   }
 
+  // Public pages list only the tutors admin switched on for the website
+  // (Teachers register: "Homepage" / Showcase). Test, trial and not-yet-hired
+  // teachers stay off the site.
+  if (params.homepage) {
+    query.homepage = 1;
+  }
+
   const response = await axiosInstance.get("/courses/teachers/", {
     params: query,
   });

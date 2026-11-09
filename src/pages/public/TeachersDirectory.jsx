@@ -85,13 +85,13 @@ const TeachersDirectory = () => {
         if (!query) {
           // Only fetch if we don't already have teachers data
           if (teachers.length <= 0) {
-            await dispatch(fetchTeachers({}));
+            await dispatch(fetchTeachers({ homepage: true }));
             console.log("Fetched teachers when no teacher search:", teachers);
           }
           setHasFetched(true);
           return;
         }
-        const result = await dispatch(fetchTeachers({ teacher: query }));
+        const result = await dispatch(fetchTeachers({ teacher: query, homepage: true }));
         console.log("Teacher search result:", result);
         const data = result.payload;
 
@@ -103,7 +103,7 @@ const TeachersDirectory = () => {
         if (!data || data.length === 0) {
           // Only fetch by course if the teacher search returned no results
           // and the request wasn't aborted
-          await dispatch(fetchTeachers({ course: query }));
+          await dispatch(fetchTeachers({ course: query, homepage: true }));
           // console.log("Teachers:", );
           
         }

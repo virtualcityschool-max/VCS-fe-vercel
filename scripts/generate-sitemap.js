@@ -155,7 +155,8 @@ async function main() {
 
   const teacherEntries = await fetchEntries(
     "teachers",
-    `${API_BASE_URL}/courses/teachers/`,
+    // only tutors admin shows on the website (?homepage=1)
+    `${API_BASE_URL}/courses/teachers/?homepage=1`,
     {
       // Tutors with no published course are noindex (TeacherProfile.jsx).
       filter: (t) => t.id != null && (t.courses || []).length > 0,
