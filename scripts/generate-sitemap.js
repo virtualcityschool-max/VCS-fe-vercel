@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { LAST_VERIFIED as EXAM_DATES_LAST_VERIFIED } from "../src/data/examDates.js";
 import { pageDates } from "./page-dates.mjs";
 import { TIMETABLE_ZONES, TIMETABLE_CHECKED, timetablePath } from "../src/data/examTimetable/index.js";
-import { buildCourseIndex, isThinCourse } from "../src/data/courseRules.js";
+import { buildCourseIndex, isThinCourse, isThinTutor } from "../src/data/courseRules.js";
 import { catalogGuideFor } from "../src/data/subjectGuides/catalog.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -43,7 +43,6 @@ const STATIC_PAGES = [
   { loc: "/mind-lab/personality-test", changefreq: "monthly", lastmod: pageDate("/mind-lab/personality-test") },
   { loc: "/mind-lab/16-personalities", changefreq: "monthly", lastmod: pageDate("/mind-lab/16-personalities") },
   { loc: "/mind-lab/workplace-assessment", changefreq: "monthly", lastmod: pageDate("/mind-lab/workplace-assessment") },
-  { loc: "/mind-lab/star-signs", changefreq: "monthly", lastmod: pageDate("/mind-lab/star-signs") },
   { loc: "/mind-lab/memory-challenge", changefreq: "monthly", lastmod: pageDate("/mind-lab/memory-challenge") },
   { loc: "/mind-lab/brain-teasers", changefreq: "monthly", lastmod: pageDate("/mind-lab/brain-teasers") },
   { loc: "/mind-lab/smart-revision", changefreq: "monthly", lastmod: pageDate("/mind-lab/smart-revision") },
@@ -153,7 +152,7 @@ async function main() {
     },
   );
 
-  const teacherEntries = await fetchEntries(
+  const teacherEntriesAll = await fetchEntries(
     "teachers",
     // only tutors admin shows on the website (?homepage=1)
     `${API_BASE_URL}/courses/teachers/?homepage=1`,
@@ -166,6 +165,16 @@ async function main() {
       toEntry: (t) => ({ loc: `/teachers/${t.id}`, changefreq: "monthly", lastmod: later(day(t.updated_at), pageDate("/teachers/:id")) }),
     },
   );
+
+  // Tutors with a short bio are noindex (TeacherProfile.jsx): the list has
+  // no bio, so each tutor's own record is read.
+  const teacherEntries = [];
+  for (const e of teacherEntriesAll) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/courses/teachers/${e.loc.split("/").pop()}/`);
+      if (res.ok && !isThinTutor(await res.json())) teacherEntries.push(e);
+    } catch { /* not reachable: leave it out this time */ }
+  }
 
   // List pages changed when the newest thing on them did; the home page
   // shows a bit of everything.

@@ -14,7 +14,6 @@ import { toastManager } from "../../utils/toastManager";
 import { formatCategoryLabel } from "../../constants";
 import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
-import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { showApiError } from "../../utils/apiErrorHandler";
 import { getDisplayName } from "../../utils/userDisplay";
@@ -24,6 +23,9 @@ import PublicCourseCard from "../../components/courses/PublicCourseCard";
 import { studentService } from "../../services/studentService";
 import { useSeo } from "../../hooks/useSeo";
 import { catalogGuideFor } from "../../data/subjectGuides/catalog";
+import { OptionalPart, lazyRetry } from "../../components/common/OptionalPart";
+// Downloaded only when someone presses Enrol (a failed download never touches the page).
+const EnrollmentTypeModal = lazyRetry(() => import("../../components/courses/EnrollmentTypeModal"));
 
 // "Subject guides" link for a row of courses: shown when the row's courses have
 // Cambridge guides, pointing at that level's part of /subjects.
@@ -751,6 +753,8 @@ const Marketplace = () => {
       </div>
 
       {/* Enrollment Type Modal */}
+      {enrollmentModalOpen && (
+      <OptionalPart>
       <EnrollmentTypeModal
         isOpen={enrollmentModalOpen}
         course={selectedCourse}
@@ -768,6 +772,8 @@ const Marketplace = () => {
             : undefined
         }
       />
+      </OptionalPart>
+      )}
 
       <AuthRequiredModal
         isOpen={authModalOpen}

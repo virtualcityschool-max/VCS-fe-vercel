@@ -22,7 +22,6 @@ import { useSubmissionGuard } from "../../utils/requestDeduplicator";
 import { useNumberFormat, useTextFormat } from "../../hooks/useFormat";
 import { getCourseImage } from "../../utils/courseImageUtils";
 import { setAuthModal, setEnrollmentIntent } from "../../store/slices/uiSlice";
-import EnrollmentTypeModal from "../../components/courses/EnrollmentTypeModal";
 import ApplyFreeAccessModal from "../../components/public/ApplyFreeAccessModal";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
 import { getStorageUrl } from "../../utils/storageUrl";
@@ -42,6 +41,9 @@ import { useActiveSection, useFollowingBox } from "../../hooks/useFollowingBox";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 import { isNotFound } from "../../utils/isNotFound";
+import { OptionalPart, lazyRetry } from "../../components/common/OptionalPart";
+// Downloaded only when someone presses Enrol (a failed download never touches the page).
+const EnrollmentTypeModal = lazyRetry(() => import("../../components/courses/EnrollmentTypeModal"));
 
 // The syllabus essentials shown on a course page. The rest of the guide (why
 // study it, question types, books, study plan, careers, FAQs) stays on its own
@@ -1080,11 +1082,16 @@ const CourseDetails = () => {
             )}
 
             <CourseSection id="course-includes" icon="fa-gift" color="emerald" title="What is included">
-              <ul className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
-                {includes.map((x) => (
-                  <li key={x} className="flex gap-3 rounded-xl p-4 bg-white/[0.03] border border-white/10 text-slate-200 text-sm"><i className="fas fa-check-circle text-emerald-400 mt-0.5"></i>{x}</li>
-                ))}
-              </ul>
+              {details.includes?.length ? (
+                <ul className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                  {includes.map((x) => (
+                    <li key={x} className="flex gap-3 rounded-xl p-4 bg-white/[0.03] border border-white/10 text-slate-200 text-sm"><i className="fas fa-check-circle text-emerald-400 mt-0.5"></i>{x}</li>
+                  ))}
+                </ul>
+              ) : (
+                // Same on every course: one short line, so each page is mostly about its own course.
+                <p className="text-base text-slate-200">{includes.join(" · ")}.</p>
+              )}
             </CourseSection>
 
             {normalizedCourse.attachment && (
@@ -1152,6 +1159,8 @@ const CourseDetails = () => {
       </div>
 
       {/* Enrollment Type Modal */}
+      {enrollmentModalOpen && (
+      <OptionalPart>
       <EnrollmentTypeModal
         isOpen={enrollmentModalOpen}
         course={normalizedCourse}
@@ -1168,6 +1177,8 @@ const CourseDetails = () => {
             : undefined
         }
       />
+      </OptionalPart>
+      )}
 
       {freeAccessOpen && (
         <ApplyFreeAccessModal

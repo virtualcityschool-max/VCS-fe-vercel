@@ -110,6 +110,8 @@ const Card = ({ tone, label, title, sub, children }) => {
 
 const StarSigns = () => {
   useSeo({
+    // Fun page, not study content: kept out of Google (Search Console brief).
+    noindex: true,
     title: "Star Sign Personality — Western, Vedic and the Real Sky",
     description:
       "Enter your birthday to discover your star-sign personality — strengths, challenges, study style and careers — plus your Vedic Rashi and the real IAU constellation the Sun was in, with star facts and history.",

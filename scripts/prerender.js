@@ -56,6 +56,10 @@ const ORIGIN = `http://localhost:${PORT}`;
 const CONCURRENCY = 4;
 const NAV_TIMEOUT_MS = 30000;
 const STATE_ROUTES = /^\/(courses|teachers)\/?$/;
+// A course page carries only its own course (a few KB), so the visitor's
+// browser and Google's renderer keep the course on screen even when the
+// fresh copy from the API is slow or fails (Search Console 2026-11-09).
+const COURSE_ROUTE = /^\/courses\/[^/]+\/?$/;
 const SETTLE_MS = 400; // small buffer after networkidle for final paint/DOM updates
 // Google Ads / Tag Manager addresses: blocked while pre-building, and any tag
 // they add is removed from the saved HTML (index.html loads them later itself).
@@ -336,7 +340,11 @@ async function prerenderRoute(browser, route, timeout = NAV_TIMEOUT_MS) {
     // state), so the app's first drawing in the visitor's browser already has
     // the list and the page doesn't jump (was CLS 0.86 on /teachers). Only
     // these pages: it adds ~50-70 KB compressed to their HTML.
-    const stateJson = !STATE_ROUTES.test(route) ? null : await page.evaluate(() => {
+    const stateJson = COURSE_ROUTE.test(route) ? await page.evaluate(() => {
+      const s = window.__VCS_STORE__ && window.__VCS_STORE__.getState();
+      if (!s || !s.courses || !s.courses.currentCourse) return null;
+      return JSON.stringify({ courses: { ...s.courses, courses: [], isLoading: false, error: null } });
+    }) : !STATE_ROUTES.test(route) ? null : await page.evaluate(() => {
       const s = window.__VCS_STORE__ && window.__VCS_STORE__.getState();
       if (!s) return null;
       // not sign-in/UI state, nor slices that load later with their own area

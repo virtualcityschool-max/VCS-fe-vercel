@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { coursesService } from "../../services/coursesService";
 import { logoutUser, loginUser } from "./authSlice";
+import { isNotFound } from "../../utils/isNotFound";
 
 const normalizeCategoryField = (obj) => ({
   ...obj,
@@ -49,6 +50,8 @@ export const fetchCourseById = createAsyncThunk(
   },
 );
 
+const sameCourse = (state, id) => state.currentCourse != null && id != null && String(state.currentCourse.id) === String(id);
+
 const initialState = {
   courses: [],
   currentCourse: null,
@@ -89,8 +92,10 @@ const coursesSlice = createSlice({
         state.error = action.payload;
       })
       // Fetch Course by ID
-      .addCase(fetchCourseById.pending, (state) => {
-        state.isLoading = true;
+      // The pre-built page already holds this course: refresh it quietly
+      // (no spinner) and, if the refresh fails, keep showing it.
+      .addCase(fetchCourseById.pending, (state, action) => {
+        state.isLoading = !sameCourse(state, action.meta.arg);
         state.error = null;
       })
       .addCase(fetchCourseById.fulfilled, (state, action) => {
@@ -100,7 +105,9 @@ const coursesSlice = createSlice({
       })
       .addCase(fetchCourseById.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload;
+        const gone = isNotFound(action.payload);
+        if (gone) state.currentCourse = null;
+        if (gone || !sameCourse(state, action.meta.arg)) state.error = action.payload;
       })
 
       // Fetch Categories

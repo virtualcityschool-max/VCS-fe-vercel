@@ -16,6 +16,7 @@ import { sizedImage, fallbackToOriginal } from "../../utils/imageCdn";
 import { useWhatsappNumber } from "../../hooks/useWhatsappNumber";
 import { isNotFound } from "../../utils/isNotFound";
 import { teacherService } from "../../services/teacherService";
+import { isThinTutor } from "../../data/courseRules";
 
 const HIRE_INTENT_KEY = "vcs_hire_intent";
 
@@ -402,7 +403,7 @@ const TeacherProfile = () => {
       // from the website, and tutors that don't exist or were removed (404)
       // stay out of Google. Not on other
       // errors: a temporary failure must not drop a real tutor page.
-      noindex: notFound || shownOnSite === false || (Boolean(teacherDetails) && teach.courses.length === 0),
+      noindex: notFound || shownOnSite === false || (Boolean(teacherDetails) && (teach.courses.length === 0 || isThinTutor(teacherDetails))),
   });
   
   if (loading && !teacherDetails) {

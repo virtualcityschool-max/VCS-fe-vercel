@@ -17,6 +17,10 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     if (isChunkLoadError(error) && reloadOnceForNewVersion()) return;
+    if (this.state.reloading && window.__VCS_PREBUILT_HTML__) {
+      console.warn("Code download failed; showing the pre-built page.", error?.message || error);
+      return;
+    }
     if (this.state.reloading) this.setState({ reloading: false });
     // Log the error to console for developers
     console.error("🔴 Error Boundary caught an error:", {
@@ -55,6 +59,11 @@ class ErrorBoundary extends React.Component {
   };
 
   render() {
+    // Only a code download failed and this page came pre-built: keep showing
+    // the pre-built page (what Google and visitors saw) instead of an error.
+    if (this.state.hasError && this.state.reloading && window.__VCS_PREBUILT_HTML__) {
+      return <div dangerouslySetInnerHTML={{ __html: window.__VCS_PREBUILT_HTML__ }} />;
+    }
     if (this.state.hasError && this.state.reloading) {
       return (
         <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-300">

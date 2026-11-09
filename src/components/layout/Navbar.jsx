@@ -261,6 +261,9 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
 
 // "Mock Exams" with its subject dropdown (like Subject Guides): every subject, which papers are live, read from the
 // Mock Exams app. The panel spans the menu's full width; the item fills the bar's height so the pointer can reach it.
+// Subjects with a guide but no mock exams page yet.
+const NO_MOCKS = new Set(["9866"]);
+
 function MocksMenu({ link, navClass, menu }) {
   const groups = menu.data?.groups ?? [];
   return (
@@ -272,7 +275,24 @@ function MocksMenu({ link, navClass, menu }) {
       <div className="invisible opacity-0 group-hover/mocks:visible group-hover/mocks:opacity-100 group-focus-within/mocks:visible group-focus-within/mocks:opacity-100 transition absolute inset-x-4 sm:inset-x-6 top-full z-50">
         <div className="rounded-2xl border border-white/10 bg-slate-950 shadow-2xl shadow-black/40 overflow-hidden">
           {groups.length === 0 ? (
-            <p className="p-6 text-sm text-slate-300">Loading subjects…</p>
+            // Before the live list arrives: plain links to each subject's mock exams, so
+            // the menu is never empty (and Google can follow it in the pre-built page).
+            <div className="grid grid-cols-2 gap-6 p-6">
+              {["O Level", "AS & A Level"].map((lvl) => (
+                <div key={lvl} className="min-w-0">
+                  <div className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">{lvl}</div>
+                  <ul className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                    {GUIDE_CATALOG.filter((g) => g.level === lvl && !NO_MOCKS.has(g.code)).map((g) => (
+                      <li key={g.slug}>
+                        <a href={`/mocks/exams/${g.code}`} className="block px-2 py-1.5 rounded-lg text-sm font-semibold text-slate-200 hover:text-white hover:bg-white/5">
+                          {g.subject} <span className="text-slate-400 font-normal">{g.code}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="grid grid-cols-5 gap-6 p-6">
               {groups.map((g) => (

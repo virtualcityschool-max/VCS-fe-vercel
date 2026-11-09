@@ -28,6 +28,8 @@ const app = (
 // Suspense boundary; nothing breaks. On the list pages the HTML also carries
 // the data it was drawn with (see store/index.js).
 const container = document.getElementById("root");
+// The error screen shows this instead when only a code download failed.
+if (container?.hasAttribute("data-prebuilt")) window.__VCS_PREBUILT_HTML__ = container.innerHTML;
 const render = () => {
   if (container.hasAttribute("data-prebuilt")) {
     hydrateRoot(container, app, {

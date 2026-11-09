@@ -1,4 +1,5 @@
 import React from "react";
+import { loadModule } from "../../routes/lazyPage";
 
 // For extra pieces that load on their own (login popup, portal sidebar,
 // profile check). If one fails to download or crashes, it is simply left out
@@ -16,5 +17,4 @@ export class OptionalPart extends React.Component {
 }
 
 // React.lazy that tries a failed download once more before giving up.
-export const lazyRetry = (factory) =>
-  React.lazy(() => factory().catch(() => new Promise((r) => setTimeout(r, 800)).then(factory)));
+export const lazyRetry = (factory) => React.lazy(() => loadModule(factory));

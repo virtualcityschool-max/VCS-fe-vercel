@@ -104,3 +104,10 @@ export const stageGuide = (guide, stage) => {
     papers: papers.length ? papers : guide.papers,
   };
 };
+
+// Tutor pages with a short or missing bio stay out of Google (noindex, and
+// out of the sitemap) until the bio is at least this long (Search Console
+// brief, 2026-11-09). The page still opens for visitors.
+export const TUTOR_BIO_MIN_WORDS = 150;
+export const isThinTutor = (teacher) =>
+  String(teacher?.bio || "").replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length < TUTOR_BIO_MIN_WORDS;

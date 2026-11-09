@@ -32,6 +32,10 @@ Allow: /
 Disallow: /mocks/admin
 Disallow: /student/
 Disallow: /teacher/
+Disallow: /parent/
+Disallow: /admin
+Disallow: /profile
+Disallow: /dashboard
 
 Sitemap: https://virtualcityschool.com/sitemap.xml
 Sitemap: https://virtualcityschool.com/mocks/sitemap.xml

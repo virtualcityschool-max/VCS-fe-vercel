@@ -12,6 +12,7 @@ import { getDisplayName } from "../../utils/userDisplay";
 import GuideBody from "../../components/subjects/GuideBody";
 import { syllabusYearRange, mockExamsHref } from "../../utils/examSeason";
 import { ACCENT, guidePhoto, guidePhotoSrcSet, guideSections } from "../../components/subjects/guideSections";
+import COURSE_INDEX from "../../data/courseIndex.json";
 
 // One Cambridge subject explained for students: what it is, why it is taught,
 // how it is examined and graded, and how to do well. Content lives in
@@ -108,6 +109,14 @@ const SubjectGuidePage = () => {
       .catch(() => {});
     return () => { live = false; };
   }, [g]);
+
+  // Until the live list arrives (or if it can't), the course list saved with
+  // the site: the links are in the page from the first moment, for Google too.
+  const savedCourses = useMemo(
+    () => (g ? COURSE_INDEX.filter((x) => x.code === g.code && !x.canonical).map((x) => ({ id: x.id, title: x.title, level: x.level, teacher: "", price: "" })) : []),
+    [g],
+  );
+  const shownCourses = courses.length ? courses : savedCourses;
 
   // Highlight the section being read; keep the table of contents in view.
   const [active, setActive] = useState("facts");
@@ -240,7 +249,7 @@ const SubjectGuidePage = () => {
           </aside>
 
           <div className="min-w-0">
-            <GuideBody g={g} sections={sections} courses={courses} />
+            <GuideBody g={g} sections={sections} courses={shownCourses} />
           </div>
         </div>
       </div>

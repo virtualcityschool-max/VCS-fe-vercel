@@ -14,7 +14,7 @@
     },
     {
       "source": "/exams/:id",
-      "destination": "/exam-dates",
+      "destination": "/mocks/exams/:id",
       "permanent": true
     },
     {

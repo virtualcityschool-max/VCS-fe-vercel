@@ -56,6 +56,12 @@ const AppInner = () => {
     (state.freeAccess?.requests || []).filter((r) => r.status === "pending").length
   );
   const location = useLocation();
+  // The login/sign-up popup is only downloaded once it is needed: opened, or
+  // asked for by the address (/signup, ?ref=, ?adminLogin=). Then it stays.
+  const authModalType = useSelector((state) => state.ui?.authModal?.type);
+  const wantsAuth = Boolean(authModalType) || location.pathname === "/signup" || /[?&](ref|adminLogin)=/.test(location.search);
+  const [authMounted, setAuthMounted] = useState(wantsAuth);
+  if (wantsAuth && !authMounted) setAuthMounted(true);
   // One global handler so clicking the dim backdrop closes any modal.
   useOutsideCloseModals();
 
@@ -220,7 +226,7 @@ const AppInner = () => {
 
         {/* Global Overlays */}
         <section className="relative z-[9999]">
-          <OptionalPart><AuthModals /></OptionalPart>
+          {authMounted && <OptionalPart><AuthModals /></OptionalPart>}
           {isLoggedIn && <OptionalPart><CompleteProfileGate /></OptionalPart>}
           <ToastContainer
             position="top-right"
