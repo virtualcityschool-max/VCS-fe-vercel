@@ -77,6 +77,27 @@ const Footer = ({ variant = "full" }) => {
               >
                 <i className="fab fa-youtube text-base" aria-hidden="true"></i>
               </a>
+              <a
+                href="https://www.tiktok.com/@virtual.city.schoo"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition"
+                aria-label="Virtual City School on TikTok"
+              >
+                {/* TikTok is not in the site's icon font subset, so the logo is drawn inline */}
+                <svg viewBox="0 0 448 512" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+                  <path d="M448 209.9a210.1 210.1 0 0 1-122.8-39.3v178.8A162.6 162.6 0 1 1 185 188.3v89.9a74.6 74.6 0 1 0 52.2 71.2V0h88a121.2 121.2 0 0 0 1.9 22.2A122.2 122.2 0 0 0 381 102.4a121.4 121.4 0 0 0 67 20.1z" />
+                </svg>
+              </a>
+              <a
+                href="https://wa.me/966556687417"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition"
+                aria-label="Message Virtual City School on WhatsApp"
+              >
+                <i className="fab fa-whatsapp text-base" aria-hidden="true"></i>
+              </a>
             </div>
           </div>
 
