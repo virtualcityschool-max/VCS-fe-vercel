@@ -33,7 +33,7 @@ export default function ScholarshipsPage() {
   useSeo({
     title: "Global Scholarships for Pakistani & Gulf Students – Bachelors, Masters & PhD",
     description:
-      "Find fully funded international scholarships in the USA, UK, Europe, Australia, and Asia. Verified criteria, deadlines, and requirements for Pakistani and international students.",
+      "Scholarships that open every year for O / A Level school leavers and graduates from Pakistan and the Gulf: Türkiye, Japan, Korea, China, UK, USA, Europe, Saudi Arabia, UAE and Pakistan, with usual months and official links.",
     url: "https://virtualcityschool.com/scholarships",
     jsonLd: [
       {
@@ -68,7 +68,7 @@ export default function ScholarshipsPage() {
         />
       </div>
 
-      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-24">
+      <article className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-24">
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-slate-400">
           <Link to="/" className="hover:text-cyan-400 transition">
@@ -89,7 +89,7 @@ export default function ScholarshipsPage() {
             <span className="text-indigo-400">Gulf Students</span>
           </h1>
           <p className="text-slate-300 text-base md:text-lg max-w-3xl leading-relaxed">
-            A comprehensive, verified directory of fully funded and partial scholarship programs for undergraduate, postgraduate, and fellowship applicants &mdash; complete with country requirements, deadlines, eligibility criteria, and direct application links.
+            Scholarships that come back <strong className="text-emerald-300 font-semibold">every year</strong>: for students finishing O / A Level and for university graduates. Each one shows when it usually opens, what it pays for, who can apply from Pakistan and the Gulf, and its official page.
           </p>
         </header>
 

@@ -100,7 +100,7 @@ const ExamTimetablePage = () => {
   if (!t) {
     return (
       <main className="min-h-screen bg-[#020617] text-white">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-24">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-24">
           <h1 className="text-3xl md:text-5xl font-black mb-4">No such zone</h1>
           <p className="text-slate-300 text-base mb-6">Cambridge has six administrative zones (1 to 6).</p>
           <Link to="/exam-dates" className="text-indigo-300 hover:text-white font-bold">Back to exam dates</Link>
@@ -114,7 +114,7 @@ const ExamTimetablePage = () => {
 
   return (
     <main className="min-h-screen bg-[#020617] text-white overflow-x-hidden">
-      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
+      <article className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>

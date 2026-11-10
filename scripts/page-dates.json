@@ -1,214 +1,214 @@
 {
   "/about": {
-    "hash": "cefcdad749e1ccb2",
-    "date": "2026-10-18"
+    "hash": "64d36b5f48587a01",
+    "date": "2026-11-10"
   },
   "/privacy-policy": {
-    "hash": "522fa551c08b2c85",
-    "date": "2026-06-15"
+    "hash": "0afedb57aa3f3de4",
+    "date": "2026-11-10"
   },
   "/terms": {
-    "hash": "7b01fe5e7f3c71a1",
-    "date": "2026-11-06"
+    "hash": "7762eb8b807019bf",
+    "date": "2026-11-10"
   },
   "/mind-lab": {
-    "hash": "1e1d3d40261885f8",
-    "date": "2026-10-31"
+    "hash": "534f2c8e02d2ea5b",
+    "date": "2026-11-10"
   },
   "/mind-lab/personality-test": {
-    "hash": "b6cce779ec42e759",
-    "date": "2026-10-31"
+    "hash": "011c69854e56cb10",
+    "date": "2026-11-10"
   },
   "/mind-lab/16-personalities": {
-    "hash": "36f9934b19990a8b",
-    "date": "2026-10-31"
+    "hash": "810df0d8a9b4da9f",
+    "date": "2026-11-10"
   },
   "/mind-lab/workplace-assessment": {
-    "hash": "bc592aea397735ca",
-    "date": "2026-10-31"
+    "hash": "3c54206f2b39a3a3",
+    "date": "2026-11-10"
   },
   "/mind-lab/star-signs": {
-    "hash": "1d5da08cdeca511e",
-    "date": "2026-11-09"
+    "hash": "be82108dbe3c430c",
+    "date": "2026-11-10"
   },
   "/mind-lab/memory-challenge": {
-    "hash": "7db4bafe6e9d4836",
-    "date": "2026-10-31"
+    "hash": "4cb226447152c9f1",
+    "date": "2026-11-10"
   },
   "/mind-lab/brain-teasers": {
-    "hash": "6d9c4e8224ae312f",
-    "date": "2026-10-31"
+    "hash": "f651d7dae4ecbb17",
+    "date": "2026-11-10"
   },
   "/mind-lab/smart-revision": {
-    "hash": "cc31443aabc728b5",
-    "date": "2026-10-31"
+    "hash": "fc72fa442d035ee6",
+    "date": "2026-11-10"
   },
   "/mind-lab/smart-notes": {
-    "hash": "5b7685463106d0da",
-    "date": "2026-10-31"
+    "hash": "e5a59360126e39ef",
+    "date": "2026-11-10"
   },
   "/mind-lab/learning-domains": {
-    "hash": "7cc65733e9766916",
-    "date": "2026-10-31"
+    "hash": "8e3574cc8f621737",
+    "date": "2026-11-10"
   },
   "/mind-lab/smart-learning": {
-    "hash": "b760f8c16419d7d9",
-    "date": "2026-10-31"
+    "hash": "f00dba3d7f6df72a",
+    "date": "2026-11-10"
   },
   "/mind-lab/career-interests": {
-    "hash": "69f5d7ae21aad722",
-    "date": "2026-10-31"
+    "hash": "d2962271f6009655",
+    "date": "2026-11-10"
   },
   "/mind-lab/eq-check": {
-    "hash": "609b59cd13179e7d",
-    "date": "2026-10-31"
+    "hash": "6176df09b67a3198",
+    "date": "2026-11-10"
   },
   "/mind-lab/reasoning-test": {
-    "hash": "3b128fd7c8afe018",
-    "date": "2026-10-31"
+    "hash": "627465f8d4d9bae6",
+    "date": "2026-11-10"
   },
   "/mind-lab/aptitude-practice": {
-    "hash": "06ac54286c8b7722",
-    "date": "2026-10-31"
+    "hash": "1ac28c5841d459d9",
+    "date": "2026-11-10"
   },
   "/teachers/:id": {
-    "hash": "8be602a26c12c962",
-    "date": "2026-11-09"
+    "hash": "11d1dd9b803a066b",
+    "date": "2026-11-10"
   },
   "/courses/:id": {
-    "hash": "2c20193c9347d504",
-    "date": "2026-11-09"
+    "hash": "b5a38a5913103322",
+    "date": "2026-11-10"
   },
   "/online-o-level": {
-    "hash": "943a6e90bea98df5",
-    "date": "2026-11-08"
+    "hash": "11dff19f22403aec",
+    "date": "2026-11-10"
   },
   "/online-a-level": {
-    "hash": "943a6e90bea98df5",
-    "date": "2026-11-08"
+    "hash": "11dff19f22403aec",
+    "date": "2026-11-10"
   },
   "/private-candidate": {
-    "hash": "f407cb3e84009ca9",
-    "date": "2026-11-06"
+    "hash": "36721154ed38667d",
+    "date": "2026-11-10"
   },
   "/scholarships": {
-    "hash": "a9e353af3a6dc9ed",
-    "date": "2026-11-09"
+    "hash": "03804b79e27ae9e8",
+    "date": "2026-11-10"
   },
   "/subjects/mathematics-4024": {
-    "hash": "b5e300d03d2d248d",
-    "date": "2026-11-09"
+    "hash": "606afa588785c01a",
+    "date": "2026-11-10"
   },
   "/subjects/additional-mathematics-4037": {
-    "hash": "f1a01e8d310c9b95",
-    "date": "2026-11-09"
+    "hash": "140d2013013f05a3",
+    "date": "2026-11-10"
   },
   "/subjects/physics-5054": {
-    "hash": "46294a19b765556f",
-    "date": "2026-11-09"
+    "hash": "1f5ab25b6f687acf",
+    "date": "2026-11-10"
   },
   "/subjects/chemistry-5070": {
-    "hash": "6947677396004c90",
-    "date": "2026-11-09"
+    "hash": "8406975d963e39e5",
+    "date": "2026-11-10"
   },
   "/subjects/biology-5090": {
-    "hash": "c5310f0a1871907c",
-    "date": "2026-11-09"
+    "hash": "16d5b4357ff97053",
+    "date": "2026-11-10"
   },
   "/subjects/english-1123": {
-    "hash": "202e902d8b59e985",
-    "date": "2026-11-09"
+    "hash": "adf20b403d8fcf6a",
+    "date": "2026-11-10"
   },
   "/subjects/computer-science-2210": {
-    "hash": "e53e43b1a570825a",
-    "date": "2026-11-09"
+    "hash": "e0997cc77cb975c8",
+    "date": "2026-11-10"
   },
   "/subjects/islamiyat-2058": {
-    "hash": "3ca2d1c7056d9bda",
-    "date": "2026-11-09"
+    "hash": "6a7c18044a48b7b0",
+    "date": "2026-11-10"
   },
   "/subjects/pakistan-studies-2059": {
-    "hash": "8901d5232e0e41bc",
-    "date": "2026-11-09"
+    "hash": "301c191c406f85ff",
+    "date": "2026-11-10"
   },
   "/subjects/urdu-3247": {
-    "hash": "aec3fed18acb0a99",
-    "date": "2026-11-09"
+    "hash": "872151eb17362513",
+    "date": "2026-11-10"
   },
   "/subjects/urdu-3248": {
-    "hash": "3c6c678a11fa42cf",
-    "date": "2026-11-09"
+    "hash": "635c1a242ef4e613",
+    "date": "2026-11-10"
   },
   "/subjects/mathematics-9709": {
-    "hash": "40a47b567f8b99c3",
-    "date": "2026-11-09"
+    "hash": "678876d4b2c3823a",
+    "date": "2026-11-10"
   },
   "/subjects/physics-9702": {
-    "hash": "6da33d964c0fb88c",
-    "date": "2026-11-09"
+    "hash": "3809d66f2c7dfeea",
+    "date": "2026-11-10"
   },
   "/subjects/chemistry-9701": {
-    "hash": "d84c53dc3cdee60f",
-    "date": "2026-11-09"
+    "hash": "a422fac0d74a1774",
+    "date": "2026-11-10"
   },
   "/subjects/biology-9700": {
-    "hash": "70739480311456f1",
-    "date": "2026-11-09"
+    "hash": "a44bcb62a1246199",
+    "date": "2026-11-10"
   },
   "/subjects/english-9093": {
-    "hash": "fd3170ca2f8d980b",
-    "date": "2026-11-09"
+    "hash": "31ef716d1741016d",
+    "date": "2026-11-10"
   },
   "/subjects/computer-science-9618": {
-    "hash": "f4b4729b6742017f",
-    "date": "2026-11-09"
+    "hash": "74c681d2bfc596e5",
+    "date": "2026-11-10"
   },
   "/subjects/urdu-9866": {
-    "hash": "f9756bee82af50ae",
-    "date": "2026-11-09"
+    "hash": "c26978c08967d9c6",
+    "date": "2026-11-10"
   },
   "/online-school/saudi-arabia": {
-    "hash": "9a2b679790c81bc5",
-    "date": "2026-11-06"
+    "hash": "2bd28f31ade1e74e",
+    "date": "2026-11-10"
   },
   "/online-school/uae": {
-    "hash": "442bab404df41601",
-    "date": "2026-11-06"
+    "hash": "abf67b010b98b8e5",
+    "date": "2026-11-10"
   },
   "/online-school/qatar": {
-    "hash": "f64d589f280edbbb",
-    "date": "2026-11-06"
+    "hash": "3fc43008515476a5",
+    "date": "2026-11-10"
   },
   "/online-school/kuwait": {
-    "hash": "ea3d19bae30e4591",
-    "date": "2026-11-06"
+    "hash": "e8ee62e1eea2534f",
+    "date": "2026-11-10"
   },
   "/online-school/bahrain": {
-    "hash": "5f8e9768022ed737",
-    "date": "2026-11-06"
+    "hash": "b19089e1d92c2de5",
+    "date": "2026-11-10"
   },
   "/online-school/oman": {
-    "hash": "5d32c98c5e9bf4fb",
-    "date": "2026-11-06"
+    "hash": "e90dee923804f438",
+    "date": "2026-11-10"
   },
   "/online-school/uk": {
-    "hash": "21467c8d6918364e",
-    "date": "2026-11-06"
+    "hash": "3dc10a1b45182e15",
+    "date": "2026-11-10"
   },
   "/online-school/us": {
-    "hash": "cd8360099f05cfc2",
-    "date": "2026-11-06"
+    "hash": "0d85c061c45af318",
+    "date": "2026-11-10"
   },
   "/online-school/canada": {
-    "hash": "e3fca2a76f28042c",
-    "date": "2026-11-06"
+    "hash": "30da01a36a813d50",
+    "date": "2026-11-10"
   },
   "/online-school/australia": {
-    "hash": "6146e0f106c1e724",
-    "date": "2026-11-06"
+    "hash": "f6e5beb134ef5330",
+    "date": "2026-11-10"
   },
   "/online-school/pakistan": {
-    "hash": "fa487c2939047961",
-    "date": "2026-11-06"
+    "hash": "e3dde0db84ce5c90",
+    "date": "2026-11-10"
   }
 }

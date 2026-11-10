@@ -1,9 +1,9 @@
-const ANNOUNCEMENT = "Admissions open for Cambridge O & A Level · Global Scholarships Finder 2026–2027 live";
+const ANNOUNCEMENT = "Admissions are now open for O Level & A Level classes";
 
 const TopBar = () => {
     return (
           <div className="w-full bg-slate-950 border-b border-white/5">
-                <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between gap-4">
+                <div className="max-w-[1920px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between gap-4">
                         <div className="flex-1 min-w-0 overflow-hidden">
                                   <div className="ticker-track flex items-center gap-16 whitespace-nowrap text-xs font-bold uppercase tracking-widest text-slate-300">
                                               <span className="flex items-center gap-2 shrink-0">

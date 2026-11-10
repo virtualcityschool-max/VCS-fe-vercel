@@ -16,7 +16,6 @@ const PUBLIC_LINKS = [
   { label: "Explore Courses", path: "/courses" },
   // A separate app behind the /mocks rewrite: a full page load, not a router link.
   { label: "Mock Exams", path: "/mocks", external: true, mocks: true },
-  { label: "Scholarships", path: "/scholarships" },
   { label: "Subject Guides", path: "/subjects", guides: true },
   { label: "Meet Our Tutors", path: "/teachers" },
   { label: "Mind Lab", path: "/mind-lab" },
@@ -72,7 +71,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
               : "border-white/5 bg-slate-950/50 backdrop-blur-xl"
           }`}
         >
-          <div className={`relative max-w-[1440px] mx-auto px-4 sm:px-6 flex justify-between items-center ${
+          <div className={`relative max-w-[1920px] mx-auto px-4 sm:px-6 flex justify-between items-center ${
             hideLogo ? "h-14 sm:h-16" : "h-20"
           }`}>
             <div className="flex items-center gap-4 sm:gap-12">
@@ -93,7 +92,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                 </div>
               )}
               {!hideLogo && (
-                <div className="hidden xl:flex items-center gap-5 2xl:gap-8">
+                <div className="hidden xl:flex items-center gap-4 2xl:gap-7">
                   {/* Real links (not buttons) so search engines can follow them. */}
                   {PUBLIC_LINKS.map((link) => {
                     const active = link.guides ? location.pathname.startsWith("/subjects") : isActivePath(link.path);
@@ -147,7 +146,8 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-4 shrink-0 ml-auto">
+            {/* Buttons stand apart from the links: a gap and a thin line between them. */}
+            <div className="flex items-center gap-1.5 sm:gap-4 shrink-0 ml-auto xl:ml-6 xl:pl-6 xl:border-l xl:border-white/10">
               <ThemeToggle className="sm:w-10 sm:h-10" />
               {!isLoggedIn ? (
                 <div id="nav-guest" className="flex items-center gap-1.5 sm:gap-5">
@@ -220,7 +220,7 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
   // Default variant (for authenticated views)
   return (
     <nav className="w-full bg-[#0f172a]/90 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-50">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 h-16 flex justify-between items-center">
         <div className="flex items-center gap-4 sm:gap-10 overflow-hidden">
           <div
             className="flex items-center gap-2 sm:gap-3 group cursor-pointer shrink-0"

@@ -112,7 +112,7 @@ const FivePillarsSection = () => {
     <div className="mb-20 md:mb-28">
       {/* No extra top margin here - the parent <section> in PublicHome
           already provides py-20 md:py-32, so this sits right after that. */}
-      <div className="max-w-[1440px] mx-auto">
+      <div className="max-w-[1920px] mx-auto">
         <Reveal className="text-center rounded-t-2xl rounded-b-sm px-8 py-8 sm:py-9 bg-gradient-to-b from-indigo-400/15 to-indigo-400/5 border border-indigo-400/25 border-b-[3px] border-b-indigo-400/40">
           <p className="text-sm font-black tracking-[0.32em] uppercase text-cyan-400 mb-2.5">
             Our Promise

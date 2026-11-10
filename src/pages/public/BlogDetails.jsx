@@ -110,7 +110,7 @@ const seoImage = found
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <article className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
+      <article className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         {/* Breadcrumb / back */}
         <Link
           to="/blogs"
@@ -255,7 +255,7 @@ const seoImage = found
 
       {/* Related */}
       {related.length > 0 && (
-        <section className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pb-24">
+        <section className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pb-24">
           <Reveal className="mb-8">
             <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-2">
               Keep Reading

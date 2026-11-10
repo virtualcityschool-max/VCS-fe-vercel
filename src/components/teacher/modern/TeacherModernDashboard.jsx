@@ -682,7 +682,7 @@ export const TeacherDashboard = ({
   if (activeTab === "evaluations") return renderEvaluationsView();
   if (activeTab === "blogs") return renderBlogsView();
   if (activeTab === "about") return renderAboutView();
-  return <div className="max-w-[1440px] mx-auto">
+  return <div className="max-w-[1920px] mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {
     /* ================= LEFT COLUMN (4 COLS) ================= */

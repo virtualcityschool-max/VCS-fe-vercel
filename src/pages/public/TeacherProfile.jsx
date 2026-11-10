@@ -409,7 +409,7 @@ const TeacherProfile = () => {
   if (loading && !teacherDetails) {
     return (
       <section className="min-h-screen bg-slate-950 text-white">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-12 sm:py-20 space-y-8 animate-pulse">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-12 sm:py-20 space-y-8 animate-pulse">
           {/* Header Skeleton */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 sm:p-10">
             <div className="flex flex-col lg:flex-row gap-8 lg:items-center">
@@ -603,7 +603,7 @@ const TeacherProfile = () => {
 
   return (
     <section id="teacher-profile-view" className="min-h-screen bg-slate-950 text-white">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-6">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -613,7 +613,7 @@ const TeacherProfile = () => {
         />
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-20">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 pb-20">
         {/* Header: photo, name, what they teach, key facts, booking */}
         <header className="rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-950/60 via-slate-900 to-slate-900 p-6 md:p-8 flex flex-col lg:flex-row gap-8">
           <div className="shrink-0 mx-auto lg:mx-0">

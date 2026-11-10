@@ -62,7 +62,7 @@ const AboutPage = () => {
       <section className="relative overflow-hidden border-b border-white/5 bg-gradient-to-br from-indigo-950 via-slate-950 to-slate-950">
         <div className="absolute -top-24 left-[5%] w-96 h-96 bg-cyan-500/10 rounded-full blur-[110px] pointer-events-none" />
         <div className="absolute -bottom-32 right-[10%] w-96 h-96 bg-violet-500/15 rounded-full blur-[110px] pointer-events-none" />
-        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-6 py-14 md:py-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
+        <div className="relative max-w-[1920px] mx-auto px-4 sm:px-6 py-14 md:py-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
           <div>
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-cyan-500/10 border border-cyan-500/25 rounded-full text-cyan-300 text-xs font-bold uppercase tracking-widest mb-6">
               <i className="fas fa-school" /> About Virtual City School
@@ -98,7 +98,7 @@ const AboutPage = () => {
         </div>
       </section>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-14 md:py-20 space-y-14">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-14 md:py-20 space-y-14">
         {/* Vision & Mission */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[

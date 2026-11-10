@@ -6,11 +6,13 @@ import {
   SCHOLARSHIP_DEGREES,
   SCHOLARSHIP_REGIONS,
   SCHOLARSHIP_COVERAGE_TYPES,
+  SCHOLARSHIP_AUDIENCES,
   filterScholarships,
 } from "../../data/scholarshipsData";
 import ScholarshipDetailModal from "./ScholarshipDetailModal";
 
 export default function ScholarshipFinderSection({ initialLimit = 6, showFullLink = true }) {
+  const [audience, setAudience] = useState("all");
   const [selectedDegree, setSelectedDegree] = useState("All Degrees");
   const [selectedRegion, setSelectedRegion] = useState("All Countries");
   const [coverageFilter, setCoverageFilter] = useState("All Funding");
@@ -23,9 +25,9 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
       region: selectedRegion,
       coverage: coverageFilter,
       search: searchQuery,
-      pakOnly: true,
+      audience,
     });
-  }, [selectedDegree, selectedRegion, coverageFilter, searchQuery]);
+  }, [audience, selectedDegree, selectedRegion, coverageFilter, searchQuery]);
 
   const displayedScholarships = initialLimit
     ? filteredScholarships.slice(0, initialLimit)
@@ -36,12 +38,12 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
       {/* Background ambient glow */}
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-3/4 max-w-4xl h-72 bg-gradient-to-r from-indigo-500/10 via-cyan-500/10 to-purple-500/10 blur-3xl rounded-full" />
 
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6">
+      <div className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6">
         {/* Section Header */}
         <Reveal className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-xs font-black uppercase tracking-[0.25em] text-indigo-400 mb-4">
             <i className="fas fa-graduation-cap text-cyan-400" />
-            Global Scholarships &amp; Pathways
+            Scholarships that open every year
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-poppins tracking-tight text-white mb-4">
             Find Scholarships by <span className="text-cyan-400">Country</span>,{" "}
@@ -49,8 +51,8 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
             <span className="text-emerald-400">Degree</span>
           </h2>
           <p className="text-slate-300 text-base md:text-lg leading-relaxed">
-            Curated opportunities for Cambridge O &amp; A Level graduates and university students in{" "}
-            <strong className="text-emerald-300 font-semibold">Pakistan and the Gulf</strong> &mdash; with verified eligibility criteria, coverage details, and upcoming deadlines.
+            {SCHOLARSHIPS_DATA.length} scholarships that run{" "}
+            <strong className="text-emerald-300 font-semibold">every year</strong>, for students in Pakistan and the Gulf, with the months they are usually open and a link to each official page. Dates move a little each year, so always check the official page before you apply.
           </p>
         </Reveal>
 
@@ -108,8 +110,29 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
             </div>
           </div>
 
-          {/* Degree Tabs */}
+          {/* Who it is for */}
           <div className="mt-4 pt-4 border-t border-white/5 flex flex-wrap items-center gap-2">
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mr-2">
+              I am:
+            </span>
+            {SCHOLARSHIP_AUDIENCES.map((a) => (
+              <button
+                key={a.key}
+                onClick={() => setAudience(a.key)}
+                aria-pressed={audience === a.key}
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-bold transition ${
+                  audience === a.key
+                    ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
+                    : "bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700/80 border border-slate-700/60"
+                }`}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Degree Tabs */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mr-2">
               Degree Level:
             </span>
@@ -145,6 +168,7 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
             <button
               onClick={() => {
                 setSelectedDegree("All Degrees");
+                setAudience("all");
                 setSelectedRegion("All Countries");
                 setCoverageFilter("All Funding");
                 setSearchQuery("");
@@ -155,7 +179,7 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
             {displayedScholarships.map((item, idx) => {
               const isClosingSoon = item.statusColor === "amber";
               const isFullyFunded = item.coverage === "Fully Funded";
@@ -178,10 +202,12 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
                         </span>
                       </div>
                       <span
-                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${
+                        className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
                           isClosingSoon
                             ? "bg-amber-500/15 border-amber-500/30 text-amber-300"
-                            : "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                            : item.statusColor === "emerald"
+                              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                              : "bg-slate-500/15 border-slate-500/30 text-slate-300"
                         }`}
                       >
                         {item.status}
@@ -202,7 +228,7 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
                     {/* Key Metrics Pills */}
                     <div className="grid grid-cols-2 gap-2 mb-4">
                       <div className="bg-slate-950/60 border border-slate-800 rounded-lg p-2.5">
-                        <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold block">
+                        <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold block">
                           Coverage
                         </span>
                         <span
@@ -214,8 +240,8 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
                         </span>
                       </div>
                       <div className="bg-slate-950/60 border border-slate-800 rounded-lg p-2.5">
-                        <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold block">
-                          Deadline
+                        <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold block">
+                          Usually open
                         </span>
                         <span className="text-xs font-bold text-amber-300 truncate block">
                           {item.lastDate}
@@ -228,7 +254,7 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
                       {item.degrees.map((d) => (
                         <span
                           key={d}
-                          className="px-2 py-0.5 rounded bg-slate-800 text-[11px] text-slate-300 font-medium"
+                          className="px-2 py-0.5 rounded bg-slate-800 text-xs text-slate-300 font-medium"
                         >
                           {d}
                         </span>
@@ -255,7 +281,7 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
                       className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition"
                     >
                       <span>View Criteria &amp; Details</span>
-                      <i className="fas fa-chevron-right text-[10px]" />
+                      <i className="fas fa-chevron-right text-xs" />
                     </button>
 
                     <a
@@ -264,8 +290,8 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
                       rel="noopener noreferrer"
                       className="px-3.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-white text-xs font-semibold flex items-center gap-1.5 transition"
                     >
-                      <span>Apply</span>
-                      <i className="fas fa-arrow-right text-[10px]" />
+                      <span>Official page</span>
+                      <i className="fas fa-arrow-right text-xs" />
                     </a>
                   </div>
                 </Reveal>
@@ -282,7 +308,7 @@ export default function ScholarshipFinderSection({ initialLimit = 6, showFullLin
               className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-cyan-600 hover:from-indigo-600 hover:to-cyan-500 text-white font-bold text-sm tracking-wide shadow-xl shadow-indigo-500/25 transition hover:-translate-y-0.5"
             >
               <i className="fas fa-globe-americas" />
-              <span>Explore All Verified International Scholarships ({SCHOLARSHIPS_DATA.length})</span>
+              <span>See all scholarships ({SCHOLARSHIPS_DATA.length})</span>
               <i className="fas fa-arrow-right text-xs" />
             </Link>
           </Reveal>

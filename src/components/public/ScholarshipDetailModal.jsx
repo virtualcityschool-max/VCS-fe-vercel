@@ -20,7 +20,7 @@ export default function ScholarshipDetailModal({ scholarship, onClose }) {
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/15 border border-amber-500/30 text-amber-300">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          {scholarship.status} ({scholarship.lastDate})
+          {scholarship.status} · usually {scholarship.lastDate}
         </span>
       );
     }
@@ -28,14 +28,14 @@ export default function ScholarshipDetailModal({ scholarship, onClose }) {
       return (
         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          {scholarship.status} &middot; Deadline: {scholarship.lastDate}
+          {scholarship.status} · usually {scholarship.lastDate}
         </span>
       );
     }
     return (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
         <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-        {scholarship.status} ({scholarship.lastDate})
+        {scholarship.status} · usually {scholarship.lastDate}
       </span>
     );
   };
@@ -101,7 +101,7 @@ export default function ScholarshipDetailModal({ scholarship, onClose }) {
             </div>
             <div>
               <p className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-1">
-                Deadline
+                Usually open
               </p>
               <p className="text-sm font-bold text-amber-300">
                 {scholarship.lastDate}

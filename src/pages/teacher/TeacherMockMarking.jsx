@@ -84,7 +84,7 @@ const TeacherMockMarking = () => {
   ];
 
   return (
-    <div className="max-w-[1440px] mx-auto">
+    <div className="max-w-[1920px] mx-auto">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-white">Mock Exams</h1>

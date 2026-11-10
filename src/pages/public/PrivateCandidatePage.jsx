@@ -68,7 +68,7 @@ const PrivateCandidatePage = () => {
 
   return (
     <main className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 overflow-x-hidden">
-      <article className="max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
+      <article className="max-w-[1920px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link><span>/</span>
           <span className="text-slate-300">Private candidates</span>

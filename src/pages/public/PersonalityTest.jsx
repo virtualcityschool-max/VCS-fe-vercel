@@ -530,7 +530,7 @@ const PersonalityTest = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <div ref={topRef} className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-10 md:pt-14 pb-24 scroll-mt-28">
+      <div ref={topRef} className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pt-10 md:pt-14 pb-24 scroll-mt-28">
         <nav aria-label="Breadcrumb" className="print-hide flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>

@@ -233,7 +233,7 @@ const TeacherMockScript = () => {
 
   if (error) {
     return (
-      <div className="max-w-[1440px] mx-auto py-10 text-center">
+      <div className="max-w-[1920px] mx-auto py-10 text-center">
         <p role="alert" className="text-base text-rose-200"><i className="fas fa-triangle-exclamation mr-2" aria-hidden="true" />{error}</p>
         <Link to="/teacher/mocks" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg border border-slate-700 px-4 text-sm font-semibold text-slate-200 hover:border-indigo-500">Back to scripts to mark</Link>
       </div>
@@ -241,7 +241,7 @@ const TeacherMockScript = () => {
   }
   if (!script) {
     return (
-      <div className="max-w-[1440px] mx-auto py-16 text-center" aria-busy="true">
+      <div className="max-w-[1920px] mx-auto py-16 text-center" aria-busy="true">
         <span className="mx-auto block h-8 w-8 rounded-full border-2 border-slate-700 border-t-indigo-400 animate-spin" aria-hidden="true" />
         <p className="mt-3 text-base text-slate-300">Opening the script…</p>
       </div>
@@ -249,7 +249,7 @@ const TeacherMockScript = () => {
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto">
+    <div className="max-w-[1920px] mx-auto">
       <Link to="/teacher/mocks" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white">
         <i className="fas fa-arrow-left" aria-hidden="true" /> Scripts to mark
       </Link>

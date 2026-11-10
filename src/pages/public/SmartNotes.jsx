@@ -53,7 +53,7 @@ const SmartNotes = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 blur-[150px] rounded-full animate-aurora" style={{ animationDelay: "-6s" }} />
       </div>
 
-      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
+      <div className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pt-12 md:pt-16 pb-24">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 mb-8">
           <Link to="/" className="hover:text-white transition">Home</Link>
           <span>/</span>

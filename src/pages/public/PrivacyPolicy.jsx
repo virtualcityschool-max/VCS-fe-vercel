@@ -43,7 +43,7 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen bg-[#020617] text-slate-300 font-sans pb-20">
       {/* Hero Section */}
       <div className="relative pt-20 pb-20 px-6 border-b border-white/5">
-        <div className="max-w-[1440px] mx-auto">
+        <div className="max-w-[1920px] mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
             <span className="text-xs font-bold tracking-[0.2em] text-indigo-400 uppercase">Compliance & Trust</span>
@@ -68,7 +68,7 @@ const PrivacyPolicy = () => {
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 mt-12">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* Sidebar Navigation */}

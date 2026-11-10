@@ -252,7 +252,7 @@ const TeacherAssignmentMarking = () => {
 
   if (loadError) {
     return (
-      <div className="max-w-[1440px] mx-auto p-6">
+      <div className="max-w-[1920px] mx-auto p-6">
         <p role="alert" className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-base text-rose-200">
           <i className="fas fa-triangle-exclamation mr-2" aria-hidden="true" />{loadError}{" "}
           <button type="button" onClick={load} className="font-semibold underline">Try again</button>
@@ -263,7 +263,7 @@ const TeacherAssignmentMarking = () => {
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6">
+    <div className="max-w-[1920px] mx-auto space-y-6">
       <BackLink />
 
       {/* The assignment */}

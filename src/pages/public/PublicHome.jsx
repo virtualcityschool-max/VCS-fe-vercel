@@ -26,7 +26,6 @@ import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
 import FivePillarsSection from "../../components/public/FivePillarsSection";
 import GlobalReachSection from "../../components/public/GlobalReachSection"; import FaqSection, { FAQ_ITEMS } from "../../components/public/FaqSection";
-import ScholarshipFinderSection from "../../components/public/ScholarshipFinderSection";
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -234,7 +233,7 @@ const PublicHome = () => {
       <div className="absolute inset-x-0 top-0 h-[720px] bg-grid pointer-events-none z-0" />
 
       {/* Hero Section */}
-      <section className="relative z-10 max-w-[1440px] mx-auto px-6 pt-10 md:pt-20">
+      <section className="relative z-10 max-w-[1920px] mx-auto px-6 pt-10 md:pt-20">
         {/* Row 1: Heading + Image */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-14">
           {/* Left: Badge + Heading */}
@@ -268,13 +267,13 @@ const PublicHome = () => {
                 Meet Our Tutors
                 <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
               </button>
-              <a
-                href="#scholarships"
+              <Link
+                to="/scholarships"
                 className="group px-7 py-4 border border-indigo-500/40 hover:border-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-200 hover:text-white rounded-xl font-bold text-sm tracking-wide transition-all hover:-translate-y-0.5 flex items-center gap-2.5"
               >
                 <i className="fas fa-graduation-cap text-cyan-400 group-hover:rotate-12 transition text-xs"></i>
                 Find Scholarships
-              </a>
+              </Link>
             </div>
 
             {/* Subtle scholarship entry - visible without scrolling */}
@@ -315,7 +314,7 @@ const PublicHome = () => {
         </div>
       </section>
 
-      <section className="relative z-10 max-w-[1440px] mx-auto px-6 py-12 md:py-16">
+      <section className="relative z-10 max-w-[1920px] mx-auto px-6 py-12 md:py-16">
         <FivePillarsSection />
         {/* Enrolled Courses Section - Only for logged-in students */}
         <DataPart>{auth.isLoggedIn &&
@@ -550,8 +549,6 @@ const PublicHome = () => {
           </div>
         </div>
 
-        {/* Global Scholarships Finder Section */}
-        <ScholarshipFinderSection initialLimit={6} showFullLink={true} />
 
         {/* Expert Tutors Section */}
         <div className="mt-16 md:mt-24 pb-20">

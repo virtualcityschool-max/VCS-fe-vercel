@@ -124,7 +124,7 @@ const Blogs = () => {
       </div>
       <div className="absolute inset-x-0 top-0 h-[420px] bg-grid pointer-events-none z-0" />
 
-      <section className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 pt-16 md:pt-24 pb-24">
+      <section className="relative z-10 max-w-[1920px] mx-auto px-4 sm:px-6 pt-16 md:pt-24 pb-24">
         {/* Header */}
         <div className="max-w-3xl mb-12">
           <p className="text-sm font-black uppercase tracking-[0.4em] text-indigo-500 mb-3 animate-fadeInUp">

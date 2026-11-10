@@ -79,19 +79,19 @@ const TeacherPaperReview = () => {
 
   if (error) {
     return (
-      <div className="max-w-[1440px] mx-auto p-10 text-center">
+      <div className="max-w-[1920px] mx-auto p-10 text-center">
         <p role="alert" className="text-rose-200">{error}</p>
         <Link to="/teacher/mocks?tab=reviews" className="mt-4 inline-block text-cyan-300 underline">Back to papers to review</Link>
       </div>
     );
   }
-  if (!review) return <div className="max-w-[1440px] mx-auto p-10 text-slate-300" aria-busy="true">Loading the paper…</div>;
+  if (!review) return <div className="max-w-[1920px] mx-auto p-10 text-slate-300" aria-busy="true">Loading the paper…</div>;
 
   const done = review.status === "done";
   const hod = review.role === "hod";
 
   return (
-    <div className="max-w-[1440px] mx-auto">
+    <div className="max-w-[1920px] mx-auto">
       <Link to="/teacher/mocks?tab=reviews" className="text-sm font-semibold text-slate-300 hover:text-white"><i className="fas fa-arrow-left mr-2" aria-hidden="true" />Papers to review</Link>
       <section className="mt-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-6">
         <p className="text-xs font-bold uppercase tracking-widest text-cyan-300">{hod ? "Final decision (HOD)" : "Paper review"} · {review.canEdit ? "you can edit marks" : "feedback only"}</p>

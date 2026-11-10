@@ -18,7 +18,7 @@ const CountryFaqSection = ({ items, kicker = "FAQ", heading = "Common Questions"
         </h2>
       </Reveal>
 
-      <div className="max-w-[1440px] mx-auto space-y-4">
+      <div className="max-w-[1920px] mx-auto space-y-4">
         {items.map((item, i) => {
           const open = openIndex === i;
           return (

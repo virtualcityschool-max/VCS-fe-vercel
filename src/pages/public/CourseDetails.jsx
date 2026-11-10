@@ -579,7 +579,7 @@ const CourseDetails = () => {
           <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[150px] rounded-full animate-pulse delay-1000"></div>
         </div>
 
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20 relative z-10">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-20 relative z-10">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <div className="relative">
@@ -609,7 +609,7 @@ const CourseDetails = () => {
           <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-red-600/10 blur-[120px] rounded-full animate-pulse"></div>
         </div>
 
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20 relative z-10">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-20 relative z-10">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center max-w-md">
               <div className="w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-red-500/20">
@@ -651,7 +651,7 @@ const CourseDetails = () => {
           <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] bg-slate-600/10 blur-[120px] rounded-full animate-pulse"></div>
         </div>
 
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20 relative z-10">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-20 relative z-10">
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center max-w-md">
               <div className="w-20 h-20 bg-slate-700/20 rounded-full flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-slate-500/20">
@@ -765,7 +765,7 @@ const CourseDetails = () => {
       </div>
 
       {/* Breadcrumb Navigation */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pt-6 pb-5 relative z-10">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 pt-6 pb-5 relative z-10">
         <BreadcrumbNavigation
           items={[
             { label: "Home", to: "/", icon: "fas fa-home" },
@@ -775,7 +775,7 @@ const CourseDetails = () => {
         />
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-20 relative z-10">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 pb-20 relative z-10">
         {/* Header: picture, title, key facts, price and enrol */}
         <header className="rounded-[1.5rem] border border-slate-700/50 bg-slate-800/40 backdrop-blur-xl p-5 md:p-6 flex flex-col lg:flex-row gap-6">
           {/* Thumbnails are designed artwork (2400×1260) with words on them: show them whole. */}

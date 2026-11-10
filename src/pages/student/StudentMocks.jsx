@@ -38,7 +38,7 @@ const StudentMocks = () => {
   }, [go]);
 
   return (
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-[1920px] mx-auto px-4 sm:px-6 py-8">
       <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-600/20 via-slate-900/60 to-slate-900/40 p-6 sm:p-10">
         <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">VCS Mock Exams</p>
         <h1 className="mt-2 text-3xl md:text-5xl font-bold text-white">Your Cambridge mocks</h1>
