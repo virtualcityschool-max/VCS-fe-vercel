@@ -35,6 +35,7 @@ export const CareerInterests = lazyPage(() => import("../pages/public/CareerInte
 export const EQSelfCheck = lazyPage(() => import("../pages/public/EQSelfCheck"));
 export const ReasoningTest = lazyPage(() => import("../pages/public/ReasoningTest"));
 export const AptitudePractice = lazyPage(() => import("../pages/public/AptitudePractice"));
+export const ScholarshipsPage = lazyPage(() => import("../pages/public/ScholarshipsPage"));
 
 // For src/main.jsx: the page component for a public path, to preload.
 export const PUBLIC_PAGES = [
@@ -56,6 +57,7 @@ export const PUBLIC_PAGES = [
   [/^\/private-candidate\/?$/, PrivateCandidatePage],
   [/^\/subjects\/?$/, SubjectGuidesIndex],
   [/^\/subjects\/[^/]+\/?$/, SubjectGuidePage],
+  [/^\/scholarships\/?$/, ScholarshipsPage],
   [/^\/mind-lab\/?$/, PlayArea],
   [/^\/mind-lab\/personality-test\/?$/, PersonalityTest],
   [/^\/mind-lab\/16-personalities\/?$/, SixteenPersonalities],

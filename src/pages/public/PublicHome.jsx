@@ -26,6 +26,7 @@ import TutorCard from "../../components/teachers/TutorCard";
 import BlogCard from "../../components/blogs/BlogCard";
 import FivePillarsSection from "../../components/public/FivePillarsSection";
 import GlobalReachSection from "../../components/public/GlobalReachSection"; import FaqSection, { FAQ_ITEMS } from "../../components/public/FaqSection";
+import ScholarshipFinderSection from "../../components/public/ScholarshipFinderSection";
 import Reveal from "../../components/ui/Reveal";
 import { toastManager } from "../../utils/toastManager";
 import { showApiError } from "../../utils/apiErrorHandler";
@@ -267,6 +268,13 @@ const PublicHome = () => {
                 Meet Our Tutors
                 <i className="fas fa-user-graduate group-hover:rotate-12 transition text-xs"></i>
               </button>
+              <a
+                href="#scholarships"
+                className="group px-7 py-4 border border-indigo-500/40 hover:border-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-200 hover:text-white rounded-xl font-bold text-sm tracking-wide transition-all hover:-translate-y-0.5 flex items-center gap-2.5"
+              >
+                <i className="fas fa-graduation-cap text-cyan-400 group-hover:rotate-12 transition text-xs"></i>
+                Find Scholarships
+              </a>
             </div>
 
             {/* Subtle scholarship entry - visible without scrolling */}
@@ -541,6 +549,9 @@ const PublicHome = () => {
             </div>
           </div>
         </div>
+
+        {/* Global Scholarships Finder Section */}
+        <ScholarshipFinderSection initialLimit={6} showFullLink={true} />
 
         {/* Expert Tutors Section */}
         <div className="mt-16 md:mt-24 pb-20">

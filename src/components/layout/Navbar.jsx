@@ -16,6 +16,7 @@ const PUBLIC_LINKS = [
   { label: "Explore Courses", path: "/courses" },
   // A separate app behind the /mocks rewrite: a full page load, not a router link.
   { label: "Mock Exams", path: "/mocks", external: true, mocks: true },
+  { label: "Scholarships", path: "/scholarships" },
   { label: "Subject Guides", path: "/subjects", guides: true },
   { label: "Meet Our Tutors", path: "/teachers" },
   { label: "Mind Lab", path: "/mind-lab" },

@@ -1,4 +1,4 @@
-const ANNOUNCEMENT = "Admissions are now open for O Level & A Level classes";
+const ANNOUNCEMENT = "Admissions open for Cambridge O & A Level · Global Scholarships Finder 2026–2027 live";
 
 const TopBar = () => {
     return (
