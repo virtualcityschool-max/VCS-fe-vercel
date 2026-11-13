@@ -1,4 +1,5 @@
 import axiosInstance from "../utils/axiosInstance";
+import { track } from "../utils/analytics";
 
 export const authService = {
   // Get current user profile
@@ -36,6 +37,7 @@ export const authService = {
   googleRegister: async (registerData) => {
     try {
       const response = await axiosInstance.post("/auth/google/register/", registerData);
+      track("sign_up", { method: "google", role: registerData?.role || "unknown" });
       return response.data;
     } catch (error) {
       console.error("Google Register error:", error);
@@ -133,6 +135,7 @@ export const authService = {
       );
 
       const response = await axiosInstance.post("/auth/register/", requestData);
+      track("sign_up", { method: "email", role: requestData.role || "unknown" });
 
       return {
         success: true,

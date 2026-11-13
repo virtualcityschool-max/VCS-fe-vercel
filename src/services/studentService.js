@@ -1,4 +1,5 @@
 import axiosInstance from "../utils/axiosInstance";
+import { track } from "../utils/analytics";
 
 export const studentService = {
   // Get student dashboard data
@@ -271,6 +272,7 @@ export const studentService = {
       const response = await axiosInstance.post(`/courses/enroll/`, {
         course_id: courseId,
       });
+      track("enrol_request", { course_id: String(courseId), enrol_type: "group" });
       return response.data;
     } catch (error) {
       console.error("Error enrolling in course:", error);
@@ -281,12 +283,14 @@ export const studentService = {
   // Normal enrollment
   enrollInCourseNormal: async (courseId) => {
     const response = await axiosInstance.post(`/courses/enroll/`, { course_id: courseId });
+    track("enrol_request", { course_id: String(courseId), enrol_type: "group" });
     return response.data;
   },
 
   // Initiate Gumroad checkout for a paid course
   initiateCheckout: async (courseId) => {
     const response = await axiosInstance.post(`/courses/${courseId}/initiate-checkout/`);
+    track("begin_checkout", { course_id: String(courseId) });
     return response.data;
   },
 
@@ -307,6 +311,7 @@ export const studentService = {
       `/courses/teachers/${teacherId}/enroll/`,
       body,
     );
+    track("enrol_request", { course_id: String(courseId), enrol_type: "private" });
     return response.data;
   },
 
