@@ -11,6 +11,9 @@ window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'AW-18418489308');
+// Google Analytics 4 (founder 2026-11-13): visits by source, incl. YouTube tracking links (utm_*).
+// page_location is captured now, before the app can change the address, so the utm tags are kept.
+gtag('config', 'G-NLMSH3HS5W', {page_location: location.href});
 (function () {
   var done = false, evs = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
   function loadTag() {
