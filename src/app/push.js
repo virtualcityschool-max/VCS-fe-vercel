@@ -20,6 +20,20 @@ function deviceLabel() {
   return `${os}${isInstalledApp() ? " app" : " browser"}`;
 }
 
+// The public key (or "not set up") is remembered for an hour on this device,
+// so dashboards don't ask the server on every visit.
+const KEY_CACHE = "vcs_push_key";
+async function serverKey() {
+  try {
+    const c = JSON.parse(sessionStorage.getItem(KEY_CACHE) || "null");
+    if (c && Date.now() - c.at < 3600e3) return c.key;
+  } catch { /* no cache */ }
+  const { data } = await axiosInstance.get("/classroom/push/key/").catch(() => ({ data: {} }));
+  const key = data?.key || "";
+  try { sessionStorage.setItem(KEY_CACHE, JSON.stringify({ key, at: Date.now() })); } catch { /* private mode */ }
+  return key;
+}
+
 async function registration() {
   if (!("serviceWorker" in navigator)) return null;
   return navigator.serviceWorker.getRegistration("/");
@@ -33,27 +47,25 @@ async function registration() {
  * "unavailable"  – server has no keys yet
  */
 export async function getReminderState() {
+  // Nothing to offer until the school has switched reminders on (server keys).
+  if (!(await serverKey())) return "unavailable";
   if (isIOS() && !isInstalledApp()) return "install-first";
   if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return "unsupported";
   if (Notification.permission === "denied") return "blocked";
   const reg = await registration();
   const sub = reg && (await reg.pushManager.getSubscription());
-  if (!sub) {
-    const { data } = await axiosInstance.get("/classroom/push/key/").catch(() => ({ data: {} }));
-    return data?.key ? "off" : "unavailable";
-  }
-  return "on";
+  return sub ? "on" : "off";
 }
 
 export async function enableReminders() {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return permission === "denied" ? "blocked" : "off";
-  const { data } = await axiosInstance.get("/classroom/push/key/");
-  if (!data?.key) return "unavailable";
+  const key = await serverKey();
+  if (!key) return "unavailable";
   const reg = (await registration()) || (await navigator.serviceWorker.register("/sw.js", { scope: "/" }));
   await navigator.serviceWorker.ready;
   let sub = await reg.pushManager.getSubscription();
-  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(data.key) });
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(key) });
   const json = sub.toJSON();
   await axiosInstance.post("/classroom/push/subscribe/", { endpoint: json.endpoint, keys: json.keys, device_label: deviceLabel() });
   return "on";
