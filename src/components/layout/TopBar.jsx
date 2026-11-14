@@ -18,10 +18,6 @@ const TopBar = () => {
                                   </div>
                         </div>
                         <div className="hidden sm:flex items-center gap-5 shrink-0 text-xs font-semibold text-slate-300">
-                                  <Link to="/download" className="flex items-center gap-1.5 text-cyan-300 hover:text-white transition">
-                                              <i className="fas fa-mobile text-cyan-400" />
-                                              Get the App
-                                  </Link>
                                   <a
                                                 href="https://wa.me/966556687417"
                                                 target="_blank"
@@ -40,9 +36,6 @@ const TopBar = () => {
                                   </a>
                         </div>
                         <div className="flex sm:hidden items-center gap-4 shrink-0">
-                                  <Link to="/download" aria-label="Get the App" className="text-xs font-semibold text-cyan-300">
-                                              App
-                                  </Link>
                                   <a href="https://wa.me/966556687417" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                                               <i className="fab fa-whatsapp text-emerald-400 text-sm" />
                                   </a>

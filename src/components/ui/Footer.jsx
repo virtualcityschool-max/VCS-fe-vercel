@@ -131,9 +131,6 @@ const Footer = ({ variant = "full" }) => {
                   <Link to="/private-candidate" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Private Candidate Registration</Link>
                 </li>
                 <li>
-                  <Link to="/download" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Get the App</Link>
-                </li>
-                <li>
                   <Link to="/mind-lab" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Mind Lab: Tests & Brain Games</Link>
                 </li>
                 <li>

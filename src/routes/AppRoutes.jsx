@@ -229,7 +229,8 @@ const AppRoutes = () => {
       <Route path="/online-o-level" element={<OnlineOLevelPage />} />
       <Route path="/online-a-level" element={<OnlineALevelPage />} />
       <Route path="/private-candidate" element={<PrivateCandidatePage />} />
-      <Route path="/download" element={<DownloadAppPage />} />
+      <Route path="/app" element={<DownloadAppPage />} />
+      <Route path="/download" element={<Navigate to="/app" replace />} />
       <Route path="/subjects" element={<SubjectGuidesIndex />} />
       <Route path="/subjects/:slug" element={<SubjectGuidePage />} />
       <Route path="/scholarships" element={<ScholarshipsPage />} />

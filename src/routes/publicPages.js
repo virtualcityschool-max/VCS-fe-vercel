@@ -56,7 +56,7 @@ export const PUBLIC_PAGES = [
   [/^\/online-o-level\/?$/, OnlineOLevelPage],
   [/^\/online-a-level\/?$/, OnlineALevelPage],
   [/^\/private-candidate\/?$/, PrivateCandidatePage],
-  [/^\/download\/?$/, DownloadAppPage],
+  [/^\/app\/?$/, DownloadAppPage],
   [/^\/subjects\/?$/, SubjectGuidesIndex],
   [/^\/subjects\/[^/]+\/?$/, SubjectGuidePage],
   [/^\/scholarships\/?$/, ScholarshipsPage],
