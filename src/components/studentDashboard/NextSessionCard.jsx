@@ -11,6 +11,7 @@ import { extractApiErrorMessage } from "../../utils/apiErrorHandler";
 import ConfirmDialog from "../common/ConfirmDialog";
 import SessionCountdown from "../common/SessionCountdown";
 import { canStudentJoin } from "../../utils/helper/StartSession";
+import { openMeet } from "../../utils/openMeet";
 
 const NextSessionCard = () => {
   const dispatch = useDispatch();
@@ -46,7 +47,7 @@ const NextSessionCard = () => {
         try {
           new URL(meetingLink);
           if (meetWin) meetWin.location.href = meetingLink;
-          else window.open(meetingLink, "_blank", "noopener,noreferrer");
+          else openMeet(meetingLink);
         } catch (_urlError) {
           meetWin?.close();
           toastManager.error("Invalid meeting link format");

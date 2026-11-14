@@ -7,8 +7,10 @@ import { store } from "./store";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { installChunkReloadHandlers } from "./utils/chunkReload";
 import { preloadPublicPage } from "./routes/publicPages";
+import { registerServiceWorker } from "./app/registerSW";
 
 installChunkReloadHandlers();
+registerServiceWorker();
 
 const app = (
   <StrictMode>

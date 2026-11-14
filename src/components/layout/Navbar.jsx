@@ -210,6 +210,13 @@ const Navbar = ({ variant = "default", hideLogo = false }) => {
                     {link.label}
                   </Link>
                 ))}
+                <Link
+                  to="/download"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-all text-cyan-300 hover:text-white hover:bg-white/5 border border-transparent"
+                >
+                  <i className="fas fa-mobile" aria-hidden="true" /> Get the App
+                </Link>
               </div>
             </div>
           )}

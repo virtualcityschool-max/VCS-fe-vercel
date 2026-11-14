@@ -39,6 +39,7 @@ const STATIC_PAGES = [
   { loc: "/online-o-level", changefreq: "monthly", lastmod: pageDate("/online-o-level") },
   { loc: "/online-a-level", changefreq: "monthly", lastmod: pageDate("/online-a-level") },
   { loc: "/private-candidate", changefreq: "monthly", lastmod: pageDate("/private-candidate") },
+  { loc: "/download", changefreq: "monthly", lastmod: pageDate("/download") },
   { loc: "/scholarships", changefreq: "weekly", lastmod: pageDate("/scholarships") },
   { loc: "/mind-lab", changefreq: "monthly", lastmod: pageDate("/mind-lab") },
   { loc: "/mind-lab/personality-test", changefreq: "monthly", lastmod: pageDate("/mind-lab/personality-test") },

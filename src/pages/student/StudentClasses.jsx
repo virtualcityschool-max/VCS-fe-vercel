@@ -14,6 +14,7 @@ import { useDateFormatters } from "../../hooks";
 import DigitalSessionClock from "../../components/common/DigitalSessionClock";
 import IssueInJoiningClassBanner from "../../components/common/IssueInJoiningClassBanner";
 import { canStudentJoin } from "../../utils/helper/StartSession";
+import { openMeet } from "../../utils/openMeet";
 
 const STATUS_COLORS = {
   scheduled: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -46,26 +47,26 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
     <div className="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden">
       <div className="divide-y divide-slate-800/40">
         {sorted.map((session) => (
-          <div key={session.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-800/20 transition">
+          <div key={session.id} className="flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-2 px-4 py-3 hover:bg-slate-800/20 transition">
             <div className={`w-0.5 h-10 rounded-full shrink-0 ${
               session.status === "live" ? "bg-emerald-400/70" :
               session.status === "ended" ? "bg-slate-500/50" : "bg-indigo-400/70"
             }`} />
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-[calc(100%-1.5rem)] sm:min-w-0">
               <p className="text-sm font-bold text-white truncate">{session.title}</p>
               <p className="text-xs text-slate-500 truncate mt-0.5">
                 {session.course?.title || session.course_title || "General"}
               </p>
             </div>
-            <div className="text-right shrink-0">
+            <div className="sm:text-right shrink-0">
               <p className="text-xs font-semibold text-slate-300 tabular-nums">
                 {formatTime(session.scheduled_at)} <TimezoneTag />
               </p>
-              <p className="hidden sm:block text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-400 mt-0.5">
                 {formatDate(session.scheduled_at)}
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0 ml-auto">
               {session.scheduled_at && session.status !== "ended" && session.status !== "cancelled" && (
                 <DigitalSessionClock
                   scheduledAt={session.scheduled_at}
@@ -82,7 +83,7 @@ const SessionListView = ({ sessions, formatTime, formatDate, onJoin, joiningId }
                 <button
                   onClick={() => onJoin(session)}
                   disabled={joiningId === session.id}
-                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
+                  className="px-4 py-1 min-h-[44px] sm:min-h-0 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-sm sm:text-xs flex items-center gap-1.5 transition shadow-sm cursor-pointer"
                 >
                   <i className="fas fa-video text-xs" />
                   <span>{joiningId === session.id ? "Entering..." : "Join"}</span>
@@ -122,14 +123,14 @@ const StudentClasses = () => {
       const result = await dispatch(joinLiveSession(sId)).unwrap();
       const link = result?.meeting_link || sessionToJoin.meeting_link;
       if (link && typeof link === "string" && link.startsWith("http")) {
-        window.open(link, "_blank", "noopener,noreferrer");
+        openMeet(link);
       } else {
         toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
       }
     } catch (err) {
       const fallbackLink = sessionToJoin.meeting_link;
       if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
-        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        openMeet(fallbackLink);
       } else {
         toastManager.error(
           typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."

@@ -95,6 +95,11 @@ axiosInstance.interceptors.request.use(
 // Add response interceptor for debugging and token refresh
 axiosInstance.interceptors.response.use(
   (response) => {
+    // Installed app: keep a copy of the upcoming classes for the offline page.
+    const cfg = response.config || {};
+    if ((cfg.method || "get") === "get" && /\/classroom\/sessions\/?$/.test(cfg.url || "") && !cfg.params?.page) {
+      import("../app/offlineTimetable").then((m) => m.saveTimetable(response.data)).catch(() => {});
+    }
     debugLog("✅ Response:", {
       status: response.status,
       statusText: response.statusText,

@@ -72,6 +72,8 @@ export const authStorage = {
     try {
       localStorage.removeItem(ACCESS_TOKEN_KEY);
       localStorage.removeItem(AUTH_USER_KEY);
+      // Signed out: forget this device's offline timetable and class reminders.
+      window.dispatchEvent(new Event("vcs-signed-out"));
     } catch (error) {
       console.error("Error clearing auth storage:", error);
     }

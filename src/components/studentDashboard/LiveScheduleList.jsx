@@ -21,6 +21,7 @@ import GmailNotice from "../common/GmailNotice";
 import IssueInJoiningClassBanner from "../common/IssueInJoiningClassBanner";
 import StudentSessionCard from "../sessions/StudentSessionCard";
 import { sizedImage } from "../../utils/imageCdn";
+import { openMeet } from "../../utils/openMeet";
 
 const tzToUTCMs = (dateStr, timeStr, tz) => {
   if (!tz) return new Date(`${dateStr}T${timeStr}`).getTime();
@@ -79,7 +80,7 @@ const LiveScheduleList = () => {
     try {
       new URL(link);
       if (win) win.location.href = link;
-      else window.open(link, "_blank", "noopener,noreferrer");
+      else openMeet(link);
     } catch {
       win?.close();
       toastManager.error("Invalid meeting link format");

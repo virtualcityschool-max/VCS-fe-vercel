@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#020617" />
+<title>You're offline | Virtual City School</title>
+<link rel="icon" href="/app-icons/icon-192.png" />
+<style>
+  :root { color-scheme: dark; --bg:#020617; --card:#0f172a; --line:#1e293b; --text:#e2e8f0; --muted:#94a3b8; --brand:#6366f1; --amber:#f59e0b; --emerald:#10b981; }
+  @media (prefers-color-scheme: light) { :root { color-scheme: light; --bg:#f8fafc; --card:#ffffff; --line:#e2e8f0; --text:#0f172a; --muted:#475569; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font: 16px/1.5 "SF Pro Display", -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+         padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  main { max-width:1920px; margin:0 auto; padding:24px 16px 40px; }
+  header { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  header img { width:44px; height:44px; border-radius:10px; }
+  h1 { font-size:28px; margin:0; }
+  .note { background:color-mix(in srgb, var(--amber) 14%, transparent); border-left:4px solid var(--amber); border-radius:12px; padding:12px 14px; margin:0 0 20px; }
+  h2 { font-size:20px; margin:24px 0 10px; }
+  .list { display:grid; gap:10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .row { background:var(--card); border:1px solid var(--line); border-left:4px solid var(--brand); border-radius:12px; padding:12px 14px; }
+  .row b { display:block; font-size:17px; }
+  .row span { color:var(--muted); font-size:14px; display:block; }
+  .when { color:var(--emerald) !important; font-weight:600; }
+  .muted { color:var(--muted); font-size:14px; }
+  button { margin-top:20px; min-height:44px; padding:0 20px; border:0; border-radius:12px; background:var(--brand); color:#fff; font:600 16px/1 inherit; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="/app-icons/icon-192.png" alt="" width="44" height="44" />
+    <h1>You're offline</h1>
+  </header>
+  <p class="note">No internet connection. Your classes, assignments and materials need the internet. Here is your timetable as it was last saved on this device. <b>Join class</b> works again once you're back online.</p>
+  <h2>Your upcoming classes</h2>
+  <div id="list" class="list"><p class="muted">Looking for your saved timetable…</p></div>
+  <p id="saved" class="muted"></p>
+  <button type="button" onclick="location.reload()">Try again</button>
+</main>
+<script>
+(function () {
+  var list = document.getElementById("list"), saved = document.getElementById("saved");
+  function empty(msg) { list.innerHTML = ""; var p = document.createElement("p"); p.className = "muted"; p.textContent = msg; list.appendChild(p); }
+  function fmt(iso, opts) { try { return new Date(iso).toLocaleString(undefined, opts); } catch (e) { return iso; } }
+  if (!window.indexedDB) return empty("No saved timetable on this device.");
+  var req = indexedDB.open("vcs-app", 1);
+  req.onupgradeneeded = function () { req.result.createObjectStore("timetable", { keyPath: "userId" }); };
+  req.onerror = function () { empty("No saved timetable on this device."); };
+  req.onsuccess = function () {
+    var db = req.result, all = db.transaction("timetable").objectStore("timetable").getAll();
+    all.onsuccess = function () {
+      var rec = all.result && all.result[0];
+      var now = Date.now();
+      var rows = rec ? rec.rows.filter(function (r) { return Date.parse(r.end || r.start) > now; }) : [];
+      if (!rows.length) return empty(rec ? "No more classes in your saved timetable." : "No saved timetable yet. Open your dashboard once while online and it will be saved here.");
+      list.innerHTML = "";
+      rows.forEach(function (r) {
+        var d = document.createElement("div"); d.className = "row";
+        var b = document.createElement("b"); b.textContent = r.title; d.appendChild(b);
+        var w = document.createElement("span"); w.className = "when";
+        w.textContent = fmt(r.start, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }); d.appendChild(w);
+        var extra = [r.course !== r.title ? r.course : "", r.teacher].filter(Boolean).join(" · ");
+        if (extra) { var e = document.createElement("span"); e.textContent = extra; d.appendChild(e); }
+        list.appendChild(d);
+      });
+      saved.textContent = "Last updated " + fmt(rec.savedAt, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }) + ". Times are in this device's time zone.";
+    };
+  };
+  addEventListener("online", function () { location.reload(); });
+})();
+</script>
+</body>
+</html>

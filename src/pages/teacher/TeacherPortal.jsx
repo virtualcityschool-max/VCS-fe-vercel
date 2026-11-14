@@ -25,6 +25,7 @@ import {  isSessionExpired } from "../../utils/helper/StartSession";
 
 // Modernized AI Studio Teacher Components
 import { TeacherDashboard as TeacherModernDashboard } from "../../components/teacher/modern/TeacherModernDashboard";
+import ClassRemindersCard from "../../components/common/ClassRemindersCard";
 import {
   PostAnnouncementModal,
   ScheduleSessionModal,
@@ -35,6 +36,7 @@ import {
   AdvancedQuizBuilderModal,
 } from "../../components/teacher/modern/AssignmentQuizModals";
 import { ReviewQuizModal } from "../../components/teacher/modern/ReviewQuizModal";
+import { openMeet } from "../../utils/openMeet";
 
 // Top-level Unified Timezone Mapping (Finding R2-9)
 const TZ_IANA_MAP = { AST: "Asia/Riyadh", PKT: "Asia/Karachi", BST: "Europe/London" };
@@ -432,7 +434,7 @@ const TeacherPortal = () => {
       }
       const link = raw?.meeting_link || session?.meetLink;
       if (link && link.startsWith("http")) {
-        window.open(link, "_blank", "noopener,noreferrer");
+        openMeet(link);
         return true;
       }
       toastManager.error("No valid meeting link found for this slot");
@@ -449,7 +451,7 @@ const TeacherPortal = () => {
         const meetingLink = result?.meeting_link || raw?.meeting_link || session?.meetLink;
         if (meetingLink && meetingLink.startsWith("http")) {
           if (meetWin) meetWin.location.href = meetingLink;
-          else window.open(meetingLink, "_blank", "noopener,noreferrer");
+          else openMeet(meetingLink);
           await dispatch(fetchTeacherDashboard()).unwrap();
           return true;
         } else {
@@ -485,7 +487,7 @@ const TeacherPortal = () => {
         try {
           new URL(meetingLink);
           if (meetWin) meetWin.location.href = meetingLink;
-          else window.open(meetingLink, "_blank", "noopener,noreferrer");
+          else openMeet(meetingLink);
           await dispatch(fetchTeacherDashboard()).unwrap();
           return true;
         } catch {
@@ -502,7 +504,7 @@ const TeacherPortal = () => {
       // Never keep a teacher out of a class that is already running
       if (alreadyLive && fallbackLink && fallbackLink.startsWith("http")) {
         if (meetWin) meetWin.location.href = fallbackLink;
-        else window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        else openMeet(fallbackLink);
         showApiError(err);
         return true;
       }
@@ -852,6 +854,9 @@ const TeacherPortal = () => {
 
   return (
     <div className="w-full">
+      <div className="px-4 pt-4 sm:px-6 empty:hidden max-w-xl">
+        <ClassRemindersCard />
+      </div>
       <TeacherModernDashboard
         activeTab={activeTab}
         onSelectTab={handleSelectTab}

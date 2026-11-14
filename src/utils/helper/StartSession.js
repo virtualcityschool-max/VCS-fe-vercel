@@ -1,3 +1,4 @@
+import { openMeet } from "../openMeet";
 
 const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
@@ -91,7 +92,7 @@ const DAY_MAP = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
       return false;
     }
     if (meeting_link) {
-      window.open(meeting_link, "_blank", "noopener,noreferrer");
+      openMeet(meeting_link);
       return true;
     }
     return false;

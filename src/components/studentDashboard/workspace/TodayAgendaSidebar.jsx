@@ -15,6 +15,7 @@ import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import { isWithinSessionWindow, isSessionExpired, getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
 import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
+import { openMeet } from "../../../utils/openMeet";
 
 const TodayAgendaSidebar = ({
   onOpenSubmitModal,
@@ -108,7 +109,7 @@ const TodayAgendaSidebar = ({
       const result = await dispatch(joinLiveSession(sId)).unwrap();
       const link = result?.meeting_link || sessionToJoin.meeting_link;
       if (link && typeof link === "string" && link.startsWith("http")) {
-        window.open(link, "_blank", "noopener,noreferrer");
+        openMeet(link);
       } else {
         toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
       }
@@ -120,7 +121,7 @@ const TodayAgendaSidebar = ({
       }
       const fallbackLink = sessionToJoin.meeting_link;
       if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
-        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        openMeet(fallbackLink);
       } else {
         toastManager.error(
           typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."
@@ -180,8 +181,8 @@ const TodayAgendaSidebar = ({
                   key={sId}
                   className="p-3 rounded-xl border transition flex flex-col gap-2 bg-emerald-950/20 border-emerald-500/30 shadow-md shadow-emerald-950/20"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1 basis-full xl:basis-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         <span className="text-xs font-mono font-bold text-indigo-300 truncate">
@@ -196,7 +197,7 @@ const TodayAgendaSidebar = ({
                       </p>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-1.5">
+                    <div className="shrink-0 flex flex-wrap items-center gap-1.5">
                       {session.scheduled_at && (
                         <DigitalSessionClock
                           scheduledAt={session.scheduled_at}

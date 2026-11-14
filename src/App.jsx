@@ -175,7 +175,7 @@ const AppInner = () => {
       {/* Mobile overlay */}
       {hasSidebar && isSidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[58]"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -193,10 +193,13 @@ const AppInner = () => {
           </header>
         )}
 
-        {/* Floating mobile hamburger (sidebar roles only) */}
+        {/* Floating mobile hamburger (sidebar roles only). Above the top
+            menu bar (z-50), which hid it for students and guardians. */}
         {hasSidebar && !isAdminArea && (
           <button
-            className={`lg:hidden fixed top-4 left-4 z-40 w-10 h-10 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition shadow-lg ${
+            type="button"
+            aria-label="Open menu"
+            className={`lg:hidden fixed top-1.5 left-3 z-[55] w-11 h-11 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition shadow-lg ${
               isSidebarOpen ? "hidden" : ""
             }`}
             onClick={() => setIsSidebarOpen(true)}

@@ -28,7 +28,7 @@ export const IssueInJoiningClassBanner = ({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 hover:text-white text-xs font-bold transition-all shadow-lg animate-pulse cursor-pointer group ${className}`}
+          className={`inline-flex items-center gap-2 px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/40 text-rose-300 hover:text-white text-xs font-bold transition-all shadow-lg animate-pulse cursor-pointer group ${className}`}
           title="Troubleshoot Google Meet, Chrome login, 20-min window, or timezone issues"
         >
           <span className="relative flex h-2 w-2 shrink-0">

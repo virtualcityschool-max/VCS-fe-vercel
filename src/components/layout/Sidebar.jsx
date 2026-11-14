@@ -408,7 +408,7 @@ const Sidebar = ({
 
   return (
     <aside className={`
-      bg-slate-950 border-r border-slate-800/80 flex flex-col fixed h-full z-50
+      bg-slate-950 border-r border-slate-800/80 flex flex-col fixed h-full z-[60]
       transition-all duration-300 ease-in-out
       lg:translate-x-0
       ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}

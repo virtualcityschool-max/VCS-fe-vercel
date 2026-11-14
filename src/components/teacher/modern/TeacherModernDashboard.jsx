@@ -40,6 +40,7 @@ import { TeachingResourcesView } from "./TeachingResourcesView";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import { SessionTroubleshootModal } from "../../common/SessionTroubleshootModal";
 import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
+import { openMeet } from "../../../utils/openMeet";
 export const TeacherDashboard = ({
   activeTab,
   onSelectTab,
@@ -788,8 +789,8 @@ export const TeacherDashboard = ({
                       key={ses.id}
                       className="p-4 rounded-xl bg-[#0C0F1D] border border-[#1B223B] hover:border-emerald-500/40 transition-all space-y-3"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
+                      <div className="flex flex-wrap sm:flex-nowrap items-start justify-between gap-3">
+                        <div className="min-w-0 basis-full sm:basis-auto">
                           <div className="text-sm font-bold text-white leading-snug">
                             {ses.title}
                           </div>
@@ -811,7 +812,7 @@ export const TeacherDashboard = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-[#151B30]">
                         <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
                           <span className={`w-2 h-2 rounded-full ${canEnter ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
                           <span className={canEnter ? "text-emerald-300 font-semibold" : "text-slate-400"}>
@@ -839,14 +840,14 @@ export const TeacherDashboard = ({
                                 if (onStartSession) {
                                   ok = await onStartSession(ses);
                                 } else if (ses.meetLink) {
-                                  window.open(ses.meetLink, "_blank", "noopener,noreferrer");
+                                  openMeet(ses.meetLink);
                                   ok = true;
                                 }
                                 if (ok) {
                                   setLaunchedSessionId(ses.id);
                                 }
                               }}
-                              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                              className={`px-3.5 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-sm sm:text-xs font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                                 isLaunched
                                   ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                                   : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-900/30"
@@ -973,14 +974,14 @@ export const TeacherDashboard = ({
                               if (onStartSession) {
                                 ok = await onStartSession(ses);
                               } else if (ses.meetLink) {
-                                window.open(ses.meetLink, "_blank", "noopener,noreferrer");
+                                openMeet(ses.meetLink);
                                 ok = true;
                               }
                               if (ok) {
                                 setLaunchedSessionId(ses.id);
                               }
                             }}
-                            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                            className={`px-3 py-1 min-h-[44px] sm:min-h-0 rounded-lg text-sm sm:text-xs font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                               isLaunched ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-indigo-600 hover:bg-indigo-500 text-white"
                             }`}
                           >
