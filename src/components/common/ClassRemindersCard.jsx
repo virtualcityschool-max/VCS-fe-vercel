@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Bell, BellOff, Download } from "lucide-react";
+import { isInstalledApp } from "../../app/registerSW";
 
 // "Turn on class reminders" — a push notification 15 minutes before each class.
 // Asks the browser for permission only when the button is tapped.
@@ -7,7 +8,9 @@ import { Bell, BellOff, Download } from "lucide-react";
 const DISMISS_KEY = "vcs_reminders_card_dismissed";
 
 export default function ClassRemindersCard({ compact = true }) {
-  const [state, setState] = useState("loading");
+  // Hidden on the website until the founder has tested the app; shown only
+  // inside the installed app (opened from the Home Screen / Dock).
+  const [state, setState] = useState(() => (isInstalledApp() ? "loading" : "unavailable"));
   const [busy, setBusy] = useState(false);
   const [dismissed, setDismissed] = useState(() => {
     try { return compact && localStorage.getItem(DISMISS_KEY) === "1"; } catch { return false; }
@@ -15,6 +18,7 @@ export default function ClassRemindersCard({ compact = true }) {
 
   useEffect(() => {
     let live = true;
+    if (!isInstalledApp()) return undefined;
     import("../../app/push")
       .then((m) => m.getReminderState())
       .then((s) => live && setState(s))
@@ -66,7 +70,7 @@ export default function ClassRemindersCard({ compact = true }) {
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {state === "install-first" && (
-              <a href="/download" className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-500">
+              <a href="/app" className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-indigo-600 px-4 text-sm font-semibold text-white hover:bg-indigo-500">
                 <Download size={16} aria-hidden /> Get the app
               </a>
             )}

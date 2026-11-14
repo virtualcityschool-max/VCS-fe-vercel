@@ -5,12 +5,12 @@ import { useSeo } from "../../hooks/useSeo";
 import { SITE_URL } from "../../data/examDates";
 import { isInstalledApp } from "../../app/registerSW";
 
-// /download — "Get the App": install the VCS portal as an app on iPhone, iPad,
+// /app — "Get the App": install the VCS portal as an app on iPhone, iPad,
 // Android, Mac and Windows (it is the same portal, installed from the browser;
 // no app store). The device is detected after the page loads, so the
 // pre-built HTML (and Google) see every set of steps.
 
-const PAGE_URL = `${SITE_URL}/download`;
+const PAGE_URL = `${SITE_URL}/app`;
 const MEET_IOS = "https://apps.apple.com/app/google-meet/id1096918571";
 const MEET_ANDROID = "https://play.google.com/store/apps/details?id=com.google.android.apps.tachyon";
 
@@ -144,6 +144,8 @@ const DownloadAppPage = () => {
     title: "Get the VCS App – iPhone, iPad, Android & Mac | Virtual City School",
     description: "Install the free Virtual City School app on iPhone, iPad, Android, Mac or Windows: join live O Level and A Level classes, get class reminders and see your timetable offline. Same login as the website.",
     url: PAGE_URL,
+    // Hidden until the founder has tested the app: not linked, not in the sitemap.
+    noindex: true,
     jsonLd: [
       {
         "@type": "HowTo",

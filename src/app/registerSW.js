@@ -37,7 +37,7 @@ function showUpdateBar(worker) {
 
 export function registerServiceWorker() {
   // Chrome/Edge/Android offer "Install" through this event; keep it for the
-  // Install button on /download (it may fire before the visitor gets there).
+  // Install button on /app (it may fire before the visitor gets there).
   addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     window.__vcsInstallPrompt = e;
