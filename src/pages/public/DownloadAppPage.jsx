@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { Smartphone, Tablet, Laptop, Download, Bell, WifiOff, Video, CheckCircle2, ShieldCheck, Share, PlusSquare, MoreVertical, Info } from "lucide-react";
 import { useSeo } from "../../hooks/useSeo";
@@ -95,6 +95,16 @@ function detectDevice() {
   return "android";
 }
 
+// Device, "already installed" and "can install" come from the browser. The
+// pre-built page (and the first client render, which must match it) has none
+// of them, so the server snapshot is empty; the real values follow at once.
+const SERVER_ENV = "||";
+const subscribeEnv = (cb) => {
+  addEventListener("vcs-install-ready", cb);
+  return () => removeEventListener("vcs-install-ready", cb);
+};
+const readEnv = () => `${detectDevice()}|${isInstalledApp() ? 1 : ""}|${window.__vcsInstallPrompt ? 1 : ""}`;
+
 const MeetButton = ({ href, store, label }) => (
   <a href={href} target="_blank" rel="noopener noreferrer"
     className="theme-keep inline-flex min-h-[52px] items-center gap-3 rounded-xl border border-white/15 bg-black px-4 py-2 text-white hover:border-white/40 transition">
@@ -111,22 +121,14 @@ const MeetButton = ({ href, store, label }) => (
 );
 
 const DownloadAppPage = () => {
-  const [device, setDevice] = useState(null);
-  const [tab, setTab] = useState("iphone");
-  const [installed, setInstalled] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
+  const [envDevice, envInstalled, envCanInstall] = useSyncExternalStore(subscribeEnv, readEnv, () => SERVER_ENV).split("|");
+  const device = envDevice || null;
+  const installed = Boolean(envInstalled);
+  const [chosenTab, setTab] = useState(null);
+  const tab = chosenTab || device || "iphone";
+  const [installDone, setInstallDone] = useState(false);
+  const canInstall = Boolean(envCanInstall) && !installDone;
   const [installMsg, setInstallMsg] = useState("");
-
-  useEffect(() => {
-    const d = detectDevice();
-    setDevice(d);
-    setTab(d);
-    setInstalled(isInstalledApp());
-    const sync = () => setCanInstall(Boolean(window.__vcsInstallPrompt));
-    sync();
-    addEventListener("vcs-install-ready", sync);
-    return () => removeEventListener("vcs-install-ready", sync);
-  }, []);
 
   const install = async () => {
     const ev = window.__vcsInstallPrompt;
@@ -134,7 +136,7 @@ const DownloadAppPage = () => {
     ev.prompt();
     const { outcome } = await ev.userChoice.catch(() => ({ outcome: "dismissed" }));
     window.__vcsInstallPrompt = null;
-    setCanInstall(false);
+    setInstallDone(true);
     setInstallMsg(outcome === "accepted" ? "Installing… VCS will appear with your apps." : "No problem: you can install it any time from this page.");
   };
 
@@ -199,13 +201,13 @@ const DownloadAppPage = () => {
         </header>
 
         <section className="mb-14 grid sm:grid-cols-2 xl:grid-cols-4 gap-4" aria-label="What the app does">
-          {FEATURES.map(({ icon: Icon, title, text }) => (
+          {FEATURES.map(({ icon, title, text }) => { const Icon = icon; return (
             <div key={title} className="rounded-2xl border border-white/10 border-t-4 border-t-indigo-500 bg-white/[0.04] p-5">
               <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-200 mb-3"><Icon className="w-5 h-5" aria-hidden="true" /></span>
               <h2 className="text-lg font-bold mb-1">{title}</h2>
               <p className="text-base text-slate-300 leading-relaxed">{text}</p>
             </div>
-          ))}
+          );})}
         </section>
 
         <section id="steps" className="mb-14 scroll-mt-24">
@@ -226,7 +228,7 @@ const DownloadAppPage = () => {
 
           <div role="tabpanel" className={`rounded-3xl border ${a.ring} ${a.bg} p-5 md:p-8`}>
             <ol className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              {current.steps.map(({ icon: Icon, text }, i) => (
+              {current.steps.map(({ icon, text }, i) => { const Icon = icon; return (
                 <li key={i} className="rounded-2xl border border-white/10 bg-slate-950/60 p-5">
                   <div className="flex items-center gap-3 mb-3">
                     <span className={`inline-flex w-10 h-10 items-center justify-center rounded-full ${a.icon}`}><Icon className="w-5 h-5" aria-hidden="true" /></span>
@@ -234,7 +236,7 @@ const DownloadAppPage = () => {
                   </div>
                   <p className="text-base text-slate-200 leading-relaxed">{text}</p>
                 </li>
-              ))}
+              );})}
             </ol>
             {current.note && (
               <p className="mt-5 flex items-start gap-2 text-base text-slate-200"><Info className="w-5 h-5 mt-0.5 shrink-0 text-amber-300" aria-hidden="true" /> {current.note}</p>

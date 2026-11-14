@@ -173,7 +173,7 @@ const ChildCard = ({ child }) => {
           {child.courses?.length > 0 && (
             <button
               onClick={() => navigate(`/parent/child/${child.id}`)}
-              className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="inline-flex items-center min-h-[44px] px-2 -mx-2 text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
             >
               View Detail <i className="fas fa-arrow-right text-[7px] ml-1"></i>
             </button>
@@ -250,7 +250,7 @@ const ChildCard = ({ child }) => {
             {upcomingSlots.length > 0 && (
               <button
                 onClick={() => navigate(`/parent/child/${child.id}`)}
-                className="text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="inline-flex items-center min-h-[44px] px-2 -mx-2 text-xs font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 transition-colors"
               >
                 View Detail <i className="fas fa-arrow-right text-[7px] ml-1"></i>
               </button>

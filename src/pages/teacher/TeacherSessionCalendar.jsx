@@ -615,7 +615,7 @@ const TeacherSessionCalendar = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={() => recordStart(s)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
+                          className="px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-sm sm:text-xs font-semibold flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
                         >
                           <i className="fas fa-video"></i> Join Meet
                         </a>
@@ -689,7 +689,7 @@ const TeacherSessionCalendar = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => recordStart(s)}
-                              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm"
+                              className="px-3 py-1.5 min-h-[44px] sm:min-h-0 rounded-lg text-sm sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm"
                             >
                               <i className="fas fa-video"></i> Join Meet
                             </a>
