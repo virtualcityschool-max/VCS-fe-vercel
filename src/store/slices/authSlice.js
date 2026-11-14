@@ -246,6 +246,9 @@ export const logoutUser = createAsyncThunk(
   async (_, { dispatch }) => {
     let backendLogoutSuccess = false;
 
+    // Stop class reminders on this device while the sign-in is still valid.
+    await import("../../app/push").then((m) => m.disableReminders()).catch(() => {});
+
     try {
       const result = await authService.logout();
       backendLogoutSuccess = result.backendLogoutSuccess;

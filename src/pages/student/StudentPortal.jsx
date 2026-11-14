@@ -27,6 +27,7 @@ import {
 } from "../../components/studentDashboard/workspace";
 import StudentAssessments from "./StudentAssessments";
 import TimezoneModal from "../../components/common/TimezoneModal";
+import ClassRemindersCard from "../../components/common/ClassRemindersCard";
 
 const VALID_TABS = [
   "overview",
@@ -182,6 +183,7 @@ const StudentPortal = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column (4 Columns): Student Workspace Card + Today's Live Classes + Upcoming Deadlines + Financial Status + Quick Actions + Invite & Refer */}
           <div className="lg:col-span-4 space-y-6 animate-fadeInUp">
+            <ClassRemindersCard />
             <TodayAgendaSidebar
               onOpenSubmitModal={(asg) => setSubmittingAssignment(asg)}
               onRequestLeave={() => setIsLeaveModalOpen(true)}

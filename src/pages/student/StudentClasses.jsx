@@ -14,6 +14,7 @@ import { useDateFormatters } from "../../hooks";
 import DigitalSessionClock from "../../components/common/DigitalSessionClock";
 import IssueInJoiningClassBanner from "../../components/common/IssueInJoiningClassBanner";
 import { canStudentJoin } from "../../utils/helper/StartSession";
+import { openMeet } from "../../utils/openMeet";
 
 const STATUS_COLORS = {
   scheduled: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -122,14 +123,14 @@ const StudentClasses = () => {
       const result = await dispatch(joinLiveSession(sId)).unwrap();
       const link = result?.meeting_link || sessionToJoin.meeting_link;
       if (link && typeof link === "string" && link.startsWith("http")) {
-        window.open(link, "_blank", "noopener,noreferrer");
+        openMeet(link);
       } else {
         toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
       }
     } catch (err) {
       const fallbackLink = sessionToJoin.meeting_link;
       if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
-        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        openMeet(fallbackLink);
       } else {
         toastManager.error(
           typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."

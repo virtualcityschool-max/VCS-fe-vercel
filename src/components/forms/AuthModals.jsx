@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { isInstalledApp } from "../../app/registerSW";
 import { toastManager } from "../../utils/toastManager";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
@@ -31,7 +32,17 @@ import { COUNTRIES, DIAL_CODES, joinPhone } from "../../utils/countries";
 const isChildEmail  = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const isChildRollNo = (v) => /^\d+$/.test(v);
 
+const APP_HINT_KEY = "vcs_app_login_hint_seen";
+
 const AuthModals = () => {
+  // Installed app on a phone has its own storage, so people sign in once more
+  // after installing: tell them so, the first time only.
+  const [showAppHint] = useState(() => {
+    try { return isInstalledApp() && !localStorage.getItem(APP_HINT_KEY); } catch { return false; }
+  });
+  useEffect(() => {
+    if (showAppHint) try { localStorage.setItem(APP_HINT_KEY, "1"); } catch { /* private mode */ }
+  }, [showAppHint]);
   const [activeRoleTab, setActiveRoleTab] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -895,6 +906,12 @@ const AuthModals = () => {
                 {adminMode ? "Admin portal access only" : "Access your learning terminal"}
               </p>
             </div>
+
+            {!adminMode && showAppHint && (
+              <p role="note" className="mb-6 rounded-2xl border-l-4 border-indigo-400 bg-indigo-500/10 px-4 py-3 text-sm text-slate-200">
+                <strong className="text-indigo-300 font-semibold">First time in the app?</strong> Sign in with your usual VCS email and password.
+              </p>
+            )}
 
             {!adminMode && (
               <div className="flex bg-slate-950 p-1.5 rounded-2xl border border-white/5 mb-6">

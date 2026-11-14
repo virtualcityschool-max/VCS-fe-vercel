@@ -40,6 +40,7 @@ import { TeachingResourcesView } from "./TeachingResourcesView";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import { SessionTroubleshootModal } from "../../common/SessionTroubleshootModal";
 import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
+import { openMeet } from "../../../utils/openMeet";
 export const TeacherDashboard = ({
   activeTab,
   onSelectTab,
@@ -839,7 +840,7 @@ export const TeacherDashboard = ({
                                 if (onStartSession) {
                                   ok = await onStartSession(ses);
                                 } else if (ses.meetLink) {
-                                  window.open(ses.meetLink, "_blank", "noopener,noreferrer");
+                                  openMeet(ses.meetLink);
                                   ok = true;
                                 }
                                 if (ok) {
@@ -973,7 +974,7 @@ export const TeacherDashboard = ({
                               if (onStartSession) {
                                 ok = await onStartSession(ses);
                               } else if (ses.meetLink) {
-                                window.open(ses.meetLink, "_blank", "noopener,noreferrer");
+                                openMeet(ses.meetLink);
                                 ok = true;
                               }
                               if (ok) {

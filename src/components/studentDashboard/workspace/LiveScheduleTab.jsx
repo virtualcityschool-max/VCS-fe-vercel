@@ -12,6 +12,7 @@ import { toastManager } from "../../../utils/toastManager";
 import DigitalSessionClock from "../../common/DigitalSessionClock";
 import IssueInJoiningClassBanner from "../../common/IssueInJoiningClassBanner";
 import { getSessionPhase, isSessionOver } from "../../../utils/helper/StartSession";
+import { openMeet } from "../../../utils/openMeet";
 
 const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
   const dispatch = useDispatch();
@@ -98,14 +99,14 @@ const LiveScheduleTab = ({ onOpenWeeklyPlanner }) => {
       const result = await dispatch(joinLiveSession(sId)).unwrap();
       const link = result?.meeting_link || sessionToJoin.meeting_link;
       if (link && typeof link === "string" && link.startsWith("http")) {
-        window.open(link, "_blank", "noopener,noreferrer");
+        openMeet(link);
       } else {
         toastManager.error("Google Meet link not available yet. Please notify admin or faculty.");
       }
     } catch (err) {
       const fallbackLink = sessionToJoin.meeting_link;
       if (fallbackLink && typeof fallbackLink === "string" && fallbackLink.startsWith("http")) {
-        window.open(fallbackLink, "_blank", "noopener,noreferrer");
+        openMeet(fallbackLink);
       } else {
         toastManager.error(
           typeof err === "string" ? err : err?.message || "Failed to join session. Meet link unavailable."

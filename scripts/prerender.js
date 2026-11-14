@@ -95,7 +95,7 @@ async function buildRouteList() {
     ...COUNTRY_LANDING_SLUGS.map((slug) => `/online-school/${slug}`),
     "/exam-dates",
     ...TIMETABLE_ZONES.map((z) => timetablePath(z)),
-    "/online-o-level", "/online-a-level", "/private-candidate", "/scholarships",
+    "/online-o-level", "/online-a-level", "/private-candidate", "/scholarships", "/download",
     "/mind-lab", "/mind-lab/personality-test", "/mind-lab/16-personalities", "/mind-lab/workplace-assessment", "/mind-lab/star-signs", "/mind-lab/memory-challenge", "/mind-lab/brain-teasers", "/mind-lab/smart-revision", "/mind-lab/smart-notes", "/mind-lab/learning-domains", "/mind-lab/smart-learning", "/mind-lab/career-interests", "/mind-lab/eq-check", "/mind-lab/reasoning-test", "/mind-lab/aptitude-practice",
     "/subjects",
     ...SUBJECT_GUIDE_SLUGS.map((slug) => `/subjects/${slug}`),

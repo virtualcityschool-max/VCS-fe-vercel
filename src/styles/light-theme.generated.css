@@ -82,6 +82,7 @@ html.theme-light .bg-\[\#1E2648\]\/60:not(.theme-keep, .theme-keep *) { backgrou
 html.theme-light .bg-\[\#1e293b\]\/90:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, #ffffff 90%, transparent) !important; }
 html.theme-light .bg-amber-900\/60:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(96.2% 0.059 95.617) 60%, transparent) !important; }
 html.theme-light .bg-amber-950\/60:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(98.7% 0.022 95.277) 60%, transparent) !important; }
+html.theme-light .bg-black:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 8%, transparent) !important; }
 html.theme-light .bg-black\/25:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 4%, transparent) !important; }
 html.theme-light .bg-black\/30:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 5%, transparent) !important; }
 html.theme-light .bg-black\/40:not(.theme-keep, .theme-keep *) { background-color: color-mix(in oklab, oklch(20.8% 0.042 265.755) 6%, transparent) !important; }

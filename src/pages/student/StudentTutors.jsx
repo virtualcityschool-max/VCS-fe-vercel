@@ -7,6 +7,7 @@ import { useDateFormatters } from "../../hooks/useDateFormatters";
 import TimezoneTag from "../../components/ui/TimezoneTag";
 import { getStorageUrl } from "../../utils/storageUrl";
 import { sizedImage } from "../../utils/imageCdn";
+import { openMeet } from "../../utils/openMeet";
 
 const fmt12 = (t) => {
   if (!t) return "";
@@ -49,7 +50,7 @@ const isSlotJoinable = (slot, tz) => {
 
 const openMeetLink = (link) => {
   if (!link || !link.startsWith("http")) { toastManager.error("No valid meeting link"); return; }
-  try { new URL(link); window.open(link, "_blank", "noopener,noreferrer"); } catch { toastManager.error("Invalid meeting link"); }
+  try { new URL(link); openMeet(link); } catch { toastManager.error("Invalid meeting link"); }
 };
 
 const StudentTutors = () => {

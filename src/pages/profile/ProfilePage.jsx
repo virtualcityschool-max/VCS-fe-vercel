@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import ClassRemindersCard from "../../components/common/ClassRemindersCard";
 import {  profileUpdated } from "../../store/slices/authSlice";
 import { fetchCategories } from "../../store/slices/coursesSlice";
 import { authService } from "../../services/authService";
@@ -399,6 +400,9 @@ const ProfilePage = () => {
             </div>
           )} */}
         </div>
+
+        {/* ── Class reminders (app push notifications) ─────────────────────── */}
+        {(role === "student" || role === "teacher") && <ClassRemindersCard compact={false} />}
 
         {/* ── Role profile fields + Timezone ───────────────────────────────── */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 lg:p-8 space-y-5">

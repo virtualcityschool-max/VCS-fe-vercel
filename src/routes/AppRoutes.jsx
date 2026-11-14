@@ -11,7 +11,7 @@ import PublicHome from "../pages/public/PublicHome";
 import {
   Marketplace, CourseDetails, Blogs, BlogDetails, TeachersDirectory, TeacherProfile, PrivacyPolicy,
   TermsAndConditions, AboutPage, OnlineSchoolHub, CountryLandingPage, ExamDatesPage, ExamTimetablePage, SubjectGuidePage,
-  SubjectGuidesIndex, OnlineOLevelPage, OnlineALevelPage, PrivateCandidatePage, PlayArea, PersonalityTest, SixteenPersonalities, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision, SmartNotes, LearningDomains, SmartLearning, CareerInterests, EQSelfCheck, ReasoningTest, AptitudePractice, ScholarshipsPage,
+  SubjectGuidesIndex, OnlineOLevelPage, OnlineALevelPage, PrivateCandidatePage, DownloadAppPage, PlayArea, PersonalityTest, SixteenPersonalities, WorkplaceAssessment, StarSigns, MemoryChallenge, BrainTeasers, SmartRevision, SmartNotes, LearningDomains, SmartLearning, CareerInterests, EQSelfCheck, ReasoningTest, AptitudePractice, ScholarshipsPage,
 } from "./publicPages";
 
 // Authenticated dashboards are code-split so public visitors never download them.
@@ -229,6 +229,7 @@ const AppRoutes = () => {
       <Route path="/online-o-level" element={<OnlineOLevelPage />} />
       <Route path="/online-a-level" element={<OnlineALevelPage />} />
       <Route path="/private-candidate" element={<PrivateCandidatePage />} />
+      <Route path="/download" element={<DownloadAppPage />} />
       <Route path="/subjects" element={<SubjectGuidesIndex />} />
       <Route path="/subjects/:slug" element={<SubjectGuidePage />} />
       <Route path="/scholarships" element={<ScholarshipsPage />} />
