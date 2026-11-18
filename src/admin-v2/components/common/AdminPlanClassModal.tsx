@@ -33,7 +33,12 @@ export const AdminPlanClassModal: React.FC<{
   reschedule?: any;
 }> = ({ isOpen, onClose, onSuccess, reschedule }) => {
   // An upcoming class keeps its own date; a missed one moves to the next free day.
-  const isUpcoming = !!reschedule && reschedule.status === 'scheduled' && new Date(reschedule.scheduled_at).getTime() > Date.now();
+  // Decided once when the planner opens, so a class whose start time passes
+  // while the form is open is still moved the same way.
+  const isUpcoming = useMemo(
+    () => !!reschedule && reschedule.status === 'scheduled' && new Date(reschedule.scheduled_at).getTime() > Date.now(),
+    [isOpen, reschedule],
+  );
   const { subjects = [], teachers = [], rawCourses = [], enrollments = [], levelOptions = [], reload, tzIana, addToast } = useApp() as any;
 
   // Active scheduling mode: 'scheduled' | 'now' | 'delayed'
@@ -271,6 +276,11 @@ export const AdminPlanClassModal: React.FC<{
         payload.instructor_id = Number(selectedTeacherId);
       }
 
+      // A one-to-one class stays one-to-one for the same student.
+      if (reschedule?.private_student) {
+        payload.private_student_id = reschedule.private_student;
+      }
+
       // The backend cancels the upcoming class once the new one is booked.
       if (isUpcoming) {
         payload.replaces = reschedule.id;
@@ -332,10 +342,10 @@ export const AdminPlanClassModal: React.FC<{
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">{reschedule ? 'Reschedule Class' : 'Create New Class'}</h3>
+              <h3 className="text-base font-bold text-white">{reschedule ? (isUpcoming ? 'Edit Class' : 'Reschedule Class') : 'Create New Class'}</h3>
               <p className="text-xs text-slate-400">
                 {reschedule
-                  ? `Everything is filled in from the ${isUpcoming ? 'planned' : 'missed'} class. Change the date or time and press the button at the bottom.${isUpcoming ? ' The old time is cancelled once the new one is booked.' : ''}`
+                  ? `Everything is filled in from the ${isUpcoming ? 'planned' : 'missed'} class. ${isUpcoming ? 'Change the date, time, teacher or title and press Save changes. The class is then booked with the changes and the old one is marked cancelled.' : 'Change the date or time and press the button at the bottom.'}`
                   : 'Plan a lecture with auto-generated Google Meet & Calendar attendee sync'}
               </p>
             </div>
@@ -356,7 +366,7 @@ export const AdminPlanClassModal: React.FC<{
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-white">{reschedule ? 'Class Rescheduled' : 'Class Created Successfully!'}</h4>
+                <h4 className="text-base font-bold text-white">{reschedule ? (isUpcoming ? 'Class Updated' : 'Class Rescheduled') : 'Class Created Successfully!'}</h4>
                 <p className="text-xs text-slate-300 mt-1">{createdSession.title}</p>
               </div>
             </div>
@@ -813,7 +823,7 @@ export const AdminPlanClassModal: React.FC<{
                 className="disabled:opacity-60 px-5 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
               >
                 {reschedule
-                  ? (submitting ? 'Booking new time…' : 'Book the new time')
+                  ? (isUpcoming ? (submitting ? 'Saving…' : 'Save changes') : (submitting ? 'Booking new time…' : 'Book the new time'))
                   : submitting
                   ? `Creating ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}…`
                   : `Create & Schedule ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}`}

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { DEPARTMENT_CONFIG } from '../data/departments';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
+import { SessionChangeButtons, canChangeSession } from '../components/common/SessionChangeButtons';
 
 export const TimetableView: React.FC = () => {
   const {
@@ -36,8 +37,7 @@ export const TimetableView: React.FC = () => {
   const [rescheduling, setRescheduling] = useState<any>(null);
 
   // Only a class that has not started yet can be moved or cancelled here.
-  const canChange = (s: any) =>
-    can('manage_academics') && s._raw?.status === 'scheduled' && new Date(s._raw.scheduled_at).getTime() > Date.now();
+  const canChange = (s: any) => can('manage_academics') && canChangeSession(s._raw);
 
   // Real calendar week (Monday–Sunday) in the admin's timezone.
   const dayKey = (d: Date) => d.toLocaleDateString('en-CA', tzIana ? { timeZone: tzIana } : undefined);
@@ -135,24 +135,10 @@ export const TimetableView: React.FC = () => {
       align: 'right',
       cell: (row) =>
         canChange(row) ? (
-          <span className="inline-flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setRescheduling((row as any)._raw)}
-              className="px-2 py-1 rounded-lg text-xs font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap cursor-pointer transition"
-              title="Move this class to a new date or time"
-            >
-              Reschedule
-            </button>
-            <button
-              type="button"
-              onClick={() => cancelUpcomingSession(row.id)}
-              className="px-2 py-1 rounded-lg text-xs font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap cursor-pointer transition"
-              title="Cancel this class"
-            >
-              Cancel
-            </button>
-          </span>
+          <SessionChangeButtons
+            onReschedule={() => setRescheduling((row as any)._raw)}
+            onCancel={() => cancelUpcomingSession(row.id)}
+          />
         ) : null,
     },
   ];
@@ -296,24 +282,11 @@ export const TimetableView: React.FC = () => {
                           </div>
 
                           {canChange(s) && (
-                            <div className="flex flex-wrap gap-1 pt-1">
-                              <button
-                                type="button"
-                                onClick={() => setRescheduling((s as any)._raw)}
-                                className="flex-1 px-1.5 py-1 rounded-lg text-xs font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white cursor-pointer transition"
-                                title="Move this class to a new date or time"
-                              >
-                                Reschedule
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => cancelUpcomingSession(s.id)}
-                                className="flex-1 px-1.5 py-1 rounded-lg text-xs font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 cursor-pointer transition"
-                                title="Cancel this class"
-                              >
-                                Cancel
-                              </button>
-                            </div>
+                            <SessionChangeButtons
+                              variant="card"
+                              onReschedule={() => setRescheduling((s as any)._raw)}
+                              onCancel={() => cancelUpcomingSession(s.id)}
+                            />
                           )}
                         </div>
                       );

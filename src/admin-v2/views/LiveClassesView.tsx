@@ -4,6 +4,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
 import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Square, Users, Video, X } from 'lucide-react';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
+import { SessionChangeButtons, canChangeSession } from '../components/common/SessionChangeButtons';
 import { MissedClassesReview } from '../components/MissedClassesReview';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
@@ -274,25 +275,8 @@ export const LiveClassesView: React.FC = () => {
               <Square className="w-3 h-3 fill-current" /> End Class
             </button>
           )}
-          {(x.phase === 'soon' || x.phase === 'later') && x.r?.status === 'scheduled' && canResolve && (
-            <span className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setRescheduling(x.r)}
-                className="px-2 py-1 rounded-lg text-xs font-semibold bg-[#6D5BFF] hover:bg-[#5B47FB] text-white whitespace-nowrap cursor-pointer transition shadow-xs"
-                title="Move this class to a new date or time"
-              >
-                Reschedule
-              </button>
-              <button
-                type="button"
-                onClick={() => cancelUpcomingSession(x.id)}
-                className="px-2 py-1 rounded-lg text-xs font-semibold border border-rose-500/40 text-rose-300 hover:bg-rose-500/10 whitespace-nowrap cursor-pointer transition"
-                title="Cancel this class"
-              >
-                Cancel
-              </button>
-            </span>
+          {(x.phase === 'soon' || x.phase === 'later') && canChangeSession(x.r) && canResolve && (
+            <SessionChangeButtons onReschedule={() => setRescheduling(x.r)} onCancel={() => cancelUpcomingSession(x.id)} />
           )}
           {(x.phase === 'missed' || x.r?.status === 'missed') && canResolve && (
             <span className="flex items-center gap-1">

@@ -1072,12 +1072,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const cancelUpcomingSession = async (id: string) => {
     const s0: any = raw.sessions.find((x: any) => sid(x.id) === sid(id));
     const ok = await confirmAction({
-      title: 'Cancel this class?',
-      message: `${s0?.title || 'This class'} is marked cancelled. The record is kept. To change its time instead, use Reschedule.`,
-      confirmLabel: 'Cancel class', isDestructive: true,
+      title: 'Delete this class?',
+      message: `${s0?.title || 'This class'} is taken off the timetable. Students and the teacher see it as cancelled, and the record is kept. To change its time instead, use Edit.`,
+      confirmLabel: 'Delete class', isDestructive: true,
     });
     if (!ok) return false;
-    return await run(() => axiosInstance.patch(`/classroom/sessions/${id}/cancel/`), 'Class cancelled', ['sessions', 'audit']);
+    return await run(() => axiosInstance.patch(`/classroom/sessions/${id}/cancel/`), 'Class deleted', ['sessions', 'audit']);
   };
 
   const batchResolveMissedSessions = async (ids: string[], resolution: 'held' | 'cancelled', note = '') => {
