@@ -247,6 +247,7 @@ export function DataTable<T extends { id: string }>({
                         </button>
                       )}
 
+                      {(onToggleStatus || onDelete) && (
                       <div className="relative">
                         <button
                           onClick={(e) => {
@@ -294,6 +295,7 @@ export function DataTable<T extends { id: string }>({
                           </div>
                         )}
                       </div>
+                      )}
                     </div>
                   </td>
                   )}

@@ -27,10 +27,18 @@ export const AdminPlanClassModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (createdSession: any) => void;
-  // A missed class to move: the form opens filled in with its course, teacher,
-  // title and time. It is only marked "rescheduled" once the new class is booked.
+  // A class to move (missed, or upcoming and not started): the form opens filled
+  // in with its course, teacher, title and time. The old class is only taken off
+  // once the new one is booked.
   reschedule?: any;
 }> = ({ isOpen, onClose, onSuccess, reschedule }) => {
+  // An upcoming class keeps its own date; a missed one moves to the next free day.
+  // Decided once when the planner opens, so a class whose start time passes
+  // while the form is open is still moved the same way.
+  const isUpcoming = useMemo(
+    () => !!reschedule && reschedule.status === 'scheduled' && new Date(reschedule.scheduled_at).getTime() > Date.now(),
+    [isOpen, reschedule],
+  );
   const { subjects = [], teachers = [], rawCourses = [], enrollments = [], levelOptions = [], reload, tzIana, addToast } = useApp() as any;
 
   // Active scheduling mode: 'scheduled' | 'now' | 'delayed'
@@ -68,7 +76,9 @@ export const AdminPlanClassModal: React.FC<{
     const time = reschedule.scheduled_at ? ast(new Date(reschedule.scheduled_at).getTime()).slice(11, 16) : '16:00';
     const nowAst = ast(Date.now());
     // Today if that time is still ahead, otherwise tomorrow.
-    const date = nowAst.slice(11, 16) < time ? nowAst.slice(0, 10) : ast(Date.now() + 86400000).slice(0, 10);
+    const date = isUpcoming
+      ? ast(new Date(reschedule.scheduled_at).getTime()).slice(0, 10)
+      : nowAst.slice(11, 16) < time ? nowAst.slice(0, 10) : ast(Date.now() + 86400000).slice(0, 10);
     setMode('scheduled');
     setSelectedLevel('all');
     setSelectedCourseId(reschedule.course ? String(reschedule.course) : '');
@@ -248,7 +258,7 @@ export const AdminPlanClassModal: React.FC<{
         isoDateTime = dt.toISOString();
       }
 
-      const isRecurringSeries = mode === 'scheduled' && classCount !== '1';
+      const isRecurringSeries = !reschedule && mode === 'scheduled' && classCount !== '1';
 
       const payload: any = {
         course: Number(selectedCourseId),
@@ -266,10 +276,20 @@ export const AdminPlanClassModal: React.FC<{
         payload.instructor_id = Number(selectedTeacherId);
       }
 
+      // A one-to-one class stays one-to-one for the same student.
+      if (reschedule?.private_student) {
+        payload.private_student_id = reschedule.private_student;
+      }
+
+      // The backend cancels the upcoming class once the new one is booked.
+      if (isUpcoming) {
+        payload.replaces = reschedule.id;
+      }
+
       // Backend auto-creates the Google Meet link through Google Calendar
       const result = await adminSessionService.createSession(payload);
       
-      if (reschedule?.id) {
+      if (reschedule?.id && !isUpcoming) {
         // The new class is booked; now take the missed one off the list.
         try {
           await axiosInstance.post(`/classroom/sessions/${reschedule.id}/resolve/`, {
@@ -322,10 +342,10 @@ export const AdminPlanClassModal: React.FC<{
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">{reschedule ? 'Reschedule Class' : 'Create New Class'}</h3>
+              <h3 className="text-base font-bold text-white">{reschedule ? (isUpcoming ? 'Edit Class' : 'Reschedule Class') : 'Create New Class'}</h3>
               <p className="text-xs text-slate-400">
                 {reschedule
-                  ? 'Everything is filled in from the missed class. Change the date or time and press the button at the bottom.'
+                  ? `Everything is filled in from the ${isUpcoming ? 'planned' : 'missed'} class. ${isUpcoming ? 'Change the date, time, teacher or title and press Save changes. The class is then booked with the changes and the old one is marked cancelled.' : 'Change the date or time and press the button at the bottom.'}`
                   : 'Plan a lecture with auto-generated Google Meet & Calendar attendee sync'}
               </p>
             </div>
@@ -346,7 +366,7 @@ export const AdminPlanClassModal: React.FC<{
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-base font-bold text-white">{reschedule ? 'Class Rescheduled' : 'Class Created Successfully!'}</h4>
+                <h4 className="text-base font-bold text-white">{reschedule ? (isUpcoming ? 'Class Updated' : 'Class Rescheduled') : 'Class Created Successfully!'}</h4>
                 <p className="text-xs text-slate-300 mt-1">{createdSession.title}</p>
               </div>
             </div>
@@ -632,6 +652,8 @@ export const AdminPlanClassModal: React.FC<{
 
                 {/* How Many Classes To Generate: Single vs Series */}
                 <div className="space-y-3 pt-2 border-t border-[#1E2648]">
+                  {/* A rescheduled class is always one class, so there is nothing to pick. */}
+                  {!reschedule && (<>
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                       How Many Classes To Plan?
@@ -665,6 +687,7 @@ export const AdminPlanClassModal: React.FC<{
                       </button>
                     ))}
                   </div>
+                  </>)}
 
                   {classCount === 'custom' && (
                     <div className="pt-1">
@@ -800,7 +823,7 @@ export const AdminPlanClassModal: React.FC<{
                 className="disabled:opacity-60 px-5 py-2 text-xs font-semibold rounded-xl bg-[#6D5BFF] hover:bg-[#5B47FB] text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer flex items-center gap-1.5"
               >
                 {reschedule
-                  ? (submitting ? 'Booking new time…' : 'Book the new time')
+                  ? (isUpcoming ? (submitting ? 'Saving…' : 'Save changes') : (submitting ? 'Booking new time…' : 'Book the new time'))
                   : submitting
                   ? `Creating ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}…`
                   : `Create & Schedule ${scheduledClassesList.length} ${scheduledClassesList.length === 1 ? 'Class' : 'Classes'}`}

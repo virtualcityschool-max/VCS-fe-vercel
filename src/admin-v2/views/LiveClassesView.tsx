@@ -4,6 +4,7 @@ import { PageHeader } from '../components/common/PageHeader';
 import { inputCls } from '../components/common/FormControls';
 import { AlertTriangle, CalendarDays, Check, ChevronLeft, ChevronRight, Copy, Info, Plus, Radio, Search, Share2, Square, Users, Video, X } from 'lucide-react';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
+import { SessionChangeButtons, canChangeSession } from '../components/common/SessionChangeButtons';
 import { MissedClassesReview } from '../components/MissedClassesReview';
 // @ts-ignore
 import DigitalSessionClock from '../../components/common/DigitalSessionClock';
@@ -26,7 +27,7 @@ const dur = (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? `${m %
 // Live Classes: today's Google Meet classes with who is in them, and a Join
 // button so an admin can drop in and observe a class.
 export const LiveClassesView: React.FC = () => {
-  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, endSession, can } = useApp() as any;
+  const { sessions = [], rawAttendanceAll = [], subjects = [], reload, tzIana, setCurrentView, resolveMissedSession, cancelUpcomingSession, endSession, can } = useApp() as any;
   const canResolve = can('manage_academics');
   const [mode, setMode] = useState<'upcoming' | 'past'>('upcoming');
   const [dayOffset, setDayOffset] = useState(0);
@@ -273,6 +274,9 @@ export const LiveClassesView: React.FC = () => {
             >
               <Square className="w-3 h-3 fill-current" /> End Class
             </button>
+          )}
+          {(x.phase === 'soon' || x.phase === 'later') && canChangeSession(x.r) && canResolve && (
+            <SessionChangeButtons onReschedule={() => setRescheduling(x.r)} onCancel={() => cancelUpcomingSession(x.id)} />
           )}
           {(x.phase === 'missed' || x.r?.status === 'missed') && canResolve && (
             <span className="flex items-center gap-1">

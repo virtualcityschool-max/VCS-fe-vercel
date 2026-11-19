@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { DEPARTMENT_CONFIG } from '../data/departments';
 import { AdminPlanClassModal } from '../components/common/AdminPlanClassModal';
+import { SessionChangeButtons, canChangeSession } from '../components/common/SessionChangeButtons';
 
 export const TimetableView: React.FC = () => {
   const {
@@ -25,11 +26,18 @@ export const TimetableView: React.FC = () => {
     openQuickAdd,
     timezone,
     tzIana,
-  } = useApp();
+    can,
+    cancelUpcomingSession,
+  } = useApp() as any;
 
   const [viewMode, setViewMode] = useState<'calendar' | 'table'>('calendar');
   const [weekOffset, setWeekOffset] = useState(0);
   const [isPlanClassOpen, setIsPlanClassOpen] = useState(false);
+  // The class being moved; opens the planner already filled in.
+  const [rescheduling, setRescheduling] = useState<any>(null);
+
+  // Only a class that has not started yet can be moved or cancelled here.
+  const canChange = (s: any) => can('manage_academics') && canChangeSession(s._raw);
 
   // Real calendar week (Monday–Sunday) in the admin's timezone.
   const dayKey = (d: Date) => d.toLocaleDateString('en-CA', tzIana ? { timeZone: tzIana } : undefined);
@@ -122,6 +130,17 @@ export const TimetableView: React.FC = () => {
       header: 'Status',
       cell: (row) => <StatusPill status={row.status} />,
     },
+    {
+      header: '',
+      align: 'right',
+      cell: (row) =>
+        canChange(row) ? (
+          <SessionChangeButtons
+            onReschedule={() => setRescheduling((row as any)._raw)}
+            onCancel={() => cancelUpcomingSession(row.id)}
+          />
+        ) : null,
+    },
   ];
 
   return (
@@ -167,6 +186,7 @@ export const TimetableView: React.FC = () => {
         <DataTable
           columns={columns}
           data={[...sessions].sort((a, b) => (b.date + b.startTime).localeCompare(a.date + a.startTime))}
+          rowActions={false}
         />
       ) : (
         /* Week Calendar View with Department color-coding */
@@ -260,6 +280,14 @@ export const TimetableView: React.FC = () => {
                               </a>
                             )}
                           </div>
+
+                          {canChange(s) && (
+                            <SessionChangeButtons
+                              variant="card"
+                              onReschedule={() => setRescheduling((s as any)._raw)}
+                              onCancel={() => cancelUpcomingSession(s.id)}
+                            />
+                          )}
                         </div>
                       );
                     })}
@@ -280,6 +308,11 @@ export const TimetableView: React.FC = () => {
       <AdminPlanClassModal
         isOpen={isPlanClassOpen}
         onClose={() => setIsPlanClassOpen(false)}
+      />
+      <AdminPlanClassModal
+        isOpen={!!rescheduling}
+        reschedule={rescheduling}
+        onClose={() => setRescheduling(null)}
       />
     </div>
   );
