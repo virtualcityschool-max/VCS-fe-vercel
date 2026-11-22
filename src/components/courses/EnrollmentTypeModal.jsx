@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { aboutService } from "../../services/aboutService";
+import { waLink } from "../../utils/whatsapp";
 
 // WhatsApp number is pulled live from Admin → About Page settings (contact_whatsapp);
 // this is only the fallback shown before that loads / if it's unset.
@@ -20,7 +21,8 @@ const MANUAL_METHODS = {
     accountNumber: "03099093548",
   },
 };
-const FALLBACK_WHATSAPP = "WHATSAPP_NUMBER";
+// Shown until the admin-set number loads, or if it can't load (never a dead wa.me link).
+const FALLBACK_WHATSAPP = "+966 556 687417";
 
 // Compact "label: value" row with a copy button - used inside the manual-payment steps.
 const CompactCopyRow = ({ label, value }) => {
@@ -229,7 +231,7 @@ const EnrollmentTypeModal = ({
   const gumroadAvailable = Boolean((course?.gumroad_product_permalink || "").trim());
   const effectiveWhatsapp = whatsappNumber || FALLBACK_WHATSAPP;
   const whatsappMessage = `Hi! I've completed my ${manualMethod.service} transfer for "${title}"${price ? ` (${price})` : ""}.\nMy student email: ${studentEmail || "<your student email>"}\n(Attaching my payment screenshot)`;
-  const whatsappHref = `https://wa.me/${effectiveWhatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappHref = waLink(whatsappMessage, effectiveWhatsapp);
 
   if (isPaid) {
     if (view === "manual") {

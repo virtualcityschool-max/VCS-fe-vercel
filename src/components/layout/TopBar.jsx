@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { waLink, WA_GENERAL } from "../../utils/whatsapp";
 const ANNOUNCEMENT = "Admissions are now open for O Level & A Level classes";
 
 const TopBar = () => {
@@ -19,7 +20,7 @@ const TopBar = () => {
                         </div>
                         <div className="hidden sm:flex items-center gap-5 shrink-0 text-xs font-semibold text-slate-300">
                                   <a
-                                                href="https://wa.me/966556687417"
+                                                href={waLink(WA_GENERAL)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-1.5 hover:text-emerald-400 transition"
@@ -36,7 +37,7 @@ const TopBar = () => {
                                   </a>
                         </div>
                         <div className="flex sm:hidden items-center gap-4 shrink-0">
-                                  <a href="https://wa.me/966556687417" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+                                  <a href={waLink(WA_GENERAL)} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
                                               <i className="fab fa-whatsapp text-emerald-400 text-sm" />
                                   </a>
                                   <a href="mailto:admin@virtualcityschool.com" aria-label="Email">

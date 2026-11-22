@@ -25,6 +25,7 @@ const CompleteProfileGate = lazyRetry(() => import("./components/common/Complete
 import { useOutsideCloseModals } from "./hooks/useOutsideCloseModals";
 import { isImpersonating, restoreAdminSession } from "./utils/impersonate";
 import { applyTheme } from "./utils/theme";
+import { waLink, WA_GENERAL } from "./utils/whatsapp";
 
 // The page and the footer don't re-run when the shell above them updates, and
 // the footer is its own Suspense part. So when the app adopts a pre-built page
@@ -214,7 +215,7 @@ const AppInner = () => {
         {/* Floating WhatsApp support button */}
         {!isAdminArea && (
         <a
-          href="https://wa.me/966556687417"
+          href={waLink(`${WA_GENERAL} I was looking at: https://virtualcityschool.com${location.pathname}`)}
           target="_blank"
           rel="noopener noreferrer"
           title="24/7 Support on WhatsApp"

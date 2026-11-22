@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { aboutService } from "../../services/aboutService";
 import { useSeo } from "../../hooks/useSeo";
+import { waLink, WA_GENERAL } from "../../utils/whatsapp";
 
 const SOCIAL = [
   { key: "social_facebook", icon: "fab fa-facebook-f", label: "Facebook" },
@@ -50,7 +51,7 @@ const AboutPage = () => {
   const aboutParas = (data?.about || "").split(/\n+/).map((x) => x.trim()).filter(Boolean);
 
   const contacts = [
-    data?.contact_whatsapp && { icon: "fab fa-whatsapp", label: "WhatsApp", value: data.contact_whatsapp, href: `https://wa.me/${data.contact_whatsapp.replace(/\D/g, "")}`, tone: "emerald", external: true },
+    data?.contact_whatsapp && { icon: "fab fa-whatsapp", label: "WhatsApp", value: data.contact_whatsapp, href: waLink(WA_GENERAL, data.contact_whatsapp), tone: "emerald", external: true },
     data?.contact_phone && { icon: "fas fa-phone", label: "Phone", value: data.contact_phone, href: `tel:${data.contact_phone}`, tone: "sky" },
     data?.contact_email && { icon: "fas fa-envelope", label: "Email", value: data.contact_email, href: `mailto:${data.contact_email}`, tone: "violet" },
     data?.contact_address && { icon: "fas fa-map-marker-alt", label: "Address", value: data.contact_address, tone: "amber" },

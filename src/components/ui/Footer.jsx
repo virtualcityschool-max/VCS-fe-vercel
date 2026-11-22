@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import { GUIDE_CATALOG } from "../../data/subjectGuides/catalog";
+import { waLink, WA_GENERAL } from "../../utils/whatsapp";
 
 const Footer = ({ variant = "full" }) => {
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ const Footer = ({ variant = "full" }) => {
                 </svg>
               </a>
               <a
-                href="https://wa.me/966556687417"
+                href={waLink(WA_GENERAL)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/5 transition"
