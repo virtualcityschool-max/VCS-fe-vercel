@@ -4,6 +4,7 @@ import { Smartphone, Tablet, Laptop, Download, Bell, WifiOff, Video, CheckCircle
 import { useSeo } from "../../hooks/useSeo";
 import { SITE_URL } from "../../data/examDates";
 import { isInstalledApp } from "../../app/registerSW";
+import { waLink } from "../../utils/whatsapp";
 
 // /app — "Get the App": install the VCS portal as an app on iPhone, iPad,
 // Android, Mac and Windows (it is the same portal, installed from the browser;
@@ -267,7 +268,7 @@ const DownloadAppPage = () => {
               </div>
             ))}
           </div>
-          <p className="mt-6 text-base text-slate-300">Need help? Message us on <a href="https://wa.me/966556687417" target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-white">WhatsApp</a>.</p>
+          <p className="mt-6 text-base text-slate-300">Need help? Message us on <a href={waLink("Hi, I need help with the Virtual City School app.")} target="_blank" rel="noopener noreferrer" className="text-emerald-300 font-semibold hover:text-white">WhatsApp</a>.</p>
         </section>
       </article>
     </main>

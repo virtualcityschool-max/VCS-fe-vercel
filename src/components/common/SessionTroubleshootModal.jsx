@@ -15,6 +15,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toastManager } from "../../utils/toastManager";
+import { waLink } from "../../utils/whatsapp";
 
 export const SessionTroubleshootModal = ({
   isOpen,
@@ -260,6 +261,14 @@ export const SessionTroubleshootModal = ({
             <p className="text-slate-300 text-[12px]">
               If you still cannot enter your meeting, reach out immediately to VCS Admin on WhatsApp:
             </p>
+            <a
+              href={waLink("Hi, I can't join my live class. Please send me the Google Meet link.")}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-300 hover:text-white"
+            >
+              <i className="fab fa-whatsapp" aria-hidden="true" /> Message VCS Admin on WhatsApp
+            </a>
             <p className="text-slate-400 text-xs">
               The School Administrator can copy the direct Google Meet link from the Admin Panel and send it to your WhatsApp group so you can join in seconds.
             </p>
