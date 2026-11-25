@@ -80,14 +80,27 @@ const StudentPortal = () => {
     }
   }, [dispatch, hasMounted]);
 
-  // Silent auto-refresh every 60s so newly planned sessions appear without needing a page reload
+  // Silent auto-refresh every 60s so newly planned sessions appear without needing a page reload.
+  // Enrollments are included so access granted or renewed by an admin unlocks the
+  // course here too, instead of the "pending renewal" notice sticking until a reload.
+  // Also refresh as soon as the tab is looked at again (laptop woken, tab switched
+  // back), because browsers slow or pause timers in hidden tabs.
   useEffect(() => {
     if (!hasMounted) return;
-    const interval = setInterval(() => {
+    const refresh = () => {
       dispatch(fetchStudentDashboard({ silent: true }));
       dispatch(fetchStudentSessions());
-    }, 60000);
-    return () => clearInterval(interval);
+      dispatch(fetchMyEnrollments());
+    };
+    const interval = setInterval(refresh, 60000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [dispatch, hasMounted]);
 
   // Show loading state while mounting or loading
