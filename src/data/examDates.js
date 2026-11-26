@@ -27,7 +27,7 @@ export const SITE_URL = "https://virtualcityschool.com";
 
 // Bump this to today's date every time you check/edit anything below.
 // Shown on the page as "Last verified".
-export const LAST_VERIFIED = "2026-08-30";
+export const LAST_VERIFIED = "2026-11-26";
 
 // Cambridge source documents referenced below. Keeping these as named
 // constants means a URL only needs updating in one place if Cambridge moves
@@ -37,6 +37,12 @@ const SOURCES = {
     "https://www.cambridgeinternational.org/Images/746005-key-dates-for-june-2026-series-international-.pdf",
   NOV_2026_KEY_DATES:
     "https://www.cambridgeinternational.org/Images/746006-key-dates-for-november-2026-series-international-.pdf",
+  // Checked 26 Nov 2026 (linked from the exams officers guide "Key dates and
+  // activities" page; PDF created 18 Nov 2026).
+  JUNE_2027_KEY_DATES:
+    "https://www.cambridgeinternational.org/Images/766680-key-dates-for-june-2027-series-international-.pdf",
+  NOV_2026_RESULTS_HELP_ARTICLE:
+    "https://help.cambridgeinternational.org/hc/en-gb/articles/29567611785234-When-will-November-2026-results-be-released",
   RESULTS_TIME_HELP_ARTICLE:
     "https://help.cambridgeinternational.org/hc/en-gb/articles/29567611785234-When-will-June-2026-results-be-released",
   EXAMS_OFFICERS_GUIDE: "https://www.cambridgeinternational.org/examsofficersguide",
@@ -318,8 +324,10 @@ export const EXAM_SERIES = [
           anchorDate: "2027-01-07",
           time: null,
           timeZoneName: null,
+          // The help article is behind a bot check (not readable on 26 Nov
+          // 2026), so no time is shown - only a pointer to Cambridge's page.
           timeSourceNote:
-            "Cambridge has not yet published an exact release time for this date - only the day is confirmed so far.",
+            "Release time: see Cambridge's help centre article \"When will November 2026 results be released?\" - schools can give you results as soon as they are released.",
           sourceUrl: SOURCES.NOV_2026_KEY_DATES,
           sourceLabel: "Cambridge: Key dates for November 2026 series (PDF)",
           highlight: true,
@@ -331,8 +339,10 @@ export const EXAM_SERIES = [
           anchorDate: "2027-01-14",
           time: null,
           timeZoneName: null,
+          // The help article is behind a bot check (not readable on 26 Nov
+          // 2026), so no time is shown - only a pointer to Cambridge's page.
           timeSourceNote:
-            "Cambridge has not yet published an exact release time for this date - only the day is confirmed so far.",
+            "Release time: see Cambridge's help centre article \"When will November 2026 results be released?\" - schools can give you results as soon as they are released.",
           sourceUrl: SOURCES.NOV_2026_KEY_DATES,
           sourceLabel: "Cambridge: Key dates for November 2026 series (PDF)",
           highlight: true,
@@ -346,22 +356,12 @@ export const EXAM_SERIES = [
     type: "may-june",
     seriesLabel: "May/June 2027 series",
     examYear: 2027,
-    // Cambridge has not published a key dates document for this series yet.
-    // Do not fill in registration/exam/results below with guesses or with
-    // last year's dates - leave them null until a real source exists.
-    published: false,
-    unpublishedNote:
-      "Cambridge has not yet published the entry deadlines for this series. Check Cambridge's exams officers guide directly, or check back here closer to the time.",
-    // Single dates Cambridge has already announced for a not-yet-published
-    // series (shown as a short list; same rules: real source, no guesses).
+    // Copied from Cambridge's key dates PDF for June 2027 (International) on
+    // 26 Nov 2026. AS & A Level results moved earlier to 28 July from 2027.
+    published: true,
+    // Read by src/utils/examFaq.js (the date-sheet answer says the zone
+    // timetables are out and links to them).
     announced: [
-      {
-        label: "Results released - Cambridge International AS & A Level",
-        displayDate: "28 July 2027",
-        date: "2027-07-28",
-        sourceUrl: SOURCES.RESULTS_2027_NEWS,
-        sourceLabel: "Cambridge news, 3 November 2026",
-      },
       {
         label: "Exam timetable (one per administrative zone)",
         displayDate: "Published - use your zone's timetable",
@@ -369,10 +369,75 @@ export const EXAM_SERIES = [
         sourceLabel: "Cambridge exam timetables",
       },
     ],
-    unpublishedSourceUrl: SOURCES.EXAMS_OFFICERS_GUIDE,
-    registration: null,
-    exam: null,
-    results: null,
+    registration: {
+      points: [
+        {
+          label: "Final entries deadline (school submits to Cambridge)",
+          date: "2027-02-21",
+          exact: true,
+          anchorDate: "2027-02-21",
+          primary: true,
+          familyNote:
+            "This is Cambridge's cutoff for your school to submit its entries - not necessarily your own school's internal deadline, which is often earlier. Confirm the real cut-off with your exams officer.",
+          sourceUrl: SOURCES.JUNE_2027_KEY_DATES,
+          sourceLabel: "Cambridge: Key dates for June 2027 series (PDF)",
+          highlight: true,
+        },
+        {
+          label: "Late entries deadline",
+          date: "2027-04-17",
+          exact: true,
+          anchorDate: "2027-04-17",
+          sourceUrl: SOURCES.JUNE_2027_KEY_DATES,
+          sourceLabel: "Cambridge: Key dates for June 2027 series (PDF)",
+          highlight: true,
+        },
+      ],
+    },
+    exam: {
+      points: [
+        {
+          label: "Start of timetabled exam period",
+          date: "2027-04-26",
+          exact: true,
+          anchorDate: "2027-04-26",
+          sourceUrl: SOURCES.JUNE_2027_KEY_DATES,
+          sourceLabel: "Cambridge: Key dates for June 2027 series (PDF)",
+          highlight: true,
+        },
+        {
+          label: "End of timetabled exam period",
+          date: "2027-06-11",
+          exact: true,
+          anchorDate: "2027-06-11",
+          sourceUrl: SOURCES.JUNE_2027_KEY_DATES,
+          sourceLabel: "Cambridge: Key dates for June 2027 series (PDF)",
+          highlight: true,
+        },
+      ],
+    },
+    results: {
+      points: [
+        {
+          label: "Results released - Cambridge International AS & A Level",
+          date: "2027-07-28",
+          exact: true,
+          anchorDate: "2027-07-28",
+          sourceUrl: SOURCES.JUNE_2027_KEY_DATES,
+          sourceLabel: "Cambridge: Key dates for June 2027 series (PDF)",
+          highlight: true,
+        },
+        {
+          label: "Results released - Cambridge IGCSE & O Level",
+          date: "2027-08-17",
+          exact: true,
+          anchorDate: "2027-08-17",
+          sourceUrl: SOURCES.JUNE_2027_KEY_DATES,
+          sourceLabel: "Cambridge: Key dates for June 2027 series (PDF)",
+          highlight: true,
+        },
+      ],
+    },
   },
 ];
 

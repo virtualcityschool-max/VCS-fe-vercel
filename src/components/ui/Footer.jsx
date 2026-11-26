@@ -129,6 +129,9 @@ const Footer = ({ variant = "full" }) => {
                   <Link to="/exam-dates" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Exam Dates & Deadlines</Link>
                 </li>
                 <li>
+                  <Link to="/compare-education-systems" onClick={() => window.scrollTo(0, 0)} className={footerLink}>O Level vs IGCSE vs IB vs Matric</Link>
+                </li>
+                <li>
                   <Link to="/private-candidate" onClick={() => window.scrollTo(0, 0)} className={footerLink}>Private Candidate Registration</Link>
                 </li>
                 <li>

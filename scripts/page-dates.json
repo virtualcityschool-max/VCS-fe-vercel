@@ -1,7 +1,7 @@
 {
   "/about": {
-    "hash": "64d36b5f48587a01",
-    "date": "2026-11-10"
+    "hash": "580362d147a11a9d",
+    "date": "2026-11-26"
   },
   "/privacy-policy": {
     "hash": "0afedb57aa3f3de4",
@@ -92,8 +92,12 @@
     "date": "2026-11-10"
   },
   "/scholarships": {
-    "hash": "03804b79e27ae9e8",
-    "date": "2026-11-10"
+    "hash": "03495e599ef15851",
+    "date": "2026-11-26"
+  },
+  "/compare-education-systems": {
+    "hash": "8f7a4a39ea85eacb",
+    "date": "2026-11-26"
   },
   "/subjects/mathematics-4024": {
     "hash": "606afa588785c01a",

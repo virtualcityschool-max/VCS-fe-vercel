@@ -143,6 +143,13 @@ export default function ScholarshipsPage() {
           </div>
         </Reveal>
 
+        <p className="my-10 text-base text-slate-200">
+          Wondering whether Cambridge, Edexcel, IB or Matric gives you a better chance?{" "}
+          <Link to="/compare-education-systems" className="text-cyan-300 font-semibold underline underline-offset-4 hover:text-cyan-200">
+            Compare the education systems
+          </Link>
+        </p>
+
         {/* Scholarships FAQ Section */}
         <section className="my-16">
           <Reveal className="text-center max-w-2xl mx-auto mb-10">

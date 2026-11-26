@@ -1,4 +1,5 @@
 import {
+  AXIS_MONTH_NAMES,
   axisRowLabel,
   getPhaseBounds,
   pointDisplayLabel,
@@ -121,6 +122,14 @@ const ExamTimeline = ({ seriesByType }) => {
   const totalHeight = TOP_PAD + 13 * ROW_H + BOTTOM_PAD;
   const referenceYear =
     seriesByType["oct-nov"]?.series?.examYear ?? seriesByType["may-june"]?.series?.examYear ?? new Date().getFullYear();
+  // From about November (next June's dates published) until January (Oct/Nov
+  // results out) the two columns are different years, e.g. May/June 2027 next
+  // to Oct/Nov 2026. A year on the shared axis would then be wrong for one
+  // column, so show plain months and let each column heading carry its year.
+  const mjYear = seriesByType["may-june"]?.series?.examYear;
+  const onYear = seriesByType["oct-nov"]?.series?.examYear;
+  const mixedYears = mjYear != null && onYear != null && mjYear !== onYear;
+  const rowLabel = (i) => (mixedYears ? AXIS_MONTH_NAMES[i] : axisRowLabel(i, referenceYear));
 
   const titleText = "Cambridge exam series timeline: registration, exams and results";
   const descText = ["may-june", "oct-nov"].map((type) => describeSeries(seriesByType[type])).join(" ");
@@ -167,6 +176,12 @@ const ExamTimeline = ({ seriesByType }) => {
         })}
       </div>
 
+      {mixedYears && (
+        <p className="text-sm text-slate-400 mb-3">
+          The two columns are different years ({mjYear} and {onYear}): each column's year is in its heading.
+        </p>
+      )}
+
       <svg
         role="img"
         viewBox={`0 0 ${VIEW_W} ${totalHeight}`}
@@ -191,7 +206,7 @@ const ExamTimeline = ({ seriesByType }) => {
               fontWeight={i === 12 ? "800" : "400"}
               className={i === 12 ? "fill-indigo-300" : "fill-slate-500"}
             >
-              {axisRowLabel(i, referenceYear)}
+              {rowLabel(i)}
             </text>
             <line x1={AXIS_LABEL_X + 4} y1={rowY(i)} x2={VIEW_W} y2={rowY(i)} className="stroke-white/5" strokeWidth="1" />
           </g>
