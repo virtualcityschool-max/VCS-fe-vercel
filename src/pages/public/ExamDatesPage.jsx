@@ -219,6 +219,15 @@ const ExamDatesPage = () => {
             ))}
           </div>
         </section>
+        <Link
+          to="/compare-education-systems"
+          className="mt-10 flex items-center gap-4 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-5 hover:border-cyan-300 transition"
+        >
+          <i className="fas fa-scale-balanced text-cyan-300 text-xl" aria-hidden="true" />
+          <span className="text-base text-slate-200">
+            <strong className="text-white">Still choosing a system?</strong> O Level, IGCSE, A Level, IB and Matric compared: universities, scholarships and exam leaks.
+          </span>
+        </Link>
         <p className="text-slate-600 text-sm mt-10 pt-6 border-t border-white/5">
           Last verified against cambridgeinternational.org on {LAST_VERIFIED}. Registration deadlines shown are Cambridge's cutoff for your school to submit entries, not necessarily your own school's internal deadline - always confirm with your exams officer.
         </p>

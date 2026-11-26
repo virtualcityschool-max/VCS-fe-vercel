@@ -48,6 +48,7 @@ async function pageContents() {
     "/online-a-level": file("src/pages/public/OnlineLevelPage.jsx"),
     "/private-candidate": file("src/pages/public/PrivateCandidatePage.jsx"),
     "/scholarships": file("src/pages/public/ScholarshipsPage.jsx") + file("src/data/scholarshipsData.js"),
+    "/compare-education-systems": file("src/pages/public/CompareEducationSystemsPage.jsx") + file("src/data/educationSystems.js"),
   };
   // A guide or country page is its own content plus the layout every page of
   // that kind shares (so a new section on all guides dates all of them).
